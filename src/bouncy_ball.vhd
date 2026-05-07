@@ -6,7 +6,7 @@ USE  IEEE.STD_LOGIC_SIGNED.all;
 
 ENTITY bouncy_ball IS
 	PORT
-		( pb1, pb2, clk, vert_sync	: IN std_logic;
+		( pb1, pb2, clk, vert_sync, mouse_left	: IN std_logic;
           pixel_row, pixel_column	: IN std_logic_vector(9 DOWNTO 0);
 		  red, green, blue 			: OUT std_logic);		
 END bouncy_ball;
@@ -19,11 +19,13 @@ SIGNAL ball_y_pos				: std_logic_vector(9 DOWNTO 0);
 SiGNAL ball_x_pos				: std_logic_vector(10 DOWNTO 0);
 SIGNAL ball_y_motion			: std_logic_vector(9 DOWNTO 0);
 
+SIGNAL JUMPING : std_logic := '0';
+SIGNAL JUMP_COUNTER : integer range 0 to 50 := 0;
 BEGIN           
 
 size <= CONV_STD_LOGIC_VECTOR(8,10);
 -- ball_x_pos and ball_y_pos show the (x,y) for the centre of ball
-ball_x_pos <= CONV_STD_LOGIC_VECTOR(590,11);
+ball_x_pos <= CONV_STD_LOGIC_VECTOR(50,11);
 
 ball_on <= '1' when ( ('0' & ball_x_pos <= '0' & pixel_column + size) and ('0' & pixel_column <= '0' & ball_x_pos + size) 	-- x_pos - size <= pixel_column <= x_pos + size
 					and ('0' & ball_y_pos <= pixel_row + size) and ('0' & pixel_row <= ball_y_pos + size) )  else	-- y_pos - size <= pixel_row <= y_pos + size
@@ -39,16 +41,40 @@ Blue <=  not ball_on;
 
 Move_Ball: process (vert_sync)  	
 begin
+
+	
 	-- Move ball once every vertical sync
-	if (rising_edge(vert_sync)) then			
-		-- Bounce off top or bottom of the screen
-		if ( ('0' & ball_y_pos >= CONV_STD_LOGIC_VECTOR(479,10) - size) ) then
-			ball_y_motion <= - CONV_STD_LOGIC_VECTOR(2,10);
-		elsif (ball_y_pos <= size) then 
-			ball_y_motion <= CONV_STD_LOGIC_VECTOR(2,10);
-		end if;
-		-- Compute next ball Y position
-		ball_y_pos <= ball_y_pos + ball_y_motion;
+	if (rising_edge(vert_sync)) then		
+			-- 1. Check for jump initiation (can happen anywhere, even on the ground)
+        if (mouse_left = '1' and JUMPING = '0') then
+            JUMPING <= '1';
+            JUMP_COUNTER <= 50;
+        end if;
+
+        -- 2. Determine intended motion (Jump vs Gravity)
+        if (JUMP_COUNTER > 0) then
+            JUMP_COUNTER <= JUMP_COUNTER - 1;
+            ball_y_motion <= -CONV_STD_LOGIC_VECTOR(2, 10); -- Moving UP
+        else
+            JUMPING <= '0';
+            ball_y_motion <= CONV_STD_LOGIC_VECTOR(2, 10);  -- Gravity (Moving DOWN)
+        end if;
+        
+        -- 3. Apply Boundaries (These will OVERRIDE the motion if touching a wall)
+        
+        -- BOTTOM BOUNDARY: Stop if at the bottom AND trying to fall
+        if ( ('0' & ball_y_pos >= CONV_STD_LOGIC_VECTOR(479,10) - size) and (JUMP_COUNTER = 0) ) then
+            ball_y_motion <= CONV_STD_LOGIC_VECTOR(0, 10);
+        end if;
+        
+        -- TOP BOUNDARY: Stop if at the top AND trying to go up
+        if ( (ball_y_pos <= size) and (JUMP_COUNTER > 0) ) then 
+            ball_y_motion <= CONV_STD_LOGIC_VECTOR(0, 10);
+            JUMP_COUNTER <= 0; -- Optional: Cancel the rest of the jump so it falls immediately
+        end if;
+        
+        -- Compute next ball Y position
+        ball_y_pos <= ball_y_pos + ball_y_motion;
 	end if;
 end process Move_Ball;
 

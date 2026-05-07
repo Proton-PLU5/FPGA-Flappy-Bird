@@ -7,16 +7,18 @@ entity DE0_CV_Default is
         CLOCK_50 : in std_logic;
 		  VGA_G, VGA_B, VGA_R : out std_logic_vector(3 downto 0);
 		  VGA_HS : out std_logic;
-		  VGA_VS : out std_logic
+		  VGA_VS : out std_logic;
+		  PS2_DAT, PS2_CLK : INOUT std_logic
     );
 end DE0_CV_Default;
 
 architecture behavior of DE0_CV_Default is
     
     component VGA_SYNC
-        port(
-            clock_25Mhz, red, green, blue : IN STD_LOGIC;
-			red_out, green_out, blue_out, horiz_sync_out, vert_sync_out	: OUT STD_LOGIC;
+		PORT(	clock_25Mhz : IN	STD_LOGIC;
+			red, green, blue: IN	STD_LOGIC_VECTOR(3 downto 0);
+			red_out, green_out, blue_out : OUT STD_LOGIC_VECTOR(3 downto 0);
+			horiz_sync_out, vert_sync_out	: OUT	STD_LOGIC;
 			pixel_row, pixel_column: OUT STD_LOGIC_VECTOR(9 DOWNTO 0));
     end component;
 
@@ -26,10 +28,43 @@ architecture behavior of DE0_CV_Default is
             Clk_out : out std_logic
         );
     end component;
+	 
+	 component ball
+		PORT
+		  (clk 						: IN std_logic;
+		  pixel_row, pixel_column	: IN std_logic_vector(9 DOWNTO 0);
+		  red, green, blue 			: OUT std_logic);	
+	 end component;
+	 
+	 component MOUSE IS
+		PORT( clock_25Mhz, reset 		: IN std_logic;
+				mouse_data					: INOUT std_logic;
+				mouse_clk 					: INOUT std_logic;
+				left_button, right_button	: OUT std_logic;
+			 mouse_cursor_row 			: OUT std_logic_vector(9 DOWNTO 0); 
+			 mouse_cursor_column 		: OUT std_logic_vector(9 DOWNTO 0));       	
+	 end component MOUSE;
+	 
+	 component bouncy_ball IS
+		PORT
+			( pb1, pb2, clk, vert_sync, mouse_left	: IN std_logic;
+				 pixel_row, pixel_column	: IN std_logic_vector(9 DOWNTO 0);
+			  red, green, blue 			: OUT std_logic);		
+	 END component bouncy_ball;
 
     signal Clk25Mhz : std_logic;
-	 signal red_out, blue_out, green_out : std_logic := '0';
-
+	 signal red_out, blue_out, green_out : std_logic_vector(3 downto 0) := (others => '0');
+	 signal pixel_row, pixel_column : std_logic_vector(9 downto 0);
+	 
+	 signal red : std_logic_vector(3 downto 0) := "1111";
+	 signal green : std_logic_vector(3 downto 0) := "1000";
+	 signal blue : std_logic_vector(3 downto 0) := "0000";
+	 
+	 signal ball_red, ball_green, ball_blue : std_logic;
+	 
+	 signal left_button : std_logic;
+	 
+	 signal vert_sync_out : std_logic;
 begin
 
     Clock_Divider : ClockDivider
@@ -37,25 +72,62 @@ begin
             Clk_in => CLOCK_50,
             Clk_out => Clk25Mhz
         );
+		  
+	 -- BALL_COMPONENT : ball port map (
+		--clk => clk25Mhz,
+		--pixel_row => pixel_row,
+		--pixel_column => pixel_column,
+		--red => ball_red,
+		--green => ball_green,
+		--blue => ball_blue
+	 --);
+	 
+	 MOUSE_COMPONENT : MOUSE port map (
+		clock_25Mhz => clk25Mhz,
+		reset => '0',
+		mouse_data => PS2_DAT,
+		mouse_clk => PS2_CLK,
+		left_button => left_button,
+		right_button => open,
+		mouse_cursor_row => open,
+		mouse_cursor_column => open
+	 );
+	  
+	 BOUNCY_BALL_COMPONENT : bouncy_ball port map (
+		pb1 => '1',
+		pb2 => '0',
+		clk => clk25Mhz,
+		vert_sync => vert_sync_out,
+		mouse_left => left_button,
+		pixel_row => pixel_row,
+		pixel_column => pixel_column,
+		red => ball_red,
+		green => ball_green,
+		blue => ball_blue
+	 );
 
     VGA : VGA_SYNC
         -- Display white color to check if it works lol
         port map (
             clock_25Mhz => Clk25Mhz,
-            red => '1', 
-            green => '0',
-            blue => '0',
+            red => red, 
+            green => green,
+            blue => blue,
             red_out => red_out,
             green_out => green_out,
             blue_out => blue_out,
             horiz_sync_out => VGA_HS,
-            vert_sync_out => VGA_VS,
-            pixel_row => open,
-            pixel_column => open
+            vert_sync_out => vert_sync_out,
+            pixel_row => pixel_row,
+            pixel_column => pixel_column
         );
+		  
+	 blue <= "0000" when ball_blue = '1' else "1111";
+	 green <= "1000" when ball_green = '1' else "1111";
     
-	 VGA_R <= (others => red_out);
-	 VGA_G <= (others => green_out);
-	 VGA_B <= (others => blue_out);
+	 VGA_R <= red_out;
+	 VGA_G <= green_out;
+	 VGA_B <= blue_out;
+	 VGA_VS <= vert_sync_out;
 	 
 end architecture behavior;

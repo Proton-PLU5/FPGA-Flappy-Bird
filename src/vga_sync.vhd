@@ -13,7 +13,8 @@ END VGA_SYNC;
 ARCHITECTURE a OF VGA_SYNC IS
 	SIGNAL horiz_sync, vert_sync : STD_LOGIC;
 	SIGNAL video_on, video_on_v, video_on_h : STD_LOGIC;
-	SIGNAL h_count, v_count :STD_LOGIC_VECTOR(9 DOWNTO 0);
+	SIGNAL h_count :STD_LOGIC_VECTOR(9 DOWNTO 0) := "0000000000";
+	SIGNAL v_count :STD_LOGIC_VECTOR(9 DOWNTO 0) := "0000000000";
 
 BEGIN
 
@@ -87,3 +88,4 @@ BEGIN
 
 END PROCESS;
 END a;
+

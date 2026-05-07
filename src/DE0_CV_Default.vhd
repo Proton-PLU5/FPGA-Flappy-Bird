@@ -43,8 +43,8 @@ begin
         port map (
             clock_25Mhz => Clk25Mhz,
             red => '1', 
-            green => '1',
-            blue => '1',
+            green => '0',
+            blue => '0',
             red_out => red_out,
             green_out => green_out,
             blue_out => blue_out,
@@ -55,7 +55,7 @@ begin
         );
     
 	 VGA_R <= (others => red_out);
-	 VGA_G <= (others => red_out);
-	 VGA_B <= (others => red_out);
+	 VGA_G <= (others => green_out);
+	 VGA_B <= (others => blue_out);
 	 
 end architecture behavior;

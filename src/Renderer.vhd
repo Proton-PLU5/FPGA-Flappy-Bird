@@ -1,4 +1,4 @@
-library library IEEE;
+library IEEE;
 use IEEE.std_logic_1164.all;
 use IEEE.numeric_std.all;
 
@@ -10,7 +10,7 @@ entity Renderer is
         vert_sync, horz_sync : IN std_logic;
         pixel_row, pixel_column	: IN std_logic_vector(9 DOWNTO 0);
         red, green, blue : OUT std_logic_vector(3 downto 0)
-    )
+    );
 end entity Renderer;
 
 architecture behavior of Renderer is
@@ -32,7 +32,7 @@ architecture behavior of Renderer is
     signal background_blue : std_logic_vector(3 downto 0) := "0000";
 begin
     
-    PLAYER : Player port map (
+    PLAYER_COMPONENT : Player port map (
         clk => clk25Mhz,
         vert_sync => vert_sync,
         mouse_left => mouse_left,
@@ -55,7 +55,7 @@ begin
             red <= background_red;
             green <= background_green;
             blue <= background_blue;
-        end if
-    end process
+        end if;
+    end process;
     
 end architecture behavior;

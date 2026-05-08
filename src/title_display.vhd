@@ -42,3 +42,4 @@ architecture behaviour of title_display is
 
 begin 
 
+end architecture behaviour;

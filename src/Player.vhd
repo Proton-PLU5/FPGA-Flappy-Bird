@@ -7,7 +7,8 @@ entity Player is
     port (
         clk, vert_sync, mouse_left	: IN std_logic;
         pixel_row, pixel_column	: IN std_logic_vector(9 DOWNTO 0);
-		red, green, blue : OUT std_logic_vector(3 downto 0);
+		  KEY : IN std_logic_vector(3 DOWNTO 0);
+		  red, green, blue : OUT std_logic_vector(3 downto 0);
         enabled : OUT std_logic);
 end entity Player;
 
@@ -19,6 +20,8 @@ architecture behavior of Player is
     SIGNAL ball_y_motion			: std_logic_vector(9 DOWNTO 0);
 
     SIGNAL JUMP_COUNTER             : integer range 0 to 50 := 0;
+	 signal red_s, green_s, blue_s : std_logic_vector(3 downto 0) := (others => '1');
+
 begin
     size <= CONV_STD_LOGIC_VECTOR(8,10);
 
@@ -32,6 +35,7 @@ begin
 	            else '0';
 
     Player_Controller : process (vert_sync)
+	 
     begin
         -- Move ball once every vertical sync
 	    if (rising_edge(vert_sync)) then		
@@ -63,12 +67,19 @@ begin
             
             -- Compute next ball Y position
             ball_y_pos <= ball_y_pos + ball_y_motion;
+				
+				--Push button flips ball colour
+				if (KEY(0) = '0') then
+					red_s <= not red_s;
+					green_s <= not green_s;
+					blue_s <= not blue_s;
+				end if;
         end if;
+		 red <= red_s;
+		 green <= green_s;
+		 blue <= blue_s;
     end process;
     
 
     enabled <= render;
-    red <= "1111";
-    green <= "1111";
-    blue <= "1111";
 end architecture behavior;

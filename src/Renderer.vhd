@@ -8,7 +8,8 @@ entity Renderer is
         clk25Mhz : IN std_logic;
         mouse_left : IN std_logic;
         vert_sync, horz_sync : IN std_logic;
-		  SW : in std_logic_vector(9 downto 0);
+		  SW : IN std_logic_vector(9 downto 0);
+		  KEY : IN std_logic_vector(3 DOWNTO 0);
         pixel_row, pixel_column	: IN std_logic_vector(9 DOWNTO 0);
         red, green, blue : OUT std_logic_vector(3 downto 0)
     );
@@ -19,6 +20,7 @@ architecture behavior of Renderer is
         port (
             clk, vert_sync, mouse_left	: IN std_logic;
             pixel_row, pixel_column	: IN std_logic_vector(9 DOWNTO 0);
+				KEY : IN std_logic_vector(3 DOWNTO 0);
             red, green, blue : OUT std_logic_vector(3 downto 0);
             enabled : OUT std_logic);
     end component Player;
@@ -27,10 +29,8 @@ architecture behavior of Renderer is
     signal ball_enabled : std_logic := '0';
     signal ball_red, ball_green, ball_blue : std_logic_vector(3 downto 0);
 
-    -- Background Values (Orange)
-    signal background_red : std_logic_vector(3 downto 0) := "0000";
-    signal background_green : std_logic_vector(3 downto 0) := "0000";
-    signal background_blue : std_logic_vector(3 downto 0) := "0000";
+    -- Background Values (Black)
+    signal background_red, background_green, background_blue : std_logic_vector(3 downto 0) := "0000";
 begin
     
     PLAYER_COMPONENT : Player port map (
@@ -39,6 +39,7 @@ begin
         mouse_left => mouse_left,
         pixel_row => pixel_row,
         pixel_column => pixel_column,
+		  KEY => KEY,
         red => ball_red,
         green => ball_green,
         blue => ball_blue,

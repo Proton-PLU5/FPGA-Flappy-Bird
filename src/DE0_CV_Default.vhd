@@ -7,6 +7,7 @@ entity DE0_CV_Default is
     port (
         CLOCK_50 : in std_logic;
 		  SW : in std_logic_vector(9 downto 0);
+		  KEY : IN std_logic_vector(3 DOWNTO 0);
 		  VGA_G, VGA_B, VGA_R : out std_logic_vector(3 downto 0);
 		  VGA_HS : out std_logic;
 		  VGA_VS : out std_logic;
@@ -47,6 +48,7 @@ architecture behavior of DE0_CV_Default is
 			mouse_left : IN std_logic;
 			vert_sync, horz_sync : IN std_logic;
 		   SW : in std_logic_vector(9 downto 0);
+			KEY : IN std_logic_vector(3 DOWNTO 0);
 			pixel_row, pixel_column	: IN std_logic_vector(9 DOWNTO 0);
 			red, green, blue : OUT std_logic_vector(3 downto 0)
 		);
@@ -117,6 +119,7 @@ begin
 		vert_sync => vert_sync_out,
 		horz_sync => horz_sync_out,
 		SW => SW,
+		KEY => KEY,
 		pixel_row => pixel_row,
 		pixel_column => pixel_column,
 		red => red,

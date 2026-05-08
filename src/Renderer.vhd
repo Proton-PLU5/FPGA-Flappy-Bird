@@ -8,6 +8,7 @@ entity Renderer is
         clk25Mhz : IN std_logic;
         mouse_left : IN std_logic;
         vert_sync, horz_sync : IN std_logic;
+		  SW : in std_logic_vector(9 downto 0);
         pixel_row, pixel_column	: IN std_logic_vector(9 DOWNTO 0);
         red, green, blue : OUT std_logic_vector(3 downto 0)
     );
@@ -27,8 +28,8 @@ architecture behavior of Renderer is
     signal ball_red, ball_green, ball_blue : std_logic_vector(3 downto 0);
 
     -- Background Values (Orange)
-    signal background_red : std_logic_vector(3 downto 0) := "1111";
-    signal background_green : std_logic_vector(3 downto 0) := "1000";
+    signal background_red : std_logic_vector(3 downto 0) := "0000";
+    signal background_green : std_logic_vector(3 downto 0) := "0000";
     signal background_blue : std_logic_vector(3 downto 0) := "0000";
 begin
     
@@ -47,6 +48,21 @@ begin
     -- Logic to determine output
     process (clk25Mhz)
     begin
+		  if (SW(0) = '1') then
+		      background_red <= "1111";
+		  else 
+				background_red <= "0000";
+		  end if;
+		  if (SW(1) = '1') then
+		      background_green <= "1111";
+		  else 
+				background_green <= "0000";
+		  end if;
+		  if (SW(2) = '1') then
+		      background_blue <= "1111";
+		  else 
+				background_blue <= "0000";
+		  end if;
         if (ball_enabled = '1') then
             red <= ball_red;
             green <= ball_green;

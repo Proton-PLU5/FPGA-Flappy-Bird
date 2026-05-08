@@ -6,6 +6,7 @@ USE  IEEE.STD_LOGIC_SIGNED.all;
 entity DE0_CV_Default is
     port (
         CLOCK_50 : in std_logic;
+		  SW : in std_logic_vector(9 downto 0);
 		  VGA_G, VGA_B, VGA_R : out std_logic_vector(3 downto 0);
 		  VGA_HS : out std_logic;
 		  VGA_VS : out std_logic;
@@ -45,6 +46,7 @@ architecture behavior of DE0_CV_Default is
 			clk25Mhz : IN std_logic;
 			mouse_left : IN std_logic;
 			vert_sync, horz_sync : IN std_logic;
+		   SW : in std_logic_vector(9 downto 0);
 			pixel_row, pixel_column	: IN std_logic_vector(9 DOWNTO 0);
 			red, green, blue : OUT std_logic_vector(3 downto 0)
 		);
@@ -58,9 +60,9 @@ architecture behavior of DE0_CV_Default is
    signal Clk25Mhz : std_logic;
 	signal red_out, blue_out, green_out : std_logic_vector(3 downto 0) := (others => '0');
 	signal pixel_row, pixel_column : std_logic_vector(9 downto 0);
-	signal red : std_logic_vector(3 downto 0) := "1111";
-	signal green : std_logic_vector(3 downto 0) := "1000";
-	signal blue : std_logic_vector(3 downto 0) := "0000";
+	signal red : std_logic_vector(3 downto 0);
+	signal green : std_logic_vector(3 downto 0);
+	signal blue : std_logic_vector(3 downto 0);
 	
 	signal ball_red, ball_green, ball_blue : std_logic;
 	
@@ -68,7 +70,7 @@ architecture behavior of DE0_CV_Default is
 	
 	signal vert_sync_out : std_logic;
 	signal horz_sync_out : std_logic;
-	
+		
 	signal count : integer range 0 to 9 := 0;
 	signal mouse_down : std_Logic := '0';
 begin
@@ -114,11 +116,12 @@ begin
 		mouse_left => left_button,
 		vert_sync => vert_sync_out,
 		horz_sync => horz_sync_out,
+		SW => SW,
 		pixel_row => pixel_row,
 		pixel_column => pixel_column,
 		red => red,
-		blue => blue,
-		green => green
+		green => green,
+		blue => blue
 	);
 
 	-- blue <= "0000" when ball_blue = '1' else "1111";

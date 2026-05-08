@@ -28,61 +28,47 @@ architecture behavior of DE0_CV_Default is
             Clk_out : out std_logic
         );
     end component;
-	 
-	 component ball
-		PORT
-		  (clk 						: IN std_logic;
-		  pixel_row, pixel_column	: IN std_logic_vector(9 DOWNTO 0);
-		  red, green, blue 			: OUT std_logic);	
-	 end component;
-	 
-	 component MOUSE IS
+
+	component MOUSE IS
 		PORT( clock_25Mhz, reset 		: IN std_logic;
-				mouse_data					: INOUT std_logic;
-				mouse_clk 					: INOUT std_logic;
-				left_button, right_button	: OUT std_logic;
-			 mouse_cursor_row 			: OUT std_logic_vector(9 DOWNTO 0); 
-			 mouse_cursor_column 		: OUT std_logic_vector(9 DOWNTO 0));       	
-	 end component MOUSE;
-	 
-	 component bouncy_ball IS
-		PORT
-			( pb1, pb2, clk, vert_sync, mouse_left	: IN std_logic;
-				 pixel_row, pixel_column	: IN std_logic_vector(9 DOWNTO 0);
-			  red, green, blue 			: OUT std_logic);		
-	 END component bouncy_ball;
+			mouse_data					: INOUT std_logic;
+			mouse_clk 					: INOUT std_logic;
+			left_button, right_button	: OUT std_logic;
+			mouse_cursor_row 			: OUT std_logic_vector(9 DOWNTO 0); 
+			mouse_cursor_column 		: OUT std_logic_vector(9 DOWNTO 0));       	
+	end component MOUSE;
+
+	component Renderer is
+		port (
+			clk25Mhz : IN std_logic;
+			mouse_left : IN std_logic;
+			vert_sync, horz_sync : IN std_logic;
+			pixel_row, pixel_column	: IN std_logic_vector(9 DOWNTO 0);
+			red, green, blue : OUT std_logic_vector(3 downto 0)
+		)
+	end component Renderer;
 
     signal Clk25Mhz : std_logic;
-	 signal red_out, blue_out, green_out : std_logic_vector(3 downto 0) := (others => '0');
-	 signal pixel_row, pixel_column : std_logic_vector(9 downto 0);
-	 
-	 signal red : std_logic_vector(3 downto 0) := "1111";
-	 signal green : std_logic_vector(3 downto 0) := "1000";
-	 signal blue : std_logic_vector(3 downto 0) := "0000";
-	 
-	 signal ball_red, ball_green, ball_blue : std_logic;
-	 
-	 signal left_button : std_logic;
-	 
-	 signal vert_sync_out : std_logic;
+	signal red_out, blue_out, green_out : std_logic_vector(3 downto 0) := (others => '0');
+	signal pixel_row, pixel_column : std_logic_vector(9 downto 0);
+	signal red : std_logic_vector(3 downto 0) := "1111";
+	signal green : std_logic_vector(3 downto 0) := "1000";
+	signal blue : std_logic_vector(3 downto 0) := "0000";
+	
+	signal ball_red, ball_green, ball_blue : std_logic;
+	
+	signal left_button : std_logic;
+	
+	signal vert_sync_out : std_logic;
 begin
-
-    Clock_Divider : ClockDivider
-        port map (
-            Clk_in => CLOCK_50,
-            Clk_out => Clk25Mhz
+	Clock_Divider : ClockDivider
+	port map (
+		Clk_in => CLOCK_50,
+		Clk_out => Clk25Mhz
         );
-		  
-	 -- BALL_COMPONENT : ball port map (
-		--clk => clk25Mhz,
-		--pixel_row => pixel_row,
-		--pixel_column => pixel_column,
-		--red => ball_red,
-		--green => ball_green,
-		--blue => ball_blue
-	 --);
-	 
-	 MOUSE_COMPONENT : MOUSE port map (
+		
+		
+	MOUSE_COMPONENT : MOUSE port map (
 		clock_25Mhz => clk25Mhz,
 		reset => '0',
 		mouse_data => PS2_DAT,
@@ -91,43 +77,40 @@ begin
 		right_button => open,
 		mouse_cursor_row => open,
 		mouse_cursor_column => open
-	 );
-	  
-	 BOUNCY_BALL_COMPONENT : bouncy_ball port map (
-		pb1 => '1',
-		pb2 => '0',
-		clk => clk25Mhz,
-		vert_sync => vert_sync_out,
+	);
+
+    VGA : VGA_SYNC port map (
+		clock_25Mhz => Clk25Mhz,
+		red => red, 
+		green => green,
+		blue => blue,
+		red_out => red_out,
+		green_out => green_out,
+		blue_out => blue_out,
+		horiz_sync_out => VGA_HS,
+		vert_sync_out => vert_sync_out,
+		pixel_row => pixel_row,
+		pixel_column => pixel_column
+	);
+		  
+	RENDERER : Renderer port map (
+		clk25Mhz => Clk25Mhz,
 		mouse_left => left_button,
+		vert_sync => vert_sync_out,
+		horz_sync => horiz_sync_out,
 		pixel_row => pixel_row,
 		pixel_column => pixel_column,
-		red => ball_red,
-		green => ball_green,
-		blue => ball_blue
-	 );
+		red => red,
+		blue => blue,
+		green => green
+	);
 
-    VGA : VGA_SYNC
-        -- Display white color to check if it works lol
-        port map (
-            clock_25Mhz => Clk25Mhz,
-            red => red, 
-            green => green,
-            blue => blue,
-            red_out => red_out,
-            green_out => green_out,
-            blue_out => blue_out,
-            horiz_sync_out => VGA_HS,
-            vert_sync_out => vert_sync_out,
-            pixel_row => pixel_row,
-            pixel_column => pixel_column
-        );
-		  
-	 blue <= "0000" when ball_blue = '1' else "1111";
-	 green <= "1000" when ball_green = '1' else "1111";
+	-- blue <= "0000" when ball_blue = '1' else "1111";
+	-- green <= "1000" when ball_green = '1' else "1111";
     
-	 VGA_R <= red_out;
-	 VGA_G <= green_out;
-	 VGA_B <= blue_out;
-	 VGA_VS <= vert_sync_out;
+	VGA_R <= red_out;
+	VGA_G <= green_out;
+	VGA_B <= blue_out;
+	VGA_VS <= vert_sync_out;
 	 
 end architecture behavior;

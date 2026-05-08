@@ -52,19 +52,36 @@ architecture behavior of DE0_CV_Default is
 			  red, green, blue 			: OUT std_logic);		
 	 END component bouncy_ball;
 
-    signal Clk25Mhz : std_logic;
+	component title_display IS
+		port (
+			clk          : in  std_logic;
+			pixel_row    : in  std_logic_vector(9 downto 0);
+			pixel_column : in  std_logic_vector(9 downto 0);
+			pixel_on     : out std_logic
+   		 );
+	end component title_display;
+
+
+
+     signal Clk25Mhz : std_logic;
+
+	 -- VGA Signals
 	 signal red_out, blue_out, green_out : std_logic_vector(3 downto 0) := (others => '0');
 	 signal pixel_row, pixel_column : std_logic_vector(9 downto 0);
-	 
+
 	 signal red : std_logic_vector(3 downto 0) := "1111";
 	 signal green : std_logic_vector(3 downto 0) := "1000";
 	 signal blue : std_logic_vector(3 downto 0) := "0000";
 	 
-	 signal ball_red, ball_green, ball_blue : std_logic;
-	 
 	 signal left_button : std_logic;
 	 
 	 signal vert_sync_out : std_logic;
+
+	 -- Text Display Signals
+	 signal text_on : std_logic;
+
+	 -- Ball Signals
+	 signal ball_red, ball_green, ball_blue : std_logic;
 begin
 
     Clock_Divider : ClockDivider
@@ -105,6 +122,19 @@ begin
 		green => ball_green,
 		blue => ball_blue
 	 );
+
+	TITLE_DISPLAY_COMPONENT : title_display port map (
+		clk => clk25Mhz,
+		pixel_row => pixel_row,
+		pixel_column => pixel_column,
+		pixel_on => open
+	);
+
+	-- Set text colour to dark blue, priority ball --> text --> background
+	red <= "0010" when text_on = '1', else "1111";
+	green <= "0000" when text_on = '1', "1000" when ball_green = '1' else "1111";
+	blue <= "1000" when text_on = '1', "0000" when ball_blue = '1' else "1111";
+
 
     VGA : VGA_SYNC
         -- Display white color to check if it works lol

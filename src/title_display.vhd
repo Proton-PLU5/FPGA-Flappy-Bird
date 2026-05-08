@@ -17,12 +17,13 @@ architecture behaviour of title_display is
         port (
             character_address : in std_logic_vector(5 downto 0);
             font_row          : in std_logic_vector(2 downto 0);
+            font_col          : in std_logic_vector(2 downto 0);
             clock             : in std_logic;
             rom_mux_output    : out std_logic
         );
     end component char_rom;
 
-    type char_array is array (11 downto 0) of std_logic_vector(5 downto 0);
+    type char_array is array (10 downto 0) of std_logic_vector(5 downto 0);
     constant title_string : char_array := (
         -- "Flappy Bird"
         O"06",
@@ -68,7 +69,7 @@ begin
     font_row_sig <= std_logic_vector(to_unsigned((row_int - text_row) mod char_height, 3));
     font_col_sig <= std_logic_vector(to_unsigned((col_int - text_col_start) mod char_width, 3));
 
-    char_addr <= TEXT(char_index) when in_text_zone = '1' else (others => '0');
+    char_addr <= title_string(char_index) when in_text_zone = '1' else (others => '0');
 
     CHAR_ROM_INST : char_rom
         port map (

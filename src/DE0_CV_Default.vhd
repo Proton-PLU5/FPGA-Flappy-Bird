@@ -127,14 +127,8 @@ begin
 		clk => clk25Mhz,
 		pixel_row => pixel_row,
 		pixel_column => pixel_column,
-		pixel_on => open
+		pixel_on => text_on
 	);
-
-	-- Set text colour to dark blue, priority ball --> text --> background
-	red <= "0010" when text_on = '1', else "1111";
-	green <= "0000" when text_on = '1', "1000" when ball_green = '1' else "1111";
-	blue <= "1000" when text_on = '1', "0000" when ball_blue = '1' else "1111";
-
 
     VGA : VGA_SYNC
         -- Display white color to check if it works lol
@@ -151,9 +145,11 @@ begin
             pixel_row => pixel_row,
             pixel_column => pixel_column
         );
-		  
-	 blue <= "0000" when ball_blue = '1' else "1111";
-	 green <= "1000" when ball_green = '1' else "1111";
+		
+	-- Priority: Ball <-- Text <-- Background
+	 red <= "0010" when text_on = '1' else "1111";
+	 blue <= "0000" when ball_blue = '1' else "0010" when text_on = '1' else "1111";
+	 green <= "1000" when ball_green = '1' else "1000" when text_on = '1' else "1111";
     
 	 VGA_R <= red_out;
 	 VGA_G <= green_out;

@@ -20,7 +20,8 @@ architecture behaviour of TitleRenderer is
 	 
 			generic (
 				text_string : string := "FLAPPY BOSS";
-				text_size : integer := 11
+				text_size : integer := 11;
+				SIZE : integer := 4
 			);
 
         port (
@@ -46,7 +47,7 @@ begin
 		  text_col_start => 200
     );
 	 
-	 SUB_TITLE : title_display generic map (text_string => "RETURN", text_size => 6) port map (
+	 SUB_TITLE : title_display generic map (text_string => "RETURN", text_size => 6, SIZE => 3) port map (
         clk => clk25Mhz,
         pixel_row => pixel_row,
         pixel_column => pixel_column,

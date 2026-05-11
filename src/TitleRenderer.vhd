@@ -47,7 +47,7 @@ begin
 		  text_col_start => 144
     );
 	 
-	 SUB_TITLE : title_display generic map (text_string => "RETURN OF THE SKELEKING", text_size => 6, SIZE => 3) port map (
+	 SUB_TITLE : title_display generic map (text_string => "RETURN OF THE SKELEKING", text_size => 23, SIZE => 3) port map (
         clk => clk25Mhz,
         pixel_row => pixel_row,
         pixel_column => pixel_column,

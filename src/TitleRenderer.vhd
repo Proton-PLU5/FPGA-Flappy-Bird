@@ -17,28 +17,48 @@ end entity TitleRenderer;
 
 architecture behaviour of TitleRenderer is
     component title_display is
+	 
+			generic (
+				text_string : string := "FLAPPY BOSS";
+				text_size : integer := 11
+			);
+
         port (
             clk          : in  std_logic;
             pixel_row    : in  std_logic_vector(9 downto 0);
             pixel_column : in  std_logic_vector(9 downto 0);
-            pixel_on     : out std_logic
+            pixel_on     : out std_logic;
+				text_row : in integer;
+				text_col_start : in integer
         );
     end component title_display;
 
     signal main_title_enable : std_logic;
+	 signal sub_title_enable : std_logic;
 begin
     
     MAIN_TITLE : title_display port map (
         clk => clk25Mhz,
         pixel_row => pixel_row,
         pixel_column => pixel_column,
-        pixel_on => main_title_enable -- Just use the red channel for the title
+        pixel_on => main_title_enable, -- Just use the red channel for the title
+		  text_row => 100,
+		  text_col_start => 200
+    );
+	 
+	 SUB_TITLE : title_display generic map (text_string => "RETURN", text_size => 6) port map (
+        clk => clk25Mhz,
+        pixel_row => pixel_row,
+        pixel_column => pixel_column,
+        pixel_on => sub_title_enable, -- Just use the red channel for the title
+		  text_row => 200,
+		  text_col_start => 200
     );
 
     -- Logic to determine output
     process (clk25Mhz)
     begin
-        if (main_title_enable = '1') then
+        if (main_title_enable = '1' OR sub_title_enable = '1') then
             red <= "1111";
             green <= "1111";
             blue <= "1111";

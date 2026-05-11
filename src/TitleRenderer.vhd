@@ -36,6 +36,7 @@ architecture behaviour of TitleRenderer is
 
     signal main_title_enable : std_logic;
 	 signal sub_title_enable : std_logic;
+	 signal training_text_enable : std_logic;
 begin
     
     MAIN_TITLE : title_display port map (
@@ -55,11 +56,21 @@ begin
 		  text_row => 200,
 		  text_col_start => 136
     );
+	 
+	 TRAINING_MODE_TEXT : title_display generic map (text_string => "TRAINING MODE", text_size => 13, size => 2) port map (
+			clk => clk25Mhz,
+			pixel_row => pixel_row,
+			pixel_column => pixel_column,
+			pixel_on => training_text_enable,
+			text_row => 300,
+			text_col_start => 268
+	 );
+			
 
     -- Logic to determine output
     process (clk25Mhz)
     begin
-        if (main_title_enable = '1' OR sub_title_enable = '1') then
+        if (main_title_enable = '1' OR sub_title_enable = '1' or training_text_enable = '1') then
             red <= "1111";
             green <= "1111";
             blue <= "1111";

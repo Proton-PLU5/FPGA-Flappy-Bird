@@ -51,7 +51,7 @@ architecture behaviour of title_display is
     constant char_height : integer := (2**(SIZE+1));
     constant num_chars : integer := text_size;
 
-    signal char_index : integer range 0 to 15;
+    signal char_index : integer;
     signal char_addr  : std_logic_vector(5 downto 0);
 
     signal font_row_full : std_logic_vector(9 downto 0);

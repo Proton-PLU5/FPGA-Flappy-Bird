@@ -181,20 +181,11 @@ begin
 			  end if;
 
 			  if (KEY[3] = '0') then
-					case (state) is
-						when 0 => -- Title Screen
-							title_state <= '0';
-							play_state <= '1';
-							state <= 1;
-						when 1 => -- Play State
-							title_state <= '1';
-							play_state <= '0';
-							state <= 0;
-						when others =>
-							title_state <= '1';
-							play_state <= '0';
-							state <= 0;
-					end case;
+					title_state <= '0';
+					play_state <= '1';
+			  elsif (KEY[2] = '0') then
+					title_state <= '1';
+					play_state <= '0';
 			  end if;
 		 end if;
 	end process;

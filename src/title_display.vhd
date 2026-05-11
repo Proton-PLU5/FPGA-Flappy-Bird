@@ -26,27 +26,31 @@ architecture behaviour of title_display is
     type char_array is array (10 downto 0) of std_logic_vector(5 downto 0);
     constant title_string : char_array := (
         -- "Flappy Bird"
-        O"06",
-        O"14",
-        O"01",
-        O"20",
-        O"20",
-        O"31",
-        O"40",
+
+        O"23",
+        O"23",
+        O"17",
         O"02",
-        O"11",
-        O"22",
-        O"04"
+        O"40",
+        O"31",
+        O"20",
+        O"01",
+        O"14",
+        O"06"
     );
 
     constant text_row : integer := 100;
-    constant text_col_start : integer := 160;
+    constant text_col_start : integer := 250;
     constant char_width : integer := 8;
     constant char_height : integer := 8;
     constant num_chars : integer := 11;
 
     signal char_index : integer range 0 to 15;
     signal char_addr  : std_logic_vector(5 downto 0);
+
+    signal font_row_full : std_logic_vector(9 downto 0);
+    signal font_col_full : std_logic_vector(9 downto 0);
+
     signal font_row_sig : std_logic_vector(2 downto 0);
     signal font_col_sig : std_logic_vector(2 downto 0);
     signal rom_out : std_logic;
@@ -66,8 +70,11 @@ begin
     -- Determines which character we are currently displaying
     char_index <= (col_int - text_col_start) / char_width;
 
-    font_row_sig <= std_logic_vector(to_unsigned((row_int - text_row) mod char_height, 3));
-    font_col_sig <= std_logic_vector(to_unsigned((col_int - text_col_start) mod char_width, 3));
+    font_row_full <= std_logic_vector(to_unsigned((row_int - text_row) mod char_height, 10));
+    font_col_full <= std_logic_vector(to_unsigned((col_int - text_col_start) mod char_width, 10));
+
+    font_row_sig <= font_row_full(3 downto 1);
+    font_col_sig <= font_col_full(3 downto 1);
 
     char_addr <= title_string(char_index) when in_text_zone = '1' else (others => '0');
 

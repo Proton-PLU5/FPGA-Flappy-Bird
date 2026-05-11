@@ -1,14 +1,18 @@
-library ieee;
-use ieee.std_logic_1164.all;
-use ieee.numeric_std.all;
+LIBRARY IEEE;
+USE IEEE.STD_LOGIC_1164.all;
+USE  IEEE.STD_LOGIC_ARITH.all;
+USE  IEEE.STD_LOGIC_SIGNED.all;
 
 entity DE0_CV_Default is
     port (
         CLOCK_50 : in std_logic;
+		  SW : in std_logic_vector(9 downto 0);
+		  KEY : IN std_logic_vector(3 DOWNTO 0);
 		  VGA_G, VGA_B, VGA_R : out std_logic_vector(3 downto 0);
 		  VGA_HS : out std_logic;
 		  VGA_VS : out std_logic;
-		  PS2_DAT, PS2_CLK : INOUT std_logic
+		  PS2_DAT, PS2_CLK : INOUT std_logic;
+		  HEX0 : OUT std_logic_vector(6 downto 0)
     );
 end DE0_CV_Default;
 
@@ -28,78 +32,78 @@ architecture behavior of DE0_CV_Default is
             Clk_out : out std_logic
         );
     end component;
-	 
-	 component ball
-		PORT
-		  (clk 						: IN std_logic;
-		  pixel_row, pixel_column	: IN std_logic_vector(9 DOWNTO 0);
-		  red, green, blue 			: OUT std_logic);	
-	 end component;
-	 
-	 component MOUSE IS
+
+	component MOUSE IS
 		PORT( clock_25Mhz, reset 		: IN std_logic;
-				mouse_data					: INOUT std_logic;
-				mouse_clk 					: INOUT std_logic;
-				left_button, right_button	: OUT std_logic;
-			 mouse_cursor_row 			: OUT std_logic_vector(9 DOWNTO 0); 
-			 mouse_cursor_column 		: OUT std_logic_vector(9 DOWNTO 0));       	
-	 end component MOUSE;
-	 
-	 component bouncy_ball IS
-		PORT
-			( pb1, pb2, clk, vert_sync, mouse_left	: IN std_logic;
-				 pixel_row, pixel_column	: IN std_logic_vector(9 DOWNTO 0);
-			  red, green, blue 			: OUT std_logic);		
-	 END component bouncy_ball;
+			mouse_data					: INOUT std_logic;
+			mouse_clk 					: INOUT std_logic;
+			left_button, right_button	: OUT std_logic;
+			mouse_cursor_row 			: OUT std_logic_vector(9 DOWNTO 0); 
+			mouse_cursor_column 		: OUT std_logic_vector(9 DOWNTO 0));       	
+	end component MOUSE;
 
-	component title_display IS
+	component Renderer is
 		port (
-			clk          : in  std_logic;
-			pixel_row    : in  std_logic_vector(9 downto 0);
-			pixel_column : in  std_logic_vector(9 downto 0);
-			pixel_on     : out std_logic
-   		 );
-	end component title_display;
+			clk25Mhz : IN std_logic;
+			mouse_left : IN std_logic;
+			vert_sync, horz_sync : IN std_logic;
+		   SW : in std_logic_vector(9 downto 0);
+			KEY : IN std_logic_vector(3 DOWNTO 0);
+			pixel_row, pixel_column	: IN std_logic_vector(9 DOWNTO 0);
+			red, green, blue : OUT std_logic_vector(3 downto 0)
+		);
+	end component Renderer;
 
+	component TitleRenderer is
+		port (
+			clk25Mhz : IN std_logic;
+			mouse_left : IN std_logic;
+			vert_sync, horz_sync : IN std_logic;
+		   SW : in std_logic_vector(9 downto 0);
+			KEY : IN std_logic_vector(3 DOWNTO 0);
+			pixel_row, pixel_column	: IN std_logic_vector(9 DOWNTO 0);
+			red, green, blue : OUT std_logic_vector(3 downto 0)
+		);
+	end component TitleRenderer;
+	
+	component BCD_to_SevenSeg is
+     port (BCD_digit : in std_logic_vector(3 downto 0);
+           SevenSeg_out : out std_logic_vector(6 downto 0));
+	end component;
 
+  signal Clk25Mhz : std_logic;
 
-     signal Clk25Mhz : std_logic;
+  -- Text Display Signals
+  signal text_on : std_logic;
 
-	 -- VGA Signals
-	 signal red_out, blue_out, green_out : std_logic_vector(3 downto 0) := (others => '0');
-	 signal pixel_row, pixel_column : std_logic_vector(9 downto 0);
+  signal Clk25Mhz : std_logic;
+	signal red_out, blue_out, green_out : std_logic_vector(3 downto 0) := (others => '0');
+	signal pixel_row, pixel_column : std_logic_vector(9 downto 0);
+	signal red : std_logic_vector(3 downto 0);
+	signal green : std_logic_vector(3 downto 0);
+	signal blue : std_logic_vector(3 downto 0);
+	
+	signal ball_red, ball_green, ball_blue : std_logic;
+	
+	signal left_button : std_logic;
+	
+	signal vert_sync_out : std_logic;
+	signal horz_sync_out : std_logic;
+		
+	signal count : integer range 0 to 9 := 0;
+	signal mouse_down : std_Logic := '0';
 
-	 signal red : std_logic_vector(3 downto 0) := "1111";
-	 signal green : std_logic_vector(3 downto 0) := "1000";
-	 signal blue : std_logic_vector(3 downto 0) := "0000";
-	 
-	 signal left_button : std_logic;
-	 
-	 signal vert_sync_out : std_logic;
-
-	 -- Text Display Signals
-	 signal text_on : std_logic;
-
-	 -- Ball Signals
-	 signal ball_red, ball_green, ball_blue : std_logic;
+	signal play_state : std_logic := '0';
+	signal title_state : std_logic := '1';
+	signal state : integer range 0 to 1 := 0; -- 0 for title, 1 for play
 begin
-
-    Clock_Divider : ClockDivider
-        port map (
-            Clk_in => CLOCK_50,
-            Clk_out => Clk25Mhz
-        );
-		  
-	 -- BALL_COMPONENT : ball port map (
-		--clk => clk25Mhz,
-		--pixel_row => pixel_row,
-		--pixel_column => pixel_column,
-		--red => ball_red,
-		--green => ball_green,
-		--blue => ball_blue
-	 --);
-	 
-	 MOUSE_COMPONENT : MOUSE port map (
+  
+	Clock_Divider : ClockDivider port map (
+		Clk_in => CLOCK_50,
+		Clk_out => Clk25Mhz
+  );
+    
+	MOUSE_COMPONENT : MOUSE port map (
 		clock_25Mhz => clk25Mhz,
 		reset => '0',
 		mouse_data => PS2_DAT,
@@ -108,52 +112,97 @@ begin
 		right_button => open,
 		mouse_cursor_row => open,
 		mouse_cursor_column => open
-	 );
-	  
-	 BOUNCY_BALL_COMPONENT : bouncy_ball port map (
-		pb1 => '1',
-		pb2 => '0',
-		clk => clk25Mhz,
-		vert_sync => vert_sync_out,
-		mouse_left => left_button,
-		pixel_row => pixel_row,
-		pixel_column => pixel_column,
-		red => ball_red,
-		green => ball_green,
-		blue => ball_blue
-	 );
-
-	TITLE_DISPLAY_COMPONENT : title_display port map (
-		clk => clk25Mhz,
-		pixel_row => pixel_row,
-		pixel_column => pixel_column,
-		pixel_on => text_on
 	);
 
-    VGA : VGA_SYNC
-        -- Display white color to check if it works lol
-        port map (
-            clock_25Mhz => Clk25Mhz,
-            red => red, 
-            green => green,
-            blue => blue,
-            red_out => red_out,
-            green_out => green_out,
-            blue_out => blue_out,
-            horiz_sync_out => VGA_HS,
-            vert_sync_out => vert_sync_out,
-            pixel_row => pixel_row,
-            pixel_column => pixel_column
-        );
-		
-	-- Priority: Ball <-- Text <-- Background
-	 red <= "0010" when text_on = '1' else "1111";
-	 blue <= "0000" when ball_blue = '1' else "0010" when text_on = '1' else "1111";
-	 green <= "1000" when ball_green = '1' else "1000" when text_on = '1' else "1111";
+  VGA : VGA_SYNC port map (
+		clock_25Mhz => Clk25Mhz,
+		red => red, 
+		green => green,
+		blue => blue,
+		red_out => red_out,
+		green_out => green_out,
+		blue_out => blue_out,
+		horiz_sync_out => horz_sync_out,
+		vert_sync_out => vert_sync_out,
+		pixel_row => pixel_row,
+		pixel_column => pixel_column
+	);
+	
+	COVERTER: BCD_to_SevenSeg port map (
+		BCD_digit => CONV_STD_LOGIC_VECTOR(count, 4),
+		SevenSeg_out => HEX0
+	);
+		  
+	RENDERER_COMPONENT : Renderer port map (
+		clk25Mhz => Clk25Mhz,
+		mouse_left => left_button,
+		vert_sync => vert_sync_out,
+		horz_sync => horz_sync_out,
+		SW => SW,
+		KEY => KEY,
+		pixel_row => pixel_row,
+		pixel_column => pixel_column,
+		red => red,
+		green => green,
+		blue => blue,
+		enabled => play_state
+	);
+
+	TITLE_RENDERER_COMPONENT : TitleRenderer port map (
+		clk25Mhz => Clk25Mhz,
+		mouse_left => left_button,
+		vert_sync => vert_sync_out,
+		horz_sync => horz_sync_out,
+		SW => SW,
+		KEY => KEY,
+		pixel_row => pixel_row,
+		pixel_column => pixel_column,
+		red => open, -- We can ignore the title renderer's output for now
+		green => open,
+		blue => open,
+		enabled => title_state
+	);
+  
+	-- blue <= "0000" when ball_blue = '1' else "1111";
+	-- green <= "1000" when ball_green = '1' else "1111";
+	
+	process (CLOCK_50)
+	begin
+		 if rising_edge(CLOCK_50) then
+			  if (left_button = '1' and mouse_down = '0') then
+					if count = 9 then
+						 count <= 0; -- Reset if it hits the max range
+					else
+						 count <= count + 1;
+					end if;
+					mouse_down <= '1';
+			  elsif (left_button = '0') then
+					mouse_down <= '0';
+			  end if;
+
+			  if (KEY[3] = '0') then
+					case (state) is
+						when 0 => -- Title Screen
+							title_state <= '0';
+							play_state <= '1';
+							state <= 1;
+						when 1 => -- Play State
+							title_state <= '1';
+							play_state <= '0';
+							state <= 0;
+						when others =>
+							title_state <= '1';
+							play_state <= '0';
+							state <= 0;
+					end case;
+			  end if;
+		 end if;
+	end process;
     
-	 VGA_R <= red_out;
-	 VGA_G <= green_out;
-	 VGA_B <= blue_out;
-	 VGA_VS <= vert_sync_out;
+	VGA_R <= red_out;
+	VGA_G <= green_out;
+	VGA_B <= blue_out;
+	VGA_VS <= vert_sync_out;
+	VGA_HS <= horz_sync_out;
 	 
 end architecture behavior;

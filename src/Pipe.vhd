@@ -1,21 +1,55 @@
-LIBRARY IEEE;
-USE IEEE.STD_LOGIC_1164.all;
-USE  IEEE.STD_LOGIC_ARITH.all;
-USE  IEEE.STD_LOGIC_SIGNED.all;
+library IEEE;
+use IEEE.STD_LOGIC_1164.all;
+use IEEE.NUMERIC_STD.all;
 
 entity Pipe is 
     port (
-        clk, vert_sync, mouse_left	: IN std_logic;
-        pixel_row, pixel_column	: IN std_logic_vector(9 DOWNTO 0);
-		red, green, blue : OUT std_logic_vector(3 downto 0);
-        enabled : OUT std_logic
+        clk, vert_sync, mouse_left : in std_logic;
+        pixel_row, pixel_column    : in std_logic_vector(9 downto 0);
+        red, green, blue          : out std_logic_vector(3 downto 0);
+        height                    : in integer range 0 to 480; -- Height of the centre of the gap in the pipe
+        gap                       : in integer range 0 to 480; -- This is the size of the gap in the pipe
+        reset                     : in std_logic;
+        end_reached               : out std_logic;
+        enabled                   : out std_logic
     );
 end entity Pipe;
 
 architecture behaviour of Pipe is
-    
+    signal render : std_logic;
+    signal pipe_x_pos : unsigned(10 downto 0) := to_unsigned(640, 11); -- Start off-screen right (assuming 640px width)
+    signal pipe_top_y_pos : unsigned(9 downto 0);
+    signal pipe_bottom_y_pos : unsigned(9 downto 0);
+    signal pipe_width : unsigned(9 downto 0) := to_unsigned(25,10);
 begin
-    
-    
-    
+    -- Calculate top and bottom y positions based on height and gap
+    pipe_top_y_pos <= to_unsigned(height, 10) - to_unsigned(gap/2, 10);
+    pipe_bottom_y_pos <= to_unsigned(height, 10) + to_unsigned(gap/2, 10);
+
+    -- Render logic
+    render <= '1' when (
+        (pipe_x_pos <= unsigned(pixel_column) + pipe_width) and (unsigned(pixel_column) <= pipe_x_pos + pipe_width)
+        and ( (unsigned(pixel_row) <= pipe_top_y_pos) or (unsigned(pixel_row) >= pipe_bottom_y_pos) )
+    ) else '0';
+
+    PIPE_CONTROLLER : process (vert_sync, reset)
+    begin
+        if reset = '1' then
+            pipe_x_pos <= to_unsigned(640, 11); -- Reset to right edge
+            end_reached <= '0';
+        elsif rising_edge(vert_sync) then
+            if (pipe_x_pos <= to_unsigned(0, 11)) then
+                end_reached <= '1';
+            else
+                pipe_x_pos <= pipe_x_pos - to_unsigned(2, 11);
+                end_reached <= '0';
+            end if;
+        end if;
+    end process PIPE_CONTROLLER;
+
+    enabled <= render;
+    red <= (others => '0');
+    green <= (others => '1');
+    blue <= (others => '0');
+
 end architecture behaviour;

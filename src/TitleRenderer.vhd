@@ -44,16 +44,16 @@ begin
         pixel_column => pixel_column,
         pixel_on => main_title_enable, -- Just use the red channel for the title
 		  text_row => 100,
-		  text_col_start => 200
+		  text_col_start => 144
     );
 	 
-	 SUB_TITLE : title_display generic map (text_string => "RETURN", text_size => 6, SIZE => 3) port map (
+	 SUB_TITLE : title_display generic map (text_string => "RETURN OF THE SKELEKING", text_size => 6, SIZE => 3) port map (
         clk => clk25Mhz,
         pixel_row => pixel_row,
         pixel_column => pixel_column,
         pixel_on => sub_title_enable, -- Just use the red channel for the title
 		  text_row => 200,
-		  text_col_start => 200
+		  text_col_start => 136
     );
 
     -- Logic to determine output

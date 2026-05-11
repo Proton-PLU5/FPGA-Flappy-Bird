@@ -47,8 +47,8 @@ architecture behaviour of title_display is
     
 	 constant title_string : char_array := CONV_TEXT_TO_ARRAY;
 	 
-    constant char_width : integer := 8 * SIZE;
-    constant char_height : integer := 8 * SIZE;
+    constant char_width : integer := (2**(SIZE+1));
+    constant char_height : integer := (2**(SIZE+1));
     constant num_chars : integer := text_size;
 
     signal char_index : integer range 0 to 15;
@@ -82,8 +82,8 @@ begin
     font_row_full <= std_logic_vector(to_unsigned((row_int - text_row) mod char_height, 10));
     font_col_full <= std_logic_vector(to_unsigned((col_int - text_col_start) mod char_width, 10));
 
-    font_row_sig <= font_row_full(SIZE-1 downto SIZE-3);
-    font_col_sig <= font_col_full(SIZE-1 downto SIZE-3);
+    font_row_sig <= font_row_full(SIZE downto SIZE-2);
+    font_col_sig <= font_col_full(SIZE downto SIZE-2);
 
     char_addr <= title_string(char_index) when in_text_zone = '1' else (others => '0');
 

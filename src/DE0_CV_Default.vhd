@@ -53,6 +53,18 @@ architecture behavior of DE0_CV_Default is
 			red, green, blue : OUT std_logic_vector(3 downto 0)
 		);
 	end component Renderer;
+
+	component TitleRenderer is
+		port (
+			clk25Mhz : IN std_logic;
+			mouse_left : IN std_logic;
+			vert_sync, horz_sync : IN std_logic;
+		   SW : in std_logic_vector(9 downto 0);
+			KEY : IN std_logic_vector(3 DOWNTO 0);
+			pixel_row, pixel_column	: IN std_logic_vector(9 DOWNTO 0);
+			red, green, blue : OUT std_logic_vector(3 downto 0)
+		);
+	end component TitleRenderer;
 	
 	component BCD_to_SevenSeg is
      port (BCD_digit : in std_logic_vector(3 downto 0);
@@ -80,6 +92,10 @@ architecture behavior of DE0_CV_Default is
 		
 	signal count : integer range 0 to 9 := 0;
 	signal mouse_down : std_Logic := '0';
+
+	signal play_state : std_logic := '0';
+	signal title_state : std_logic := '1';
+	signal state : integer range 0 to 1 := 0; -- 0 for title, 1 for play
 begin
   
 	Clock_Divider : ClockDivider port map (
@@ -128,15 +144,31 @@ begin
 		pixel_column => pixel_column,
 		red => red,
 		green => green,
-		blue => blue
+		blue => blue,
+		enabled => play_state
+	);
+
+	TITLE_RENDERER_COMPONENT : TitleRenderer port map (
+		clk25Mhz => Clk25Mhz,
+		mouse_left => left_button,
+		vert_sync => vert_sync_out,
+		horz_sync => horz_sync_out,
+		SW => SW,
+		KEY => KEY,
+		pixel_row => pixel_row,
+		pixel_column => pixel_column,
+		red => open, -- We can ignore the title renderer's output for now
+		green => open,
+		blue => open,
+		enabled => title_state
 	);
   
 	-- blue <= "0000" when ball_blue = '1' else "1111";
 	-- green <= "1000" when ball_green = '1' else "1111";
 	
-	process (clk25Mhz)
+	process (CLOCK_50)
 	begin
-		 if rising_edge(clk25Mhz) then
+		 if rising_edge(CLOCK_50) then
 			  if (left_button = '1' and mouse_down = '0') then
 					if count = 9 then
 						 count <= 0; -- Reset if it hits the max range
@@ -146,6 +178,23 @@ begin
 					mouse_down <= '1';
 			  elsif (left_button = '0') then
 					mouse_down <= '0';
+			  end if;
+
+			  if (KEY[3] = '0') then
+					case (state) is
+						when 0 => -- Title Screen
+							title_state <= '0';
+							play_state <= '1';
+							state <= 1;
+						when 1 => -- Play State
+							title_state <= '1';
+							play_state <= '0';
+							state <= 0;
+						when others =>
+							title_state <= '1';
+							play_state <= '0';
+							state <= 0;
+					end case;
 			  end if;
 		 end if;
 	end process;

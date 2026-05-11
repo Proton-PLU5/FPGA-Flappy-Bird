@@ -49,21 +49,21 @@ begin
     -- Logic to determine output
     process (clk25Mhz)
     begin
-		  if (SW(0) = '1') then
-		      background_red <= "1111";
-		  else 
-				background_red <= "0000";
-		  end if;
-		  if (SW(1) = '1') then
-		      background_green <= "1111";
-		  else 
-				background_green <= "0000";
-		  end if;
-		  if (SW(2) = '1') then
-		      background_blue <= "1111";
-		  else 
-				background_blue <= "0000";
-		  end if;
+        if (SW(0) = '1') then
+            background_red <= "1111";
+        else 
+            background_red <= "0000";
+        end if;
+        if (SW(1) = '1') then
+            background_green <= "1111";
+        else 
+            background_green <= "0000";
+        end if;
+        if (SW(2) = '1') then
+            background_blue <= "1111";
+        else 
+            background_blue <= "0000";
+        end if;
         if (ball_enabled = '1') then
             red <= ball_red;
             green <= ball_green;

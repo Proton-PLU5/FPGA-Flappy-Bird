@@ -59,7 +59,12 @@ architecture behavior of DE0_CV_Default is
            SevenSeg_out : out std_logic_vector(6 downto 0));
 	end component;
 
-   signal Clk25Mhz : std_logic;
+  signal Clk25Mhz : std_logic;
+
+  -- Text Display Signals
+  signal text_on : std_logic;
+
+  signal Clk25Mhz : std_logic;
 	signal red_out, blue_out, green_out : std_logic_vector(3 downto 0) := (others => '0');
 	signal pixel_row, pixel_column : std_logic_vector(9 downto 0);
 	signal red : std_logic_vector(3 downto 0);
@@ -76,13 +81,12 @@ architecture behavior of DE0_CV_Default is
 	signal count : integer range 0 to 9 := 0;
 	signal mouse_down : std_Logic := '0';
 begin
-	Clock_Divider : ClockDivider
-	port map (
+  
+	Clock_Divider : ClockDivider port map (
 		Clk_in => CLOCK_50,
 		Clk_out => Clk25Mhz
-        );
-		
-		
+  );
+    
 	MOUSE_COMPONENT : MOUSE port map (
 		clock_25Mhz => clk25Mhz,
 		reset => '0',
@@ -94,7 +98,7 @@ begin
 		mouse_cursor_column => open
 	);
 
-    VGA : VGA_SYNC port map (
+  VGA : VGA_SYNC port map (
 		clock_25Mhz => Clk25Mhz,
 		red => red, 
 		green => green,
@@ -126,7 +130,7 @@ begin
 		green => green,
 		blue => blue
 	);
-
+  
 	-- blue <= "0000" when ball_blue = '1' else "1111";
 	-- green <= "1000" when ball_green = '1' else "1111";
 	

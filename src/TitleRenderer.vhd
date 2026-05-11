@@ -16,7 +16,7 @@ entity TitleRenderer is
 end entity TitleRenderer;
 
 architecture behaviour of TitleRenderer is
-    entity title_display is
+    component title_display is
         port (
             clk          : in  std_logic;
             pixel_row    : in  std_logic_vector(9 downto 0);
@@ -33,7 +33,7 @@ begin
         pixel_row => pixel_row,
         pixel_column => pixel_column,
         pixel_on => main_title_enable -- Just use the red channel for the title
-    )
+    );
 
     -- Logic to determine output
     process (clk25Mhz)

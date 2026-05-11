@@ -11,7 +11,8 @@ entity Renderer is
 		  SW : IN std_logic_vector(9 downto 0);
 		  KEY : IN std_logic_vector(3 DOWNTO 0);
         pixel_row, pixel_column	: IN std_logic_vector(9 DOWNTO 0);
-        red, green, blue : OUT std_logic_vector(3 downto 0)
+        red, green, blue : OUT std_logic_vector(3 downto 0);
+		  enabled : IN std_logic
     );
 end entity Renderer;
 

@@ -76,7 +76,6 @@ architecture behavior of DE0_CV_Default is
   -- Text Display Signals
   signal text_on : std_logic;
 
-  signal Clk25Mhz : std_logic;
 	signal red_out, blue_out, green_out : std_logic_vector(3 downto 0) := (others => '0');
 	signal pixel_row, pixel_column : std_logic_vector(9 downto 0);
 	signal red : std_logic_vector(3 downto 0);
@@ -96,6 +95,9 @@ architecture behavior of DE0_CV_Default is
 	signal play_state : std_logic := '0';
 	signal title_state : std_logic := '1';
 	signal state : integer range 0 to 1 := 0; -- 0 for title, 1 for play
+	
+	signal red_play, green_play, blue_play : std_logic_vector(3 downto 0);
+	signal red_title, green_title, blue_title : std_logic_vector(3 downto 0);
 begin
   
 	Clock_Divider : ClockDivider port map (
@@ -142,10 +144,9 @@ begin
 		KEY => KEY,
 		pixel_row => pixel_row,
 		pixel_column => pixel_column,
-		red => red,
-		green => green,
-		blue => blue,
-		enabled => play_state
+		red => red_play,
+		green => green_play,
+		blue => blue_play
 	);
 
 	TITLE_RENDERER_COMPONENT : TitleRenderer port map (
@@ -157,10 +158,9 @@ begin
 		KEY => KEY,
 		pixel_row => pixel_row,
 		pixel_column => pixel_column,
-		red => open, -- We can ignore the title renderer's output for now
-		green => open,
-		blue => open,
-		enabled => title_state
+		red => red_title, -- We can ignore the title renderer's output for now
+		green => green_title,
+		blue => blue_title
 	);
   
 	-- blue <= "0000" when ball_blue = '1' else "1111";
@@ -180,15 +180,19 @@ begin
 					mouse_down <= '0';
 			  end if;
 
-			  if (KEY[3] = '0') then
+			  if (KEY(3) = '0') then
 					title_state <= '0';
 					play_state <= '1';
-			  elsif (KEY[2] = '0') then
+			  elsif (KEY(2)= '0') then
 					title_state <= '1';
 					play_state <= '0';
 			  end if;
 		 end if;
 	end process;
+	
+	red <= red_play WHEN play_state = '1' ELSE red_title;
+	blue <= blue_play WHEN play_state = '1' ELSE blue_title;
+	green <= green_play WHEN play_state = '1' ELSE green_title;
     
 	VGA_R <= red_out;
 	VGA_G <= green_out;

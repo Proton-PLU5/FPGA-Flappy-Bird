@@ -41,6 +41,16 @@ package body utils is
 			  when 'X'    => return "011000"; -- O"30"
 			  when 'Y'    => return "011001"; -- O"31"
 			  when 'Z'    => return "011010"; -- O"32"
+			  when '0' => return  O"60";
+			  when '1' => return  O"61";
+			  when '2' => return  O"62";
+			  when '3' => return  O"63";
+			  when '4' => return  O"64";
+			  when '5' => return  O"65";
+			  when '6' => return  O"66";
+			  when '7' => return  O"67";
+			  when '8' => return  O"70";
+			  when '9' => return  O"71";
 			  when others => return O"40"; -- space/default
 		 end case;
 	end function;

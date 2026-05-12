@@ -26,6 +26,8 @@ architecture behavior of Player is
     constant fall_velocity_max : std_logic_vector(9 DOWNTO 0) := CONV_STD_LOGIC_VECTOR(6, 10);
     constant jump_velocity : std_logic_vector(9 DOWNTO 0) := CONV_STD_LOGIC_VECTOR(-6, 10);
 
+    signal is_pressed : std_logic := '0';
+
 
 begin
     size <= CONV_STD_LOGIC_VECTOR(8,10);
@@ -66,11 +68,15 @@ begin
             
 				
 				--Push button flips ball colour
-				if (KEY(0) = '0') then
+				if (KEY(0) = '0' and is_pressed = '0') then
 					red_s <= not red_s;
 					green_s <= not green_s;
 					blue_s <= not blue_s;
-				end if;
+					is_pressed <= '1';
+                elsif (KEY(0) = '1') then
+                    is_pressed <= '0';
+                end if;
+
         end if;
 		 red <= red_s;
 		 green <= green_s;

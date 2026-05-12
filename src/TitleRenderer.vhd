@@ -43,7 +43,7 @@ begin
         clk => clk25Mhz,
         pixel_row => pixel_row,
         pixel_column => pixel_column,
-        pixel_on => main_title_enable, -- Just use the red channel for the title
+        pixel_on => main_title_enable, 
 		  text_row => 100,
 		  text_col_start => 144
     );
@@ -52,7 +52,7 @@ begin
         clk => clk25Mhz,
         pixel_row => pixel_row,
         pixel_column => pixel_column,
-        pixel_on => sub_title_enable, -- Just use the red channel for the title
+        pixel_on => sub_title_enable, 
 		  text_row => 200,
 		  text_col_start => 136
     );
@@ -70,10 +70,14 @@ begin
     -- Logic to determine output
     process (clk25Mhz)
     begin
-        if (main_title_enable = '1' OR sub_title_enable = '1' or training_text_enable = '1') then
+        if (sub_title_enable = '1' or training_text_enable = '1') then
             red <= "1111";
             green <= "1111";
             blue <= "1111";
+        elsif (main_title_enable = '1') then
+            red <= "1111";
+            green <= "0000";
+            blue <= "0000";
         else
             red <= "0000";
             green <= "0000";

@@ -26,9 +26,29 @@ architecture behavior of Renderer is
             enabled : OUT std_logic);
     end component Player;
 
+    component title_display is
+        generic (
+            text_string : string := "FLAPPY BOSS";
+            text_size : integer := 11;
+            SIZE : integer := 4
+        );
+
+        port (
+            clk          : in  std_logic;
+            pixel_row    : in  std_logic_vector(9 downto 0);
+            pixel_column : in  std_logic_vector(9 downto 0);
+            pixel_on     : out std_logic;
+            text_row : in integer;
+            text_col_start : in integer
+            
+        );
+    end component title_display;
+
     -- Ball Values
     signal ball_enabled : std_logic := '0';
     signal ball_red, ball_green, ball_blue : std_logic_vector(3 downto 0);
+
+    signal score_enable : std_logic := '0';
 
     -- Background Values (Black)
     signal background_red, background_green, background_blue : std_logic_vector(3 downto 0) := "0000";
@@ -47,9 +67,24 @@ begin
         enabled => ball_enabled
     );
 
-    -- Logic to determine output
+    SCORE_COMPONENT : title_display generic map(
+        text_string => " 00 ",
+        text_size => 4,
+        SIZE => 3
+    )
+    port map (
+        clk => clk25Mhz,
+        pixel_row => pixel_row,
+        pixel_column => pixel_column,
+        pixel_on => score_enable,
+        text_row => 50,
+        text_col_start => 288
+    );
+
     process (clk25Mhz)
     begin
+
+
         if (SW(0) = '1') then
             background_red <= "1111";
         else 
@@ -65,10 +100,15 @@ begin
         else 
             background_blue <= "0000";
         end if;
+
         if (ball_enabled = '1') then
             red <= ball_red;
             green <= ball_green;
             blue <= ball_blue;
+        elsif (score_enable = '1') then
+            red <= "1111";
+            green <= "1111";
+            blue <= "1111";
         else
             red <= background_red;
             green <= background_green;

@@ -12,7 +12,8 @@ entity GameRenderer is
 		  KEY : IN std_logic_vector(3 DOWNTO 0);
         pixel_row, pixel_column	: IN std_logic_vector(9 DOWNTO 0);
         red, green, blue : OUT std_logic_vector(3 downto 0);
-		enabled : IN std_logic
+        request_back : OUT std_logic;
+        enabled : IN std_logic
     );
 end entity GameRenderer;
 
@@ -26,13 +27,49 @@ architecture behavior of GameRenderer is
             enabled : OUT std_logic);
     end component Player;
 
+    component title_display is
+        generic (
+            text_string : string := "FLAPPY BOSS";
+            text_size : integer := 11;
+            SIZE : integer := 4
+        );
+
+        port (
+            clk          : in  std_logic;
+            pixel_row    : in  std_logic_vector(9 downto 0);
+            pixel_column : in  std_logic_vector(9 downto 0);
+            pixel_on     : out std_logic;
+		    text_row : in integer;
+			text_col_start : in integer
+        );
+    end component title_display;
+
+
     -- Ball Values
     signal ball_enabled : std_logic := '0';
     signal ball_red, ball_green, ball_blue : std_logic_vector(3 downto 0);
 
+    signal last_key_3_state : std_logic := '1';
+
     -- Background Values (Black)
     signal background_red, background_green, background_blue : std_logic_vector(3 downto 0) := "0000";
+
+    signal score_enable : std_logic := '0';
 begin
+
+    SCORE_COMPONENT : title_display generic map(
+        text_string => " 00 ",
+        text_size => 4,
+        SIZE => 3
+    )
+    port map (
+        clk => clk25Mhz,
+        pixel_row => pixel_row,
+        pixel_column => pixel_column,
+        pixel_on => score_enable,
+        text_row => 50,
+        text_col_start => 288
+    );
     
     PLAYER_COMPONENT : Player port map (
         clk => clk25Mhz,
@@ -50,34 +87,48 @@ begin
     -- Logic to determine output
     process (clk25Mhz)
     begin
-        if (enabled = '1') then
-            if (SW(0) = '1') then
-                background_red <= "1111";
-            else 
-                background_red <= "0000";
+        if rising_edge(clk25Mhz) then
+            if enabled = '1' then
+                if (SW(0) = '1') then
+                    background_red <= "1111";
+                else 
+                    background_red <= "0000";
+                end if;
+
+                if (SW(1) = '1') then
+                    background_green <= "1111";
+                else 
+                    background_green <= "0000";
+                end if;
+                
+                if (SW(2) = '1') then
+                    background_blue <= "1111";
+                else 
+                    background_blue <= "0000";
+                end if;
+                
+                if (ball_enabled = '1') then
+                    red <= ball_red;
+                    green <= ball_green;
+                    blue <= ball_blue;
+                elsif score_enable = '1' then
+                    red <= "1111";
+                    green <= "0000";
+                    blue <= "0000";
+                else
+                    red <= background_red;
+                    green <= background_green;
+                    blue <= background_blue;
+                end if;
             end if;
 
-            if (SW(1) = '1') then
-                background_green <= "1111";
-            else 
-                background_green <= "0000";
-            end if;
-            
-            if (SW(2) = '1') then
-                background_blue <= "1111";
-            else 
-                background_blue <= "0000";
-            end if;
-            
-            if (ball_enabled = '1') then
-                red <= ball_red;
-                green <= ball_green;
-                blue <= ball_blue;
+            -- Go back to title
+            if KEY(3) = '0' and last_key_3_state = '1' then
+                request_back <= '1';
             else
-                red <= background_red;
-                green <= background_green;
-                blue <= background_blue;
+                request_back <= '0';
             end if;
+            last_key_3_state <= KEY(3);
         end if;
     end process;
     

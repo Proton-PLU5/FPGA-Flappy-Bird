@@ -37,14 +37,13 @@ architecture behaviour of Renderer is
 		);
 	end component TitleRenderer;
 
-    signal red_play, green_play, blue_play : std_logic_vector(3 downto 0);
+   signal red_play, green_play, blue_play : std_logic_vector(3 downto 0);
 	signal red_title, green_title, blue_title : std_logic_vector(3 downto 0);
 
-    signal play_state : std_logic := '0';
+   signal play_state : std_logic := '0';
 	signal title_state : std_logic := '1';
 	signal state : integer range 0 to 1 := 0; -- 0 for title, 1 for play
 begin
-
     GAME_RENDERER_COMPONENT : GameRenderer port map (
 		clk25Mhz => Clk25Mhz,
 		mouse_left => left_button,
@@ -85,4 +84,18 @@ begin
     red <= red_play WHEN play_state = '1' ELSE red_title;
     green <= green_play WHEN play_state = '1' ELSE green_title;
     blue <= blue_play WHEN play_state = '1' ELSE blue_title;
-end architecture behaviour;
+
+    SCORE_COMPONENT : title_display generic map(
+        text_string => " 00 ",
+        text_size => 4,
+        SIZE => 3
+    )
+    port map (
+        clk => clk25Mhz,
+        pixel_row => pixel_row,
+        pixel_column => pixel_column,
+        pixel_on => score_enable,
+        text_row => 50,
+        text_col_start => 288
+    );
+end architecture behavior;

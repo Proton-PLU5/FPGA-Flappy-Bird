@@ -15,17 +15,16 @@ end entity Player;
 architecture behavior of Player is
     SIGNAL render                   : std_logic;
     SIGNAL size 					: std_logic_vector(9 DOWNTO 0);  
-    SIGNAL ball_y_pos				: std_logic_vector(9 DOWNTO 0);
+    SIGNAL ball_y_pos : std_logic_vector(9 DOWNTO 0) := CONV_STD_LOGIC_VECTOR(240, 10);
     SiGNAL ball_x_pos				: std_logic_vector(10 DOWNTO 0);
-    SIGNAL ball_y_motion			: std_logic_vector(9 DOWNTO 0);
+    signal ball_velocity : std_logic_vector(9 DOWNTO 0) := (others => '0');
 
-    SIGNAL JUMP_COUNTER             : integer range 0 to 50 := 0;
 	 signal red_s, green_s, blue_s : std_logic_vector(3 downto 0) := (others => '1');
+
 
     constant gravity : std_logic_vector(9 DOWNTO 0) := CONV_STD_LOGIC_VECTOR(2, 10);
     constant fall_velocity_max : std_logic_vector(9 DOWNTO 0) := CONV_STD_LOGIC_VECTOR(6, 10);
     constant jump_velocity : std_logic_vector(9 DOWNTO 0) := CONV_STD_LOGIC_VECTOR(-6, 10);
-    signal ball_velocity : std_logic_vector(9 DOWNTO 0) := (others => '0');
 
 
 begin
@@ -44,34 +43,25 @@ begin
 	 
     begin
         -- Move ball once every vertical sync
-	    if (rising_edge(vert_sync)) then		
-			-- 1. Check for jump initiation (can happen anywhere, even on the ground)
+	    if (rising_edge(vert_sync)) then	
+        
+            -- BOTTOM BOUNDARY: Stop if at the bottom AND trying to fall
+            if ( ('0' & ball_y_pos >= CONV_STD_LOGIC_VECTOR(479, 10) - size) and (ball_velocity >= CONV_STD_LOGIC_VECTOR(0, 10)) ) then
+                ball_y_pos <= CONV_STD_LOGIC_VECTOR(479, 10) - size;
+            -- TOP BOUNDARY: Stop if at the top 
+            elsif (ball_y_pos <= size) then 
+                ball_velocity <= CONV_STD_LOGIC_VECTOR(0, 10); 
+                ball_y_pos <= CONV_STD_LOGIC_VECTOR(0, 10) + (size + 1); -- +1 to prevent getting stuck at top boundary 
+            else
+                ball_y_pos <= ball_y_pos + ball_velocity; 
+            end if;
+
+
+			-- Increase/decrease ball velocity depending on if mouse is clicked (go up) or not (fall)
             if (mouse_left = '1') then
                 ball_velocity <= jump_velocity;
             elsif (ball_velocity < fall_velocity_max) then
                 ball_velocity <= ball_velocity + gravity; 
-            end if;
-
-            -- 2. Determine intended motion (Jump vs Gravity)
-            if (JUMP_COUNTER > 0) then
-                JUMP_COUNTER <= JUMP_COUNTER - 1;
-                ball_y_motion <= -CONV_STD_LOGIC_VECTOR(2, 10); -- Moving UP
-            else
-                ball_y_motion <= CONV_STD_LOGIC_VECTOR(2, 10);  -- Gravity (Moving DOWN)
-            end if;
-            
-            -- 3. Apply Boundaries (These will OVERRIDE the motion if touching a wall)
-            
-            -- BOTTOM BOUNDARY: Stop if at the bottom AND trying to fall
-            if ( ('0' & ball_y_pos >= CONV_STD_LOGIC_VECTOR(479, 10) - size) and (ball_velocity >= CONV_STD_LOGIC_VECTOR(0, 10)) ) then
-                ball_y_pos <= CONV_STD_LOGIC_VECTOR(479, 10) - size;
-            -- TOP BOUNDARY: Stop if at the top AND trying to go up
-            elsif ( (ball_y_pos <= size) and (JUMP_COUNTER > 0) ) then 
-                ball_y_motion <= CONV_STD_LOGIC_VECTOR(0, 10);
-                ball_velocity <= CONV_STD_LOGIC_VECTOR(0, 10);
-                JUMP_COUNTER <= 0; -- Optional: Cancel the rest of the jump so it falls immediately
-            else
-                ball_y_pos <= ball_y_pos + ball_velocity; 
             end if;
             
 				

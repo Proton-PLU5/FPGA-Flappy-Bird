@@ -3,6 +3,7 @@ use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
 entity title_display is
+
     port (
         clk          : in  std_logic;
         pixel_row    : in  std_logic_vector(9 downto 0);

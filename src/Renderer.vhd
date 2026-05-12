@@ -1,8 +1,4 @@
-library IEEE;
-use IEEE.std_logic_1164.all;
-use IEEE.numeric_std.all;
 
--- Lets use this file to manage Rendering
 entity Renderer is
     port (
         clk25Mhz : IN std_logic;
@@ -16,56 +12,78 @@ entity Renderer is
     );
 end entity Renderer;
 
-architecture behavior of Renderer is
-    component Player is
-        port (
-            clk, vert_sync, mouse_left	: IN std_logic;
-            pixel_row, pixel_column	: IN std_logic_vector(9 DOWNTO 0);
-				KEY : IN std_logic_vector(3 DOWNTO 0);
-            red, green, blue : OUT std_logic_vector(3 downto 0);
-            enabled : OUT std_logic);
-    end component Player;
+architecture behaviour of Renderer is
+    component GameRenderer is
+		port (
+			clk25Mhz : IN std_logic;
+			mouse_left : IN std_logic;
+			vert_sync, horz_sync : IN std_logic;
+		   SW : in std_logic_vector(9 downto 0);
+			KEY : IN std_logic_vector(3 DOWNTO 0);
+			pixel_row, pixel_column	: IN std_logic_vector(9 DOWNTO 0);
+			red, green, blue : OUT std_logic_vector(3 downto 0)
+		);
+	end component GameRenderer;
 
-    component title_display is
-        generic (
-            text_string : string := "FLAPPY BOSS";
-            text_size : integer := 11;
-            SIZE : integer := 4
-        );
+	component TitleRenderer is
+		port (
+			clk25Mhz : IN std_logic;
+			mouse_left : IN std_logic;
+			vert_sync, horz_sync : IN std_logic;
+		   SW : in std_logic_vector(9 downto 0);
+			KEY : IN std_logic_vector(3 DOWNTO 0);
+			pixel_row, pixel_column	: IN std_logic_vector(9 DOWNTO 0);
+			red, green, blue : OUT std_logic_vector(3 downto 0)
+		);
+	end component TitleRenderer;
 
-        port (
-            clk          : in  std_logic;
-            pixel_row    : in  std_logic_vector(9 downto 0);
-            pixel_column : in  std_logic_vector(9 downto 0);
-            pixel_on     : out std_logic;
-            text_row : in integer;
-            text_col_start : in integer
-            
-        );
-    end component title_display;
+   signal red_play, green_play, blue_play : std_logic_vector(3 downto 0);
+	signal red_title, green_title, blue_title : std_logic_vector(3 downto 0);
 
-    -- Ball Values
-    signal ball_enabled : std_logic := '0';
-    signal ball_red, ball_green, ball_blue : std_logic_vector(3 downto 0);
-
-    signal score_enable : std_logic := '0';
-
-    -- Background Values (Black)
-    signal background_red, background_green, background_blue : std_logic_vector(3 downto 0) := "0000";
+   signal play_state : std_logic := '0';
+	signal title_state : std_logic := '1';
+	signal state : integer range 0 to 1 := 0; -- 0 for title, 1 for play
 begin
-    
-    PLAYER_COMPONENT : Player port map (
-        clk => clk25Mhz,
-        vert_sync => vert_sync,
-        mouse_left => mouse_left,
-        pixel_row => pixel_row,
-        pixel_column => pixel_column,
-		  KEY => KEY,
-        red => ball_red,
-        green => ball_green,
-        blue => ball_blue,
-        enabled => ball_enabled
-    );
+    GAME_RENDERER_COMPONENT : GameRenderer port map (
+		clk25Mhz => Clk25Mhz,
+		mouse_left => left_button,
+		vert_sync => vert_sync_out,
+		horz_sync => horz_sync_out,
+		SW => SW,
+		KEY => KEY,
+		pixel_row => pixel_row,
+		pixel_column => pixel_column,
+		red => red_play,
+		green => green_play,
+		blue => blue_play
+        enabled => play_state
+	);
+
+	TITLE_RENDERER_COMPONENT : TitleRenderer port map (
+		clk25Mhz => Clk25Mhz,
+		mouse_left => left_button,
+		vert_sync => vert_sync_out,
+		horz_sync => horz_sync_out,
+		SW => SW,
+		KEY => KEY,
+		pixel_row => pixel_row,
+		pixel_column => pixel_column,
+		red => red_title, -- We can ignore the title renderer's output for now
+		green => green_title,
+		blue => blue_title,
+        enabled => title_state
+	);
+
+    state <= 0 when (key(3) = '0') else
+             1 when (key(2) = '0') else
+             state;
+
+    title_state <= '1' when state = 0 else '0';
+    play_state <= '1' when state = 1 else '0';
+
+    red <= red_play WHEN play_state = '1' ELSE red_title;
+    green <= green_play WHEN play_state = '1' ELSE green_title;
+    blue <= blue_play WHEN play_state = '1' ELSE blue_title;
 
     SCORE_COMPONENT : title_display generic map(
         text_string => " 00 ",
@@ -80,40 +98,4 @@ begin
         text_row => 50,
         text_col_start => 288
     );
-
-    process (clk25Mhz)
-    begin
-
-
-        if (SW(0) = '1') then
-            background_red <= "1111";
-        else 
-            background_red <= "0000";
-        end if;
-        if (SW(1) = '1') then
-            background_green <= "1111";
-        else 
-            background_green <= "0000";
-        end if;
-        if (SW(2) = '1') then
-            background_blue <= "1111";
-        else 
-            background_blue <= "0000";
-        end if;
-
-        if (ball_enabled = '1') then
-            red <= ball_red;
-            green <= ball_green;
-            blue <= ball_blue;
-        elsif (score_enable = '1') then
-            red <= "1111";
-            green <= "1111";
-            blue <= "1111";
-        else
-            red <= background_red;
-            green <= background_green;
-            blue <= background_blue;
-        end if;
-    end process;
-    
 end architecture behavior;

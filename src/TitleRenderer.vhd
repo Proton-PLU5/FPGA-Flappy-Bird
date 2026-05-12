@@ -11,7 +11,8 @@ entity TitleRenderer is
 		  SW : IN std_logic_vector(9 downto 0);
 		  KEY : IN std_logic_vector(3 DOWNTO 0);
         pixel_row, pixel_column	: IN std_logic_vector(9 DOWNTO 0);
-        red, green, blue : OUT std_logic_vector(3 downto 0)
+        red, green, blue : OUT std_logic_vector(3 downto 0);
+        enabled : IN std_logic
     );
 end entity TitleRenderer;
 
@@ -70,18 +71,20 @@ begin
     -- Logic to determine output
     process (clk25Mhz)
     begin
-        if (sub_title_enable = '1' or training_text_enable = '1') then
-            red <= "1111";
-            green <= "1111";
-            blue <= "1111";
-        elsif (main_title_enable = '1') then
-            red <= "1111";
-            green <= "0000";
-            blue <= "0000";
-        else
-            red <= "0000";
-            green <= "0000";
-            blue <= "0000";
+        if (enabled = '1') then
+          if (sub_title_enable = '1' or training_text_enable = '1') then
+              red <= "1111";
+              green <= "1111";
+              blue <= "1111";
+          elsif (main_title_enable = '1') then
+              red <= "1111";
+              green <= "0000";
+              blue <= "0000";
+          else
+              red <= "0000";
+              green <= "0000";
+              blue <= "0000";
+          end if;
         end if;
     end process;
 end architecture behaviour;

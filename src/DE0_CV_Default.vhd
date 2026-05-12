@@ -53,18 +53,6 @@ architecture behavior of DE0_CV_Default is
 			red, green, blue : OUT std_logic_vector(3 downto 0)
 		);
 	end component Renderer;
-
-	component TitleRenderer is
-		port (
-			clk25Mhz : IN std_logic;
-			mouse_left : IN std_logic;
-			vert_sync, horz_sync : IN std_logic;
-		   SW : in std_logic_vector(9 downto 0);
-			KEY : IN std_logic_vector(3 DOWNTO 0);
-			pixel_row, pixel_column	: IN std_logic_vector(9 DOWNTO 0);
-			red, green, blue : OUT std_logic_vector(3 downto 0)
-		);
-	end component TitleRenderer;
 	
 	component BCD_to_SevenSeg is
      port (BCD_digit : in std_logic_vector(3 downto 0);
@@ -92,12 +80,6 @@ architecture behavior of DE0_CV_Default is
 	signal count : integer range 0 to 9 := 0;
 	signal mouse_down : std_Logic := '0';
 
-	signal play_state : std_logic := '0';
-	signal title_state : std_logic := '1';
-	signal state : integer range 0 to 1 := 0; -- 0 for title, 1 for play
-	
-	signal red_play, green_play, blue_play : std_logic_vector(3 downto 0);
-	signal red_title, green_title, blue_title : std_logic_vector(3 downto 0);
 begin
   
 	Clock_Divider : ClockDivider port map (
@@ -116,7 +98,7 @@ begin
 		mouse_cursor_column => open
 	);
 
-  VGA : VGA_SYNC port map (
+  	VGA : VGA_SYNC port map (
 		clock_25Mhz => Clk25Mhz,
 		red => red, 
 		green => green,
@@ -144,23 +126,9 @@ begin
 		KEY => KEY,
 		pixel_row => pixel_row,
 		pixel_column => pixel_column,
-		red => red_play,
-		green => green_play,
-		blue => blue_play
-	);
-
-	TITLE_RENDERER_COMPONENT : TitleRenderer port map (
-		clk25Mhz => Clk25Mhz,
-		mouse_left => left_button,
-		vert_sync => vert_sync_out,
-		horz_sync => horz_sync_out,
-		SW => SW,
-		KEY => KEY,
-		pixel_row => pixel_row,
-		pixel_column => pixel_column,
-		red => red_title, -- We can ignore the title renderer's output for now
-		green => green_title,
-		blue => blue_title
+		red => red,
+		green => green,
+		blue => blue
 	);
   
 	-- blue <= "0000" when ball_blue = '1' else "1111";
@@ -169,31 +137,19 @@ begin
 	process (CLOCK_50)
 	begin
 		 if rising_edge(CLOCK_50) then
-			  if (left_button = '1' and mouse_down = '0') then
-					if count = 9 then
-						 count <= 0; -- Reset if it hits the max range
-					else
-						 count <= count + 1;
-					end if;
-					mouse_down <= '1';
-			  elsif (left_button = '0') then
-					mouse_down <= '0';
-			  end if;
-
-			  if (KEY(3) = '0') then
-					title_state <= '0';
-					play_state <= '1';
-			  elsif (KEY(2)= '0') then
-					title_state <= '1';
-					play_state <= '0';
-			  end if;
+			if (left_button = '1' and mouse_down = '0') then
+				if count = 9 then
+						count <= 0; -- Reset if it hits the max range
+				else
+						count <= count + 1;
+				end if;
+				mouse_down <= '1';
+			elsif (left_button = '0') then
+				mouse_down <= '0';
+			end if;
 		 end if;
 	end process;
-	
-	red <= red_play WHEN play_state = '1' ELSE red_title;
-	blue <= blue_play WHEN play_state = '1' ELSE blue_title;
-	green <= green_play WHEN play_state = '1' ELSE green_title;
-    
+
 	VGA_R <= red_out;
 	VGA_G <= green_out;
 	VGA_B <= blue_out;

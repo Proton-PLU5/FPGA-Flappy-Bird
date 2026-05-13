@@ -51,6 +51,7 @@ package body utils is
 			  when '7' => return  O"67";
 			  when '8' => return  O"70";
 			  when '9' => return  O"71";
+			  when '>' => return  O"37";
 			  when others => return O"40"; -- space/default
 		 end case;
 	end function;

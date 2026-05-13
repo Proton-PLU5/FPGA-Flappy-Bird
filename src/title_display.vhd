@@ -16,8 +16,8 @@ entity title_display is
         pixel_row    : in  std_logic_vector(9 downto 0);
         pixel_column : in  std_logic_vector(9 downto 0);
         pixel_on     : out std_logic;
-		  text_row : in integer;
-		  text_col_start : in integer
+        text_row : in integer;
+        text_col_start : in integer
 		  
     );
 end entity title_display;
@@ -45,7 +45,7 @@ architecture behaviour of title_display is
 		return result;
 	end function CONV_TEXT_TO_ARRAY;
     
-	 constant title_string : char_array := CONV_TEXT_TO_ARRAY;
+	constant title_string : char_array := CONV_TEXT_TO_ARRAY;
 	 
     constant char_width : integer := (2**(SIZE+1));
     constant char_height : integer := (2**(SIZE+1));
@@ -77,10 +77,10 @@ begin
     in_text_zone <= '1' when (row_int >= text_row and row_int < text_row + char_height and col_int >= text_col_start and col_int < text_col_start + num_chars * char_width) else '0';
 
     -- Determines which character we are currently displaying
-    char_index <= (col_int - text_col_start) / char_width;
+    char_index <= (col_int - text_col_start) / char_width when in_text_zone = '1' else 0;
 
-    font_row_full <= std_logic_vector(to_unsigned((row_int - text_row) mod char_height, 10));
-    font_col_full <= std_logic_vector(to_unsigned((col_int - text_col_start) mod char_width, 10));
+    font_row_full <= std_logic_vector(to_unsigned((row_int - text_row) mod char_height, 10)) when in_text_zone = '1' else (others => '0');
+    font_col_full <= std_logic_vector(to_unsigned((col_int - text_col_start) mod char_width, 10)) when in_text_zone = '1' else (others => '0');
 
     font_row_sig <= font_row_full(SIZE downto SIZE-2);
     font_col_sig <= font_col_full(SIZE downto SIZE-2);

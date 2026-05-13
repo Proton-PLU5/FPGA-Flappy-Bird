@@ -1,0 +1,111 @@
+library IEEE;
+use IEEE.std_logic_1164.all;
+use IEEE.numeric_std.all;
+
+use work.sprite_data_pkg.all;
+
+entity SpriteRenderer is
+    port (
+        clk : in std_logic;
+
+        pixel_row    : in std_logic_vector(9 downto 0);
+        pixel_column : in std_logic_vector(9 downto 0);
+
+        start_x  : in std_logic_vector(9 downto 0);
+        start_y  : in std_logic_vector(9 downto 0);
+        sprite_id : in integer;
+
+        red   : out std_logic_vector(3 downto 0);
+        green : out std_logic_vector(3 downto 0);
+        blue  : out std_logic_vector(3 downto 0)
+    );
+end entity;
+
+architecture behavior of SpriteRenderer is
+
+    signal sprite_x : integer;
+    signal sprite_y : integer;
+    signal sprite_width : integer;
+    signal sprite_height : integer;
+
+begin
+
+    sprite_x <= to_integer(unsigned(start_x));
+    sprite_y <= to_integer(unsigned(start_y));
+
+    process(clk)
+
+        variable screen_x : integer;
+        variable screen_y : integer;
+
+        variable local_x : integer;
+        variable local_y : integer;
+
+        variable addr : integer;
+
+        variable palette_index : integer;
+
+        variable color : std_logic_vector(11 downto 0);
+        variable width : integer;
+        variable height : integer;
+
+    begin
+
+        if rising_edge(clk) then
+
+            screen_x := to_integer(unsigned(pixel_column));
+            screen_y := to_integer(unsigned(pixel_row));
+
+            -- default black
+            red   <= "0000";
+            green <= "0000";
+            blue  <= "0000";
+
+            -- Select sprite dimensions based on sprite_id
+            case sprite_id is
+                when 0 =>
+                    width := SKELETRON_HEAD_WIDTH;
+                    height := SKELETRON_HEAD_HEIGHT;
+                when 1 =>
+                    width := SKELETRON_JAW_WIDTH;
+                    height := SKELETRON_JAW_HEIGHT;
+                when others =>
+                    width := SKELETRON_HEAD_WIDTH;
+                    height := SKELETRON_HEAD_HEIGHT;
+            end case;
+
+            -- inside sprite?
+            if screen_x >= sprite_x and
+               screen_x < sprite_x + width and
+               screen_y >= sprite_y and
+               screen_y < sprite_y + height then
+
+                local_x := screen_x - sprite_x;
+                local_y := screen_y - sprite_y;
+
+                addr := local_y * width + local_x;
+
+                -- Select sprite data based on sprite_id
+                case sprite_id is
+                    when 0 =>
+                        palette_index := SKELETRON_HEAD_DATA(addr);
+                        color := SKELETRON_HEAD_PALETTE(palette_index);
+                    when 1 =>
+                        palette_index := SKELETRON_JAW_DATA(addr);
+                        color := SKELETRON_JAW_PALETTE(palette_index);
+                    when others =>
+                        palette_index := SKELETRON_HEAD_DATA(addr);
+                        color := SKELETRON_HEAD_PALETTE(palette_index);
+                end case;
+
+                red   <= color(11 downto 8);
+                green <= color(7 downto 4);
+                blue  <= color(3 downto 0);
+
+            end if;
+
+        end if;
+
+    end process;
+
+end architecture;

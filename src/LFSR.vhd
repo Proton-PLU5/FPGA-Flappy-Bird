@@ -22,6 +22,8 @@ begin
             if (reset = '1') then
                 output <= x"FF";
             elsif (enable = '1') then
+                -- Really simple LFSR that just flips bits 4, 3, 2, and 0 and then shifts everything to the right.
+                -- should be enough for our purposes, but might want to make it better in the future?
                 temp := output(4) XOR output(3) XOR output(2) XOR output(0);
                 output <= temp & output(7 downto 1);
             end if;

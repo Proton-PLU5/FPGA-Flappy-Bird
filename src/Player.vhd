@@ -50,6 +50,7 @@ architecture behavior of Player is
     signal transparent : std_logic := '0';
 
 begin
+    -- need to update in the future to support variable size sprites.
     size <= CONV_STD_LOGIC_VECTOR(80,10);
 
     -- ball_x_pos and ball_y_pos show the (x,y) for the top-left of the sprite
@@ -105,6 +106,6 @@ begin
 		 blue <= blue_s;
     end process;
     
-    -- Enable output if within bounding box and pixel is not transparent
+    -- glad we did it like this, cuz its so easy to do transparency!
     enabled <= render and not transparent;
 end architecture behavior;

@@ -27,30 +27,28 @@ architecture behavior of SpriteRenderer is
     signal sprite_height : integer;
 
 begin
-
+    -- use integers since we have width and height as integers and its easier to do math by
+    -- just turning them all into integers than having convert them each time.
+    -- in the future we MUST add some range constraints to reduce the amount of bits we use.
+    -- Cuz these use soooo much resources and i think its cuz of these that the compile times are so long.
+    
     sprite_x <= to_integer(unsigned(start_x));
     sprite_y <= to_integer(unsigned(start_y));
 
     process(clk)
-
         variable screen_x : integer;
         variable screen_y : integer;
-
         variable local_x : integer;
         variable local_y : integer;
-
         variable addr : integer;
-
         variable palette_index : integer;
-
         variable color : std_logic_vector(11 downto 0);
         variable width : integer;
         variable height : integer;
-
     begin
 
         if rising_edge(clk) then
-
+            
             screen_x := to_integer(unsigned(pixel_column));
             screen_y := to_integer(unsigned(pixel_row));
 
@@ -74,16 +72,19 @@ begin
             end case;
 
             -- Check if the current pixel is within the sprite's bounding box
+            -- very simple rectangle bb check.
             if screen_x >= sprite_x and
                screen_x < sprite_x + width and
                screen_y >= sprite_y and
                screen_y < sprite_y + height then
 
+                -- Calculate the local pixel coordinates within the sprite
                 local_x := screen_x - sprite_x;
                 local_y := screen_y - sprite_y;
 
-                -- used to search thru the 1d array to find the "2d" pixel pallete data.
+                -- used to search thru the 1d array to find the pixel pallete data.
                 -- cuz the data is actually 1d array and not a 2d array.
+                -- so we do some math to emulate 2d indexing.
                 addr := local_y * width + local_x;
 
                 -- Select the colors using the sprite we are rendering
@@ -100,6 +101,7 @@ begin
                 end case;
 
                 -- Check for transparency (palette index 0 is transparent)
+                -- we can use this to just turn off the pixel so its super simple.
                 if (palette_index /= 0) then
                     red   <= color(11 downto 8);
                     green <= color(7 downto 4);

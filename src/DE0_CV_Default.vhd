@@ -12,7 +12,7 @@ entity DE0_CV_Default is
 		  VGA_HS : out std_logic;
 		  VGA_VS : out std_logic;
 		  PS2_DAT, PS2_CLK : INOUT std_logic;
-		  HEX0 : OUT std_logic_vector(6 downto 0)
+		  HEX0, HEX1, HEX2 : OUT std_logic_vector(6 downto 0)
     );
 end DE0_CV_Default;
 
@@ -77,7 +77,10 @@ architecture behavior of DE0_CV_Default is
 	signal vert_sync_out : std_logic;
 	signal horz_sync_out : std_logic;
 		
-	signal count : integer range 0 to 9 := 0;
+	signal count : integer range 0 to 999 := 0;
+	signal ones : std_logic_vector(3 downto 0);
+	signal tens : std_logic_vector(3 downto 0);
+	signal hundreds : std_logic_vector(3 downto 0);
 	signal mouse_down : std_Logic := '0';
 
 begin
@@ -112,9 +115,17 @@ begin
 		pixel_column => pixel_column
 	);
 	
-	COVERTER: BCD_to_SevenSeg port map (
-		BCD_digit => CONV_STD_LOGIC_VECTOR(count, 4),
+	ONES_COVERTER: BCD_to_SevenSeg port map (
+		BCD_digit => ones,
 		SevenSeg_out => HEX0
+	);
+	TENS_COVERTER: BCD_to_SevenSeg port map (
+		BCD_digit => tens,
+		SevenSeg_out => HEX1
+	);
+	HUNDREDS_COVERTER: BCD_to_SevenSeg port map (
+		BCD_digit => hundreds,
+		SevenSeg_out => HEX2
 	);
 		  
 	RENDERER_COMPONENT : Renderer port map (
@@ -138,10 +149,10 @@ begin
 	begin
 		 if rising_edge(CLOCK_50) then
 			if (left_button = '1' and mouse_down = '0') then
-				if count = 9 then
-						count <= 0; -- Reset if it hits the max range
+				if count = 999 then
+					count <= 0; -- Reset if it hits the max range
 				else
-						count <= count + 1;
+					count <= count + 1;
 				end if;
 				mouse_down <= '1';
 			elsif (left_button = '0') then
@@ -155,5 +166,8 @@ begin
 	VGA_B <= blue_out;
 	VGA_VS <= vert_sync_out;
 	VGA_HS <= horz_sync_out;
+	ones <= CONV_STD_LOGIC_VECTOR(count mod 10, 4);
+	tens <= CONV_STD_LOGIC_VECTOR((count / 10) mod 10, 4);
+	hundreds <= CONV_STD_LOGIC_VECTOR(count / 100, 4);
 	 
 end architecture behavior;

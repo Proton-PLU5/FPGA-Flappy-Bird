@@ -82,6 +82,8 @@ begin
                 local_x := screen_x - sprite_x;
                 local_y := screen_y - sprite_y;
 
+                -- used to search thru the 1d array to find the "2d" pixel pallete data.
+                -- cuz the data is actually 1d array and not a 2d array.
                 addr := local_y * width + local_x;
 
                 -- Select the colors using the sprite we are rendering

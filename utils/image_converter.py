@@ -94,7 +94,7 @@ def convert_images_to_vhdl_package(input_dir, output_path):
                 pixel = image.getpixel((x, y))
 
                 # Any transparent pixel -> palette 0
-                if pixel[3] == 0:
+                if pixel[3] == 0: # type: ignore
                     pixel_data.append('0')
 
                 elif pixel in color_to_index:

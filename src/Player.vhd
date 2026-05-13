@@ -61,18 +61,18 @@ begin
 	            else '0';
 					
 					
-	 SPRITE_RENDERER : SpriteRenderer port map (
-		clk => clk,
-		pixel_row => pixel_row,
-		pixel_column => pixel_column,
-		start_x => ball_x_pos,
-		start_y => ball_y_pos,
-		sprite_id => 0,
-		red => red_s,
-		blue => blue_s,
-		green => green_s,
+    SPRITE_RENDERER : SpriteRenderer port map (
+        clk => clk,
+        pixel_row => pixel_row,
+        pixel_column => pixel_column,
+        start_x => ball_x_pos,
+        start_y => ball_y_pos,
+        sprite_id => 0,
+        red => red_s,
+        blue => blue_s,
+        green => green_s,
         transparent => transparent
-	 );
+    );
 
     Player_Controller : process (vert_sync)
 	 

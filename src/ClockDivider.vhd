@@ -13,6 +13,7 @@ end ClockDivider;
 architecture behavior of ClockDivider is
     signal clk_reg : std_logic := '0';
 begin
+    -- For some reason the ClockDivider has really small fmax
     process(Clk_in)
     begin
         if rising_edge(Clk_in) then

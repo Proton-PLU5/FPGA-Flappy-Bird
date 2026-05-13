@@ -115,48 +115,48 @@ begin
     begin
         if rising_edge(clk25Mhz) then
             if enabled = '1' then
-            if KEY(1) = '0' and last_key_1_state = '1' then
-                case selected_option is
-                when 0 =>
-                    selected_option <= 1;
-                    selected_text_row <= 300;
-                when 1 =>
-                    selected_option <= 2;
-                    selected_text_row <= 340;
-                when others =>
-                    selected_option <= 0;
-                    selected_text_row <= 260;
-                end case;
-            end if;
-            -- update previous-key snapshot
-            last_key_1_state <= KEY(1);
-           
-            -- Goto play mode if KEY(3) is pressed while "PLAY MODE" is selected
-            if KEY(3) = '0' and last_key_3_state = '1' and selected_option = 1 then
-                start_game <= '1';
-            else
-                start_game <= '0';
-            end if;
+                if KEY(1) = '0' and last_key_1_state = '1' then
+                    case selected_option is
+                    when 0 =>
+                        selected_option <= 1;
+                        selected_text_row <= 300;
+                    when 1 =>
+                        selected_option <= 2;
+                        selected_text_row <= 340;
+                    when others =>
+                        selected_option <= 0;
+                        selected_text_row <= 260;
+                    end case;
+                end if;
+                -- update previous-key snapshot
+                last_key_1_state <= KEY(1);
+            
+                -- Goto play mode if KEY(3) is pressed while "PLAY MODE" is selected
+                if KEY(3) = '0' and last_key_3_state = '1' and selected_option = 1 then
+                    start_game <= '1';
+                else
+                    start_game <= '0';
+                end if;
 
-            -- update previous-key snapshot for KEY(3)
-            last_key_3_state <= KEY(3);
+                -- update previous-key snapshot for KEY(3)
+                last_key_3_state <= KEY(3);
 
-            -- color logic can stay here (it will be updated each clock)
-            if (sub_title_enable = '1' or training_text_enable = '1'
-                or play_text_enable = '1' or settings_text_enable = '1'
-                or selected_text_enable = '1') then
-                red   <= "1111";
-                green <= "1111";
-                blue  <= "1111";
-            elsif main_title_enable = '1' then
-                red   <= "1111";
-                green <= "0000";
-                blue  <= "0000";
-            else
-                red   <= "0000";
-                green <= "0000";
-                blue  <= "0000";
-            end if;
+                -- color logic can stay here (it will be updated each clock)
+                if (sub_title_enable = '1' or training_text_enable = '1'
+                    or play_text_enable = '1' or settings_text_enable = '1'
+                    or selected_text_enable = '1') then
+                    red   <= "1111";
+                    green <= "1111";
+                    blue  <= "1111";
+                elsif main_title_enable = '1' then
+                    red   <= "1111";
+                    green <= "0000";
+                    blue  <= "0000";
+                else
+                    red   <= "0000";
+                    green <= "0000";
+                    blue  <= "0000";
+                end if;
             end if;
         end if;
     end process;

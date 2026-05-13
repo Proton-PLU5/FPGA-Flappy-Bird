@@ -2,6 +2,7 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
+-- utils package with all our random helper functions!
 package utils is
 
     type char_array is array (natural range <>) of std_logic_vector(5 downto 0);

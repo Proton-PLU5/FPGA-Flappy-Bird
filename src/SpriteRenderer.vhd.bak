@@ -7,15 +7,17 @@ use work.sprite_data_pkg.all;
 entity SpriteRenderer is
     port (
         clk : in std_logic;
+
         pixel_row    : in std_logic_vector(9 downto 0);
         pixel_column : in std_logic_vector(9 downto 0);
+
         start_x  : in std_logic_vector(9 downto 0);
         start_y  : in std_logic_vector(9 downto 0);
         sprite_id : in integer;
+
         red   : out std_logic_vector(3 downto 0);
         green : out std_logic_vector(3 downto 0);
-        blue  : out std_logic_vector(3 downto 0);
-		transparent : out std_logic
+        blue  : out std_logic_vector(3 downto 0)
     );
 end entity;
 
@@ -58,9 +60,8 @@ begin
             red   <= "0000";
             green <= "0000";
             blue  <= "0000";
-            transparent <= '1';
 
-            -- Get the sprite dimensions
+            -- Select sprite dimensions based on sprite_id
             case sprite_id is
                 when 0 =>
                     width := SKELETRON_HEAD_WIDTH;
@@ -73,7 +74,7 @@ begin
                     height := SKELETRON_HEAD_HEIGHT;
             end case;
 
-            -- Check if the current pixel is within the sprite's bounding box
+            -- inside sprite?
             if screen_x >= sprite_x and
                screen_x < sprite_x + width and
                screen_y >= sprite_y and
@@ -84,7 +85,7 @@ begin
 
                 addr := local_y * width + local_x;
 
-                -- Select the colors using the sprite we are rendering
+                -- Select sprite data based on sprite_id
                 case sprite_id is
                     when 0 =>
                         palette_index := SKELETRON_HEAD_DATA(addr);
@@ -97,16 +98,14 @@ begin
                         color := SKELETRON_HEAD_PALETTE(palette_index);
                 end case;
 
-                -- Check for transparency (palette index 0 is transparent)
-                if (palette_index /= 0) then
-                    red   <= color(11 downto 8);
-                    green <= color(7 downto 4);
-                    blue  <= color(3 downto 0);
-                    transparent <= '0';
-                else
-                    transparent <= '1';
-                end if;
+                red   <= color(11 downto 8);
+                green <= color(7 downto 4);
+                blue  <= color(3 downto 0);
+
             end if;
+
         end if;
+
     end process;
+
 end architecture;

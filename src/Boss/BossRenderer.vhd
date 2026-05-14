@@ -9,7 +9,7 @@ entity BossRenderer is
     clk25Mhz : IN std_logic;
     pixel_row, pixel_column : IN std_logic_vector(9 downto 0);
     red, green, blue : OUT std_logic_vector(3 downto 0);
-    vert_sync : IN std_logic
+    vert_sync : IN std_logic;
     enabled : OUT std_logic
   );
 end BossRenderer;
@@ -35,9 +35,10 @@ architecture behavior of BossRenderer is
     signal transparent_upper_jaw, transparent_lower_jaw : std_logic := '0';
 
     signal x_pos, y_pos : std_logic_vector(9 downto 0) := (others => '0');
-    signal lower_jaw_x_offset, lower_jaw_y_offset : std_logic_vector(9 downto 0) := (others => '0'); -- Adjust as needed for jaw positioning
+    signal lower_jaw_x_offset : std_logic_vector(9 downto 0) := CONV_STD_LOGIC_VECTOR(13, 10); -- Adjust as needed for jaw positioning
+    signal lower_jaw_y_offset : std_logic_vector(9 downto 0) := CONV_STD_LOGIC_VECTOR(57, 10); -- Adjust as needed for jaw positioning
 
-    constant lower_jaw_anim_threshold : integer := 50; -- Number of clock cycles for lower jaw animation
+    constant lower_jaw_anim_threshold : integer := 12; -- Number of clock cycles for lower jaw animation
 begin
     BOSS_UPPER_JAW : SpriteRenderer port map (
         clk => clk25Mhz,
@@ -65,21 +66,26 @@ begin
         transparent => transparent_lower_jaw
     );
 
-
     x_pos <= CONV_STD_LOGIC_VECTOR(200, 10); -- Starting X position of the boss
-    y_pos <= CONV_STD_LOGIC_VECTOR(100, 10); -- Starting Y position of the boss
+    y_pos <= CONV_STD_LOGIC_VECTOR(50, 10); -- Starting Y position of the boss
 
     process (vert_sync)
-        variable lower_jaw_anim_counter : integer range 0 to 99 := 0;
+        variable lower_jaw_anim_counter : integer range 0 to 24 := 0;
+        variable moving_down : boolean := true;
     begin
         if rising_edge(vert_sync) then
-            if (lower_jaw_anim_counter < lower_jaw_anim_threshold) then
+            if moving_down then
                 lower_jaw_y_offset <= lower_jaw_y_offset + 1;
             else
                 lower_jaw_y_offset <= lower_jaw_y_offset - 1;
             end if;
-            
-            lower_jaw_anim_counter := lower_jaw_anim_counter + 1;
+
+            if lower_jaw_anim_counter = lower_jaw_anim_threshold then
+                moving_down := not moving_down;
+                lower_jaw_anim_counter := 0;
+            else
+                lower_jaw_anim_counter := lower_jaw_anim_counter + 1;
+            end if;
         end if;
     end process;
 

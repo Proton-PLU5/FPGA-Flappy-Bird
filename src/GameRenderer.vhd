@@ -71,7 +71,8 @@ architecture behavior of GameRenderer is
             clk25Mhz : IN std_logic;
             pixel_row, pixel_column : IN std_logic_vector(9 downto 0);
             red, green, blue : OUT std_logic_vector(3 downto 0);
-            enabled : OUT std_logic
+            enabled : OUT std_logic;
+            vert_sync : IN std_logic
         );
     end component BossRenderer;
     

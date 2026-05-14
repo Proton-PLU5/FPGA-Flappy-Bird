@@ -39,7 +39,7 @@ architecture behavior of GameRenderer is
             pixel_column : in std_logic_vector(9 downto 0);
             pixel_on : out std_logic;
             text_row : in integer;
-            text_col_start : in integer
+            text_col_start : in integer;
         );
     end component ScoreTextRenderer;
 

@@ -15,7 +15,7 @@ entity ScoreTextRenderer is
         pixel_column : in std_logic_vector(9 downto 0);
         pixel_on : out std_logic;
         text_row : in integer;
-        text_col_start : in integer
+        text_col_start : in integer;
     );
 end entity ScoreTextRenderer;
 
@@ -40,13 +40,13 @@ architecture behavior of ScoreTextRenderer is
         -- Score will be 3 digits max.
 
         -- Digit 0 is the ones place
-        digit0 := i mod 10;
-        digit1 := ((i mod 100) - digit0) / 10;
-        digit2 := (i - (digit1 * 10) - digit0) / 100;
+        digit0 <= i mod 10;
+        digit1 <= ((i mod 100) - digit0) / 10;
+        digit2 <= (i - (digit1 * 10) - digit0) / 100;
         
-        result(0) := int_to_addr(digit0);
-        result(1) := int_to_addr(digit1);
-        result(2) := int_to_addr(digit2);
+        result(0) <= int_to_addr(digit0);
+        result(1) <= int_to_addr(digit1);
+        result(2) <= int_to_addr(digit2);
 
 		return result;
 	end function CONV_TEXT_TO_ARRAY;

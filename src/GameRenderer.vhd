@@ -35,19 +35,39 @@ architecture behavior of GameRenderer is
         );
 
         port (
-            clk          : in  std_logic;
-            pixel_row    : in  std_logic_vector(9 downto 0);
-            pixel_column : in  std_logic_vector(9 downto 0);
-            pixel_on     : out std_logic;
-		    text_row : in integer;
-			text_col_start : in integer
+            clk             : in  std_logic;
+            pixel_row       : in  std_logic_vector(9 downto 0);
+            pixel_column    : in  std_logic_vector(9 downto 0);
+            pixel_on        : out std_logic;
+		    text_row        : in integer;
+			text_col_start  : in integer
         );
     end component title_display;
+
+    component Pipe is 
+        port (
+            clk, vert_sync, mouse_left : in std_logic;
+            pixel_row, pixel_column    : in std_logic_vector(9 downto 0);
+            red, green, blue           : out std_logic_vector(3 downto 0);
+            height                     : in integer range 0 to 480; -- Height of the centre of the gap in the pipe
+            gap                        : in integer range 0 to 480; -- This is the size of the gap in the pipe
+            reset                      : in std_logic;
+            end_reached                : out std_logic;
+            enabled                    : out std_logic;
+            x_pos                      : out unsigned(10 downto 0)
+        );
+    end component Pipe;
 
 
     -- Ball Values
     signal ball_enabled : std_logic := '0';
     signal ball_red, ball_green, ball_blue : std_logic_vector(3 downto 0);
+
+    -- Pipe Values
+    signal pipe_enabled : std_logic := '0';
+    signal pipe_end_reached : std_logic;
+    signal pipe_x_pos : unsigned(10 downto 0);
+    signal pipe_red, pipe_green, pipe_blue : std_logic_vector(3 downto 0);
 
     signal last_key_3_state : std_logic := '1';
 
@@ -84,6 +104,23 @@ begin
         enabled => ball_enabled
     );
 
+    PIPE_COMPONENT : Pipe port map (
+        clk => clk25Mhz,
+        vert_sync => vert_sync,
+        mouse_left => mouse_left,
+        pixel_row => pixel_row,
+        pixel_column => pixel_column,
+        red => pipe_red,
+        green => pipe_green,
+        blue => pipe_blue,
+        height => 240,
+        gap => 100,
+        reset => pipe_end_reached,
+        end_reached => pipe_end_reached,
+        enabled => pipe_enabled,
+        x_pos => pipe_x_pos
+    );
+
     -- Logic to determine output
     process (clk25Mhz)
     begin
@@ -115,6 +152,10 @@ begin
                     red <= "1111";
                     green <= "0000";
                     blue <= "0000";
+                elsif pipe_enabled = '1' then
+                    red <= pipe_red;
+                    green <= pipe_green;
+                    blue <= pipe_blue;
                 else
                     red <= background_red;
                     green <= background_green;

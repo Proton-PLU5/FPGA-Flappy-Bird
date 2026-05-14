@@ -183,11 +183,11 @@ begin
                     blue <= background_blue;
                 end if;
 
-                -- Score increment:
+                -- Score increment (one point per pipe pass):
                 if (pipe_x_pos < to_unsigned(50, 11) and score_incremented = '0') then
                     score <= score + 1;
                     score_incremented <= '1';
-                elsif (pipe_end_reached = '1') then
+                elsif (pipe_x_pos >= to_unsigned(50, 11)) then
                     score_incremented <= '0';
                 end if;
             end if;

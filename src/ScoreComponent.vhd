@@ -87,7 +87,7 @@ begin
     font_row_sig <= font_row_full(SIZE downto SIZE-2);
     font_col_sig <= font_col_full(SIZE downto SIZE-2);
 
-    char_addr <= text_string(char_index) when in_text_zone = '1' else (others => '0');
+    char_addr <= text_string(2 - char_index) when in_text_zone = '1' else (others => '0');
 
     CHAR_ROM_INST : char_rom
         port map (

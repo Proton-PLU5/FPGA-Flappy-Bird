@@ -75,7 +75,7 @@ architecture behavior of GameRenderer is
 
     signal score_enable : std_logic := '0';
 
-    signal score : integer := 0;
+    signal score : integer range 0 to 999 := 0;
     signal score_incremented : std_logic := '0';
 begin
 
@@ -167,7 +167,7 @@ begin
                 if (pipe_x_pos < to_unsigned(50, 11) and score_incremented = '0') then
                     score <= score + 1;
                     score_incremented <= '1';
-                else
+                elsif (pipe_end_reached = '1') then
                     score_incremented <= '0';
                 end if;
             end if;
@@ -178,6 +178,7 @@ begin
             else
                 request_back <= '0';
             end if;
+
             last_key_3_state <= KEY(3);
         end if;
     end process;

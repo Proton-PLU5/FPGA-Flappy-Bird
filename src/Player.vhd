@@ -51,7 +51,7 @@ architecture behavior of Player is
 
 begin
     -- need to update in the future to support variable size sprites.
-    size <= CONV_STD_LOGIC_VECTOR(80,10);
+    size <= CONV_STD_LOGIC_VECTOR(17,10);
 
     -- ball_x_pos and ball_y_pos show the (x,y) for the top-left of the sprite
     ball_x_pos <= CONV_STD_LOGIC_VECTOR(50,10);
@@ -68,7 +68,7 @@ begin
         pixel_column => pixel_column,
         start_x => ball_x_pos,
         start_y => ball_y_pos,
-        sprite_id => 0,
+        sprite_id => 2,
         red => red_s,
         blue => blue_s,
         green => green_s,

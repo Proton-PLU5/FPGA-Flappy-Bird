@@ -3,10 +3,41 @@ use IEEE.std_logic_1164.all;
 
 package sprite_data_pkg is
 
+    constant FLAPPY_BIRD_WIDTH  : integer := 17;
+    constant FLAPPY_BIRD_HEIGHT : integer := 12;
     constant SKELETRON_HEAD_WIDTH  : integer := 80;
     constant SKELETRON_HEAD_HEIGHT : integer := 76;
     constant SKELETRON_JAW_WIDTH  : integer := 54;
     constant SKELETRON_JAW_HEIGHT : integer := 38;
+
+    -- FLAPPY_BIRD
+    type FLAPPY_BIRD_palette_t is array(0 to 7) of std_logic_vector(11 downto 0);
+    constant FLAPPY_BIRD_PALETTE : FLAPPY_BIRD_palette_t := (
+        x"000",
+        x"FD9",
+        x"FB4",
+        x"FFF",
+        x"F31",
+        x"DEC",
+        x"D83",
+        x"534"
+    );
+
+    type FLAPPY_BIRD_sprite_t is array(0 to 203) of integer range 0 to 7;
+    constant FLAPPY_BIRD_DATA : FLAPPY_BIRD_sprite_t := (
+        0,         0,         0,         0,         0,         0,         7,         7,         7,         7,         7,         7,         0,         0,         0,         0,         0,  -- row
+        0,         0,         0,         0,         7,         7,         1,         1,         1,         7,         3,         3,         7,         0,         0,         0,         0,  -- row
+        0,         0,         0,         7,         1,         1,         2,         2,         7,         3,         3,         3,         3,         7,         0,         0,         0,  -- row
+        0,         7,         7,         7,         7,         2,         2,         2,         7,         5,         3,         3,         7,         3,         7,         0,         0,  -- row
+        7,         3,         3,         3,         3,         7,         2,         2,         7,         5,         3,         3,         7,         3,         7,         0,         0,  -- row
+        7,         3,         3,         3,         3,         3,         7,         2,         2,         7,         5,         3,         3,         3,         7,         0,         0,  -- row
+        7,         1,         3,         3,         3,         1,         7,         2,         2,         2,         7,         7,         7,         7,         7,         7,         0,  -- row
+        0,         7,         1,         1,         1,         7,         2,         2,         2,         7,         4,         4,         4,         4,         4,         4,         7,  -- row
+        0,         0,         7,         7,         7,         6,         6,         6,         7,         4,         7,         7,         7,         7,         7,         7,         0,  -- row
+        0,         0,         7,         6,         6,         6,         6,         6,         6,         7,         4,         4,         4,         4,         4,         7,         0,  -- row
+        0,         0,         0,         7,         7,         6,         6,         6,         6,         6,         7,         7,         7,         7,         7,         0,         0,  -- row
+        0,         0,         0,         0,         0,         7,         7,         7,         7,         7,         0,         0,         0,         0,         0,         0,         0  -- row
+    );
 
     -- SKELETRON_HEAD
     type SKELETRON_HEAD_palette_t is array(0 to 11) of std_logic_vector(11 downto 0);

@@ -66,6 +66,9 @@ begin
                 when 1 =>
                     width := SKELETRON_JAW_WIDTH;
                     height := SKELETRON_JAW_HEIGHT;
+                when 2 =>
+                    width := FLAPPY_BIRD_WIDTH;
+                    height := FLAPPY_BIRD_HEIGHT;
                 when others =>
                     width := SKELETRON_HEAD_WIDTH;
                     height := SKELETRON_HEAD_HEIGHT;
@@ -95,6 +98,9 @@ begin
                     when 1 =>
                         palette_index := SKELETRON_JAW_DATA(addr);
                         color := SKELETRON_JAW_PALETTE(palette_index);
+                    when 2 =>
+                        palette_index := FLAPPY_BIRD_DATA(addr);
+                        color := FLAPPY_BIRD_PALETTE(palette_index);
                     when others =>
                         palette_index := SKELETRON_HEAD_DATA(addr);
                         color := SKELETRON_HEAD_PALETTE(palette_index);

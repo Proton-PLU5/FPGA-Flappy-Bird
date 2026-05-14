@@ -73,13 +73,21 @@ architecture behavior of GameRenderer is
     signal ball_enabled : std_logic := '0';
     signal ball_red, ball_green, ball_blue : std_logic_vector(3 downto 0);
 
-    -- Pipe Values
+    -- Pipe 1 Values
     signal pipe_enabled : std_logic := '0';
     signal pipe_end_reached : std_logic;
     signal pipe_x_pos : unsigned(10 downto 0);
     signal pipe_red, pipe_green, pipe_blue : std_logic_vector(3 downto 0);
     signal pipe_reset : std_logic := '0';
     signal pipe_height   : integer range 0 to 480 := 240;
+
+    -- Pipe 2 Values
+    signal pipe2_enabled : std_logic := '0';
+    signal pipe2_end_reached : std_logic;
+    signal pipe2_x_pos : unsigned(10 downto 0);
+    signal pipe2_red, pipe2_green, pipe2_blue : std_logic_vector(3 downto 0);
+    signal pipe2_reset : std_logic := '0';
+    signal pipe2_height   : integer range 0 to 480 := 240;
 
     signal last_key_3_state : std_logic := '1';
 
@@ -138,6 +146,23 @@ begin
         x_pos => pipe_x_pos
     );
 
+    PIPE2_COMPONENT : Pipe port map (
+        clk => clk25Mhz,
+        vert_sync => vert_sync,
+        mouse_left => mouse_left,
+        pixel_row => pixel_row,
+        pixel_column => pixel_column,
+        red => pipe2_red,
+        green => pipe2_green,
+        blue => pipe2_blue,
+        height => pipe2_height,
+        gap => 150,
+        reset => pipe2_reset,
+        end_reached => pipe2_end_reached,
+        enabled => pipe2_enabled,
+        x_pos => pipe2_x_pos
+    );
+
     LFSR_COMPONENT : LFSR port map (
         clk        => clk25Mhz,
         reset      => '0',
@@ -180,6 +205,10 @@ begin
                     red <= pipe_red;
                     green <= pipe_green;
                     blue <= pipe_blue;
+                elsif pipe2_enabled = '1' then
+                    red <= pipe2_red;
+                    green <= pipe2_green;
+                    blue <= pipe2_blue;
                 else
                     red <= background_red;
                     green <= background_green;
@@ -228,5 +257,16 @@ begin
             end if;
         end if;
     end process PIPE_HEIGHT_RANDOMISER;
+
+    PIPE2_HEIGHT_RANDOMISER : process (vert_sync)
+    begin
+        if rising_edge(vert_sync) then
+            pipe2_reset <= '0';
+            if (pipe2_end_reached = '1' and pipe_x_pos = to_unsigned(320, 11)) then
+                pipe2_height <= to_integer(unsigned(lfsr_out)) * 280 / 256 + 100;
+                pipe2_reset <= '1';
+            end if;
+        end if;
+    end process PIPE2_HEIGHT_RANDOMISER;
     
 end architecture behavior;

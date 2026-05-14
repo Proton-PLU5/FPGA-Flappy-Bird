@@ -65,6 +65,15 @@ architecture behavior of GameRenderer is
         random_out : OUT std_logic_vector(7 downto 0)
     );
     end component LFSR;
+
+    component BossRenderer is
+        port (
+            clk25Mhz : IN std_logic;
+            pixel_row, pixel_column : IN std_logic_vector(9 downto 0);
+            red, green, blue : OUT std_logic_vector(3 downto 0);
+            enabled : OUT std_logic
+        );
+    end component BossRenderer;
     
     -- Collision values
         signal collided_pipe : std_logic := '0';
@@ -89,10 +98,14 @@ architecture behavior of GameRenderer is
     -- Background Values (Black)
     signal background_red, background_green, background_blue : std_logic_vector(3 downto 0) := "0000";
 
+    -- Score Values
     signal score_enable : std_logic := '0';
-
     signal score : integer range 0 to 999 := 0;
     signal score_incremented : std_logic := '0';
+
+    -- Boss Values
+    signal boss_enabled : std_logic := '0';
+    signal boss_red, boss_green, boss_blue : std_logic_vector(3 downto 0);
 begin
 
     SCORE_COMPONENT : ScoreTextRenderer generic map (
@@ -145,6 +158,16 @@ begin
         random_out => lfsr_out
     );
 
+    BOSS_COMPONENT : BossRenderer port map (
+        clk25Mhz => clk25Mhz,
+        pixel_row => pixel_row,
+        pixel_column => pixel_column,
+        red => boss_red,
+        green => boss_green,
+        blue => boss_blue,
+        enabled => boss_enabled
+    );
+
     -- Logic to determine output
     process (clk25Mhz)
     begin
@@ -176,6 +199,10 @@ begin
                     red <= "1111";
                     green <= "0000";
                     blue <= "0000";
+                elsif boss_enabled = '1' then
+                    red <= boss_red;
+                    green <= boss_green;
+                    blue <= boss_blue;
                 elsif pipe_enabled = '1' then
                     red <= pipe_red;
                     green <= pipe_green;

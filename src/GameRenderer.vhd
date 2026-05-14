@@ -66,6 +66,9 @@ architecture behavior of GameRenderer is
     );
     end component LFSR;
     
+    -- Collision values
+        signal collided_pipe : std_logic := '0';
+
     -- Ball Values
     signal ball_enabled : std_logic := '0';
     signal ball_red, ball_green, ball_blue : std_logic_vector(3 downto 0);
@@ -182,6 +185,18 @@ begin
                     green <= background_green;
                     blue <= background_blue;
                 end if;
+
+                -- Collision pipe with player
+
+                if (ball_enabled = '1' and pipe_enabled = '1' and collided_pipe = '0')  then -- don't allow score reset if already colliding
+                    score <= 0; 
+                    collided_pipe <= '1';
+                elsif (ball_enabled = '1' and pipe_enabled = '1' and collided_pipe = '1') then
+                    collided_pipe <= '1';
+                elsif (ball_enabled = '1' and pipe_enabled = '0') then
+                    collided_pipe <= '0'; 
+                end if;
+
 
                 -- Score increment (one point per pipe pass):
                 if (pipe_x_pos < to_unsigned(50, 11) and score_incremented = '0') then

@@ -58,7 +58,15 @@ architecture behavior of GameRenderer is
         );
     end component Pipe;
 
-
+	component LFSR is
+        port (
+        clk : IN std_logic;
+        reset : IN std_logic;
+        enable : IN std_logic;
+        random_out : OUT std_logic_vector(7 downto 0)
+    );
+    end component LFSR;
+    
     -- Ball Values
     signal ball_enabled : std_logic := '0';
     signal ball_red, ball_green, ball_blue : std_logic_vector(3 downto 0);
@@ -68,8 +76,12 @@ architecture behavior of GameRenderer is
     signal pipe_end_reached : std_logic;
     signal pipe_x_pos : unsigned(10 downto 0);
     signal pipe_red, pipe_green, pipe_blue : std_logic_vector(3 downto 0);
+    signal pipe_height   : integer range 0 to 480 := 240;
 
     signal last_key_3_state : std_logic := '1';
+
+    --LSFR
+    signal lfsr_out      : std_logic_vector(7 downto 0);
 
     -- Background Values (Black)
     signal background_red, background_green, background_blue : std_logic_vector(3 downto 0) := "0000";
@@ -113,12 +125,19 @@ begin
         red => pipe_red,
         green => pipe_green,
         blue => pipe_blue,
-        height => 240,
+        height => pipe_height,
         gap => 100,
         reset => pipe_end_reached,
         end_reached => pipe_end_reached,
         enabled => pipe_enabled,
         x_pos => pipe_x_pos
+    );
+
+    LFSR_COMPONENT : LFSR port map (
+        clk        => clk25Mhz,
+        reset      => '0',
+        enable     => '1',
+        random_out => lfsr_out
     );
 
     -- Logic to determine output
@@ -172,5 +191,16 @@ begin
             last_key_3_state <= KEY(3);
         end if;
     end process;
+
+    PIPE_HEIGHT_RANDOMISER : process (vert_sync)
+    begin
+        if rising_edge(vert_sync) then
+            if pipe_end_reached = '1' then
+                pipe_height <= to_integer(unsigned(lfsr_out)) * 280 / 256 + 100;
+            else
+                pipe_height <= 240;
+            end if;
+        end if;
+    end process PIPE_HEIGHT_RANDOMISER;
     
 end architecture behavior;

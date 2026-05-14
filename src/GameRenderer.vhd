@@ -75,21 +75,12 @@ architecture behavior of GameRenderer is
     signal background_red, background_green, background_blue : std_logic_vector(3 downto 0) := "0000";
 
     signal score_enable : std_logic := '0';
+
+    signal score : integer := 0;
+    signal score_incremented : std_logic := '0';
 begin
 
-    SCORE_COMPONENT : title_display generic map(
-        text_string => " 00 ",
-        text_size => 4,
-        SIZE => 3
-    )
-    port map (
-        clk => clk25Mhz,
-        pixel_row => pixel_row,
-        pixel_column => pixel_column,
-        pixel_on => score_enable,
-        text_row => 50,
-        text_col_start => 288
-    );
+    
     
     PLAYER_COMPONENT : Player port map (
         clk => clk25Mhz,
@@ -160,6 +151,14 @@ begin
                     red <= background_red;
                     green <= background_green;
                     blue <= background_blue;
+                end if;
+
+                -- Score increment:
+                if (pipe_x_pos < to_unsigned(50, 11) and score_incremented = '0') then
+                    score <= score + 1;
+                    score_incremented <= '1';
+                else
+                    score_incremented <= '0';
                 end if;
             end if;
 

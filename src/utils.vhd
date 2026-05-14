@@ -8,6 +8,7 @@ package utils is
     type char_array is array (natural range <>) of std_logic_vector(5 downto 0);
 
     function char_to_addr(c : character) return std_logic_vector;
+	function int_to_addr(i : integer range 0 to 9) return std_logic_vector;
 
 end package utils;
 
@@ -55,5 +56,21 @@ package body utils is
 			  when '>' => return  O"37";
 			  when others => return O"40"; -- space/default
 		 end case;
+	end function;
+
+	function int_to_addr(i : integer range 0 to 9) return std_logic_vector is
+	begin
+		case (i) is
+			when 0 => return  O"60";
+			when 1 => return  O"61";
+			when 2 => return  O"62";
+			when 3 => return  O"63";
+			when 4 => return  O"64";
+			when 5 => return  O"65";
+			when 6 => return  O"66";
+			when 7 => return  O"67";
+			when 8 => return  O"70";
+			when others => return  O"71";
+		end case;
 	end function;
 end package body utils;

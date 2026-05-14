@@ -76,6 +76,7 @@ architecture behavior of GameRenderer is
     signal pipe_end_reached : std_logic;
     signal pipe_x_pos : unsigned(10 downto 0);
     signal pipe_red, pipe_green, pipe_blue : std_logic_vector(3 downto 0);
+    signal pipe_reset : std_logic := '0';
     signal pipe_height   : integer range 0 to 480 := 240;
 
     signal last_key_3_state : std_logic := '1';
@@ -127,7 +128,7 @@ begin
         blue => pipe_blue,
         height => pipe_height,
         gap => 100,
-        reset => pipe_end_reached,
+        reset => pipe_reset,
         end_reached => pipe_end_reached,
         enabled => pipe_enabled,
         x_pos => pipe_x_pos
@@ -195,10 +196,10 @@ begin
     PIPE_HEIGHT_RANDOMISER : process (vert_sync)
     begin
         if rising_edge(vert_sync) then
+            pipe_reset <= '0';
             if pipe_end_reached = '1' then
                 pipe_height <= to_integer(unsigned(lfsr_out)) * 280 / 256 + 100;
-            else
-                pipe_height <= 240;
+                pipe_reset <= '1';
             end if;
         end if;
     end process PIPE_HEIGHT_RANDOMISER;

@@ -2,14 +2,11 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 use ieee.std_logic_unsigned.all;
-use ieee.std_logic_arith.all;
-
 entity BossRenderer is
   port (
     clk25Mhz : IN std_logic;
     pixel_row, pixel_column : IN std_logic_vector(9 downto 0);
     red, green, blue : OUT std_logic_vector(3 downto 0);
-    vert_sync : IN std_logic
     enabled : OUT std_logic
   );
 end BossRenderer;
@@ -69,14 +66,14 @@ begin
     x_pos <= CONV_STD_LOGIC_VECTOR(200, 10); -- Starting X position of the boss
     y_pos <= CONV_STD_LOGIC_VECTOR(100, 10); -- Starting Y position of the boss
 
-    process (vert_sync)
+    process (clk25Mhz)
         variable lower_jaw_anim_counter : integer range 0 to 99 := 0;
     begin
-        if rising_edge(vert_sync) then
+        if rising_edge(clk25Mhz) then
             if (lower_jaw_anim_counter < lower_jaw_anim_threshold) then
-                lower_jaw_y_offset <= lower_jaw_y_offset + 1;
+                lower_jaw_y_offset := lower_jaw_y_offset + 1;
             else
-                lower_jaw_y_offset <= lower_jaw_y_offset - 1;
+                lower_jaw_y_offset := lower_jaw_y_offset - 1;
             end if;
             
             lower_jaw_anim_counter := lower_jaw_anim_counter + 1;

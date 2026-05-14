@@ -160,6 +160,7 @@ begin
 
     BOSS_COMPONENT : BossRenderer port map (
         clk25Mhz => clk25Mhz,
+        vert_sync => vert_sync,
         pixel_row => pixel_row,
         pixel_column => pixel_column,
         red => boss_red,

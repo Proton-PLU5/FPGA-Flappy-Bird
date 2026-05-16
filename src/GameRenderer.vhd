@@ -8,12 +8,14 @@ entity GameRenderer is
         clk25Mhz : IN std_logic;
         mouse_left : IN std_logic;
         vert_sync, horz_sync : IN std_logic;
-		  SW : IN std_logic_vector(9 downto 0);
-		  KEY : IN std_logic_vector(3 DOWNTO 0);
+		SW : IN std_logic_vector(9 downto 0);
+		KEY : IN std_logic_vector(3 DOWNTO 0);
         pixel_row, pixel_column	: IN std_logic_vector(9 DOWNTO 0);
         red, green, blue : OUT std_logic_vector(3 downto 0);
         request_back : OUT std_logic;
-        enabled : IN std_logic
+        enabled : IN std_logic;
+        level_state : IN integer := 0;
+        level_one_enable, level_two_enable, level_three_enable, level_four_enable : out std_logic;
     );
 end entity GameRenderer;
 
@@ -44,40 +46,27 @@ architecture behavior of GameRenderer is
         );
     end component title_display;
 
-    component Pipe is 
+    component LevelOne is
         port (
-            clk, vert_sync, mouse_left : in std_logic;
-            pixel_row, pixel_column    : in std_logic_vector(9 downto 0);
-            red, green, blue           : out std_logic_vector(3 downto 0);
-            height                     : in integer range 0 to 480; -- Height of the centre of the gap in the pipe
-            gap                        : in integer range 0 to 480; -- This is the size of the gap in the pipe
-            reset                      : in std_logic;
-            end_reached                : out std_logic;
-            enabled                    : out std_logic;
-            x_pos                      : out unsigned(10 downto 0)
+            clk25Mhz : IN std_logic;
+            mouse_left : IN std_logic;
+            vert_sync : IN std_logic;
+            SW : IN std_logic_vector(9 downto 0);
+            KEY : IN std_logic_vector(3 DOWNTO 0);
+            level_one_enable : IN std_logic;
+            pixel_row, pixel_column	: IN std_logic_vector(9 DOWNTO 0);
+            pipe_enabled : OUT std_logic;
+            red, green, blue : OUT std_logic_vector(3 downto 0);
         );
-    end component Pipe;
-
-	component LFSR is
-        port (
-        clk : IN std_logic;
-        reset : IN std_logic;
-        enable : IN std_logic;
-        random_out : OUT std_logic_vector(7 downto 0)
-    );
-    end component LFSR;
+    end component LevelOne;
     
     -- Ball Values
     signal ball_enabled : std_logic := '0';
     signal ball_red, ball_green, ball_blue : std_logic_vector(3 downto 0);
 
-    -- Pipe Values
-    signal pipe_enabled : std_logic := '0';
-    signal pipe_end_reached : std_logic;
-    signal pipe_x_pos : unsigned(10 downto 0);
-    signal pipe_red, pipe_green, pipe_blue : std_logic_vector(3 downto 0);
-    signal pipe_reset : std_logic := '0';
-    signal pipe_height   : integer range 0 to 480 := 240;
+    -- Obstacle Values
+    signal obstacle_enabled : std_logic := '0';
+    signal obstacle_red, obstacle_green, obstacle_blue : std_logic_vector(3 downto 0);
 
     signal last_key_3_state : std_logic := '1';
 
@@ -117,28 +106,19 @@ begin
         enabled => ball_enabled
     );
 
-    PIPE_COMPONENT : Pipe port map (
-        clk => clk25Mhz,
-        vert_sync => vert_sync,
+    LEVEL_ONE_COMPONENT : LevelOne port map (
+        clk25Mhz => clk25Mhz,
         mouse_left => mouse_left,
+        vert_sync => vert_sync,
+        SW => SW,
+        KEY => KEY,
+        level_one_enable => level_one_enable,
         pixel_row => pixel_row,
         pixel_column => pixel_column,
-        red => pipe_red,
-        green => pipe_green,
-        blue => pipe_blue,
-        height => pipe_height,
-        gap => 100,
-        reset => pipe_reset,
-        end_reached => pipe_end_reached,
-        enabled => pipe_enabled,
-        x_pos => pipe_x_pos
-    );
-
-    LFSR_COMPONENT : LFSR port map (
-        clk        => clk25Mhz,
-        reset      => '0',
-        enable     => '1',
-        random_out => lfsr_out
+        red => obstacle_red,
+        green => obstacle_green,
+        blue => obstacle_blue,
+        pipe_enabled => obstacle_enabled
     );
 
     -- Logic to determine output
@@ -172,10 +152,10 @@ begin
                     red <= "1111";
                     green <= "0000";
                     blue <= "0000";
-                elsif pipe_enabled = '1' then
-                    red <= pipe_red;
-                    green <= pipe_green;
-                    blue <= pipe_blue;
+                elsif obstacle_enabled = '1' then
+                    red <= obstacle_red;
+                    green <= obstacle_green;
+                    blue <= obstacle_blue;
                 else
                     red <= background_red;
                     green <= background_green;
@@ -193,15 +173,19 @@ begin
         end if;
     end process;
 
-    PIPE_HEIGHT_RANDOMISER : process (vert_sync)
+    LEVEL_SELECT : process (clk25Mhz)
     begin
-        if rising_edge(vert_sync) then
-            pipe_reset <= '0';
-            if pipe_end_reached = '1' then
-                pipe_height <= to_integer(unsigned(lfsr_out)) * 280 / 256 + 100;
-                pipe_reset <= '1';
+        if rising_edge(clk25Mhz) then
+            if level_state = 1 then
+                level_one_enable <= '1';
+            elsif level_state = 2 then
+                level_two_enable <= '1';
+            elsif level_state = 3 then
+                level_three_enable <= '1';
+            elsif level_state = 4 then
+                level_four_enable <= '1';
             end if;
         end if;
-    end process PIPE_HEIGHT_RANDOMISER;
+    end process LEVEL_SELECT;
     
 end architecture behavior;

@@ -12,7 +12,8 @@ entity Pipe is
         reset                       : in std_logic;
         end_reached                 : out std_logic;
         x_pos                       : out unsigned(10 downto 0);
-        enabled                     : out std_logic
+        enabled                     : out std_logic,
+        level_one_enable            : in std_logic;
     );
 end entity Pipe;
 
@@ -35,15 +36,17 @@ begin
 
     PIPE_CONTROLLER : process (vert_sync, reset)
     begin
-        if reset = '1' then
-            pipe_x_pos <= to_unsigned(640, 11); -- Reset to right edge
-            end_reached <= '0';
-        elsif rising_edge(vert_sync) then
-            if (pipe_x_pos <= to_unsigned(0, 11)) then
-                end_reached <= '1';
-            else
-                pipe_x_pos <= pipe_x_pos - to_unsigned(2, 11);
+        if level_one_enable = '1' then
+            if reset = '1' then
+                pipe_x_pos <= to_unsigned(640, 11); -- Reset to right edge
                 end_reached <= '0';
+            elsif rising_edge(vert_sync) then
+                if (pipe_x_pos <= to_unsigned(0, 11)) then
+                    end_reached <= '1';
+                else
+                    pipe_x_pos <= pipe_x_pos - to_unsigned(2, 11);
+                    end_reached <= '0';
+                end if;
             end if;
         end if;
     end process PIPE_CONTROLLER;

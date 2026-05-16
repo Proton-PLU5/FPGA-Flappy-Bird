@@ -14,7 +14,7 @@ entity GameRenderer is
         red, green, blue : OUT std_logic_vector(3 downto 0);
         request_back : OUT std_logic;
         enabled : IN std_logic;
-        level_state : IN integer := 0;
+        level_state : IN integer := 1;
         level_one_enable, level_two_enable, level_three_enable, level_four_enable : out std_logic;
     );
 end entity GameRenderer;

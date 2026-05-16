@@ -82,8 +82,8 @@ begin
 
     PIPE_HEIGHT_RANDOMISER : process (vert_sync)
     begin
-        if level_one_enable = '1' then
-            if rising_edge(vert_sync) then
+        if rising_edge(vert_sync) then
+            if level_one_enable = '1' then
                 pipe_reset <= '0';
                 if pipe_end_reached = '1' then
                     pipe_height <= to_integer(unsigned(lfsr_out)) * 280 / 256 + 100;

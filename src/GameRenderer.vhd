@@ -29,22 +29,21 @@ architecture behavior of GameRenderer is
             enabled : OUT std_logic);
     end component Player;
 
-    component title_display is
+    component ScoreTextRenderer is
         generic (
-            text_string : string := "FLAPPY BOSS";
-            text_size : integer := 11;
             SIZE : integer := 4
         );
 
         port (
-            clk             : in  std_logic;
-            pixel_row       : in  std_logic_vector(9 downto 0);
-            pixel_column    : in  std_logic_vector(9 downto 0);
-            pixel_on        : out std_logic;
-		    text_row        : in integer;
-			text_col_start  : in integer
+            clk : in std_logic;
+            score : in integer;
+            pixel_row : in std_logic_vector(9 downto 0);
+            pixel_column : in std_logic_vector(9 downto 0);
+            pixel_on : out std_logic;
+            text_row : in integer;
+            text_col_start : in integer
         );
-    end component title_display;
+    end component ScoreTextRenderer;
 
     component LevelOne is
         port (
@@ -55,18 +54,26 @@ architecture behavior of GameRenderer is
             KEY : IN std_logic_vector(3 DOWNTO 0);
             level_one_enable : IN std_logic;
             pixel_row, pixel_column	: IN std_logic_vector(9 DOWNTO 0);
-            pipe_enabled : OUT std_logic;
-            red, green, blue : OUT std_logic_vector(3 downto 0);
+            pipe_1_enabled, pipe_2_enabled : OUT std_logic;
+            pipe_1_red, pipe_1_green, pipe_1_blue : OUT std_logic_vector(3 downto 0);
+            pipe_2_red, pipe_2_green, pipe_2_blue : OUT std_logic_vector(3 downto 0);
+            pipe_x_pos : OUT unsigned(10 downto 0);
         );
     end component LevelOne;
     
+    -- Collision values
+    signal collided_pipe : std_logic := '0';
+
     -- Ball Values
     signal ball_enabled : std_logic := '0';
     signal ball_red, ball_green, ball_blue : std_logic_vector(3 downto 0);
 
     -- Obstacle Values
-    signal obstacle_enabled : std_logic := '0';
-    signal obstacle_red, obstacle_green, obstacle_blue : std_logic_vector(3 downto 0);
+    signal obstacle_1_enabled : std_logic := '0';
+    signal obstacle_1_red, obstacle_1_green, obstacle_1_blue : std_logic_vector(3 downto 0);
+    signal obstacle_2_enabled : std_logic := '0';
+    signal obstacle_2_red, obstacle_2_green, obstacle_2_blue : std_logic_vector(3 downto 0);
+    signal obstacle_x_pos : unsigned(10 downto 0);
 
     signal last_key_3_state : std_logic := '1';
 
@@ -77,15 +84,17 @@ architecture behavior of GameRenderer is
     signal background_red, background_green, background_blue : std_logic_vector(3 downto 0) := "0000";
 
     signal score_enable : std_logic := '0';
+
+    signal score : integer range 0 to 999 := 0;
+    signal score_incremented : std_logic := '0';
 begin
 
-    SCORE_COMPONENT : title_display generic map(
-        text_string => " 00 ",
-        text_size => 4,
+    SCORE_COMPONENT : ScoreTextRenderer generic map (
         SIZE => 3
     )
     port map (
         clk => clk25Mhz,
+        score => score,
         pixel_row => pixel_row,
         pixel_column => pixel_column,
         pixel_on => score_enable,
@@ -115,10 +124,15 @@ begin
         level_one_enable => level_one_enable,
         pixel_row => pixel_row,
         pixel_column => pixel_column,
-        red => obstacle_red,
-        green => obstacle_green,
-        blue => obstacle_blue,
-        pipe_enabled => obstacle_enabled
+        pipe_1_red => obstacle_1_red,
+        pipe_1_green => obstacle_1_green,
+        pipe_1_blue => obstacle_1_blue,
+        pipe_1_enabled => obstacle_1_enabled,
+        pipe_2_red => obstacle_2_red,
+        pipe_2_green => obstacle_2_green,
+        pipe_2_blue => obstacle_2_blue,
+        pipe_2_enabled => obstacle_2_enabled,
+        pipe_x_pos => obstacle_x_pos
     );
 
     -- Logic to determine output
@@ -152,14 +166,39 @@ begin
                     red <= "1111";
                     green <= "0000";
                     blue <= "0000";
-                elsif obstacle_enabled = '1' then
-                    red <= obstacle_red;
-                    green <= obstacle_green;
-                    blue <= obstacle_blue;
+                elsif obstacle_1_enabled = '1' then
+                    red <= obstacle_1_red;
+                    green <= obstacle_1_green;
+                    blue <= obstacle_1_blue;
+                elsif obstacle_2_enabled = '1' then
+                    red <= obstacle_2_red;
+                    green <= obstacle_2_green;
+                    blue <= obstacle_2_blue;
                 else
                     red <= background_red;
                     green <= background_green;
                     blue <= background_blue;
+                end if;
+
+                -- TODO:
+                -- Collision pipe with player
+
+                if (ball_enabled = '1' and obstacle_1_enabled = '1' and collided_pipe = '0')  then -- don't allow score reset if already colliding
+                    score <= 0; 
+                    collided_pipe <= '1';
+                elsif (ball_enabled = '1' and obstacle_1_enabled = '1' and collided_pipe = '1') then
+                    collided_pipe <= '1';
+                elsif (ball_enabled = '1' and obstacle_1_enabled = '0') then
+                    collided_pipe <= '0'; 
+                end if;
+
+
+                -- Score increment (one point per pipe pass):
+                if (obstacle_x_pos < to_unsigned(50, 11) and score_incremented = '0') then
+                    score <= score + 1;
+                    score_incremented <= '1';
+                elsif (obstacle_x_pos >= to_unsigned(50, 11)) then
+                    score_incremented <= '0';
                 end if;
             end if;
 
@@ -169,6 +208,7 @@ begin
             else
                 request_back <= '0';
             end if;
+
             last_key_3_state <= KEY(3);
         end if;
     end process;
@@ -178,11 +218,23 @@ begin
         if rising_edge(clk25Mhz) then
             if level_state = 1 then
                 level_one_enable <= '1';
+                level_two_enable <= '0';
+                level_three_enable <= '0';
+                level_four_enable <= '0';
             elsif level_state = 2 then
+                level_one_enable <= '0';
                 level_two_enable <= '1';
+                level_three_enable <= '0';
+                level_four_enable <= '0';
             elsif level_state = 3 then
+                level_one_enable <= '0';
+                level_two_enable <= '0';
                 level_three_enable <= '1';
+                level_four_enable <= '0';
             elsif level_state = 4 then
+                level_one_enable <= '0';
+                level_two_enable <= '0';
+                level_three_enable <= '0';
                 level_four_enable <= '1';
             end if;
         end if;

@@ -11,8 +11,10 @@ entity LevelOne is
 		KEY : IN std_logic_vector(3 DOWNTO 0);
         level_one_enable : IN std_logic;
         pixel_row, pixel_column	: IN std_logic_vector(9 DOWNTO 0);
-        pipe_enabled : OUT std_logic;
-        red, green, blue : OUT std_logic_vector(3 downto 0);
+        pipe_1_enabled, pipe_2_enabled : OUT std_logic;
+        pipe_1_red, pipe_1_green, pipe_1_blue : OUT std_logic_vector(3 downto 0);
+        pipe_2_red, pipe_2_green, pipe_2_blue : OUT std_logic_vector(3 downto 0);
+        pipe_x_pos : OUT unsigned(10 downto 0);
     );
 end entity LevelOne;
 
@@ -41,13 +43,21 @@ architecture behavior of LevelOne is
     );
     end component LFSR;
 
-    -- Pipe Values
-    signal pipe_enabled_s : std_logic := '0';
-    signal pipe_end_reached : std_logic;
-    signal pipe_x_pos : unsigned(10 downto 0);
-    signal pipe_red, pipe_green, pipe_blue : std_logic_vector(3 downto 0);
-    signal pipe_reset : std_logic := '0';
-    signal pipe_height   : integer range 0 to 480 := 240;
+    -- Pipe 1 Values
+    signal pipe_1_enabled_s : std_logic := '0';
+    signal pipe_1_end_reached : std_logic;
+    signal pipe_1_x_pos : unsigned(10 downto 0);
+    signal pipe_1_red_s, pipe_1_green_s, pipe_1_blue_s : std_logic_vector(3 downto 0);
+    signal pipe_1_reset : std_logic := '0';
+    signal pipe_1_height   : integer range 0 to 480 := 240;
+
+    -- Pipe 2 Values
+    signal pipe_2_enabled_s : std_logic := '0';
+    signal pipe_2_end_reached : std_logic;
+    signal pipe_2_x_pos : unsigned(10 downto 0);
+    signal pipe_2_red_s, pipe_2_green_s, pipe_2_blue_s : std_logic_vector(3 downto 0);
+    signal pipe_2_reset : std_logic := '0';
+    signal pipe_2_height   : integer range 0 to 480 := 240;
 
     signal last_key_3_state : std_logic := '1';
 
@@ -61,16 +71,33 @@ begin
         mouse_left => mouse_left,
         pixel_row => pixel_row,
         pixel_column => pixel_column,
-        red => pipe_red,
-        green => pipe_green,
-        blue => pipe_blue,
-        height => pipe_height,
+        red => pipe_1_red_s,
+        green => pipe_1_green_s,
+        blue => pipe_1_blue_s,
+        height => pipe_1_height,
         gap => 100,
-        reset => pipe_reset,
+        reset => pipe_1_reset,
         level_one_enable => level_one_enable,
-        end_reached => pipe_end_reached,
-        enabled => pipe_enabled_s,
-        x_pos => pipe_x_pos
+        end_reached => pipe_1_end_reached,
+        enabled => pipe_1_enabled_s,
+        x_pos => pipe_1_x_pos
+    );
+
+    PIPE2_COMPONENT : Pipe port map (
+        clk => clk25Mhz,
+        vert_sync => vert_sync,
+        mouse_left => mouse_left,
+        pixel_row => pixel_row,
+        pixel_column => pixel_column,
+        red => pipe_2_red_s,
+        green => pipe_2_green_s,
+        blue => pipe_2_blue_s,
+        height => pipe_2_height,
+        gap => 150,
+        reset => pipe_2_reset,
+        end_reached => pipe_2_end_reached,
+        enabled => pipe_2_enabled_s,
+        x_pos => pipe_2_x_pos
     );
 
     LFSR_COMPONENT : LFSR port map (
@@ -84,17 +111,35 @@ begin
     begin
         if rising_edge(vert_sync) then
             if level_one_enable = '1' then
-                pipe_reset <= '0';
-                if pipe_end_reached = '1' then
-                    pipe_height <= to_integer(unsigned(lfsr_out)) * 280 / 256 + 100;
-                    pipe_reset <= '1';
+                pipe_1_reset <= '0';
+                if pipe_1_end_reached = '1' then
+                    pipe_1_height <= to_integer(unsigned(lfsr_out)) * 280 / 256 + 100;
+                    pipe_1_reset <= '1';
                 end if;
             end if;
         end if;
     end process PIPE_HEIGHT_RANDOMISER;
 
-    pipe_enabled <= pipe_enabled_s;
-    red <= pipe_red;
-    green <= pipe_green;
-    blue <= pipe_blue;
+    PIPE_2_HEIGHT_RANDOMISER : process (vert_sync)
+    begin
+        if rising_edge(vert_sync) then
+            if level_one_enable = '1' then
+                pipe_2_reset <= '0';
+                if (pipe_2_end_reached = '1' and pipe_1_x_pos = to_unsigned(320, 11)) then
+                    pipe_2_height <= to_integer(unsigned(lfsr_out)) * 280 / 256 + 100;
+                    pipe_2_reset <= '1';
+                end if;
+            end if;
+        end if;
+    end process PIPE_2_HEIGHT_RANDOMISER;
+
+    pipe_1_enabled <= pipe_1_enabled_s;
+    pipe_2_enabled <= pipe_2_enabled_s;
+    pipe_1_red <= pipe_1_red_s;
+    pipe_1_green <= pipe_1_green_s;
+    pipe_1_blue <= pipe_1_blue_s;
+    pipe_2_red <= pipe_2_red_s;
+    pipe_2_green <= pipe_2_green_s;
+    pipe_2_blue <= pipe_2_blue_s;
+    pipe_x_pos <= pipe_1_x_pos;
 end architecture behavior;

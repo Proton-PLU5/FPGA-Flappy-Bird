@@ -60,6 +60,22 @@ architecture behavior of GameRenderer is
             pipe_x_pos : OUT unsigned(10 downto 0);
         );
     end component LevelOne;
+
+    component LevelTwo is
+        port (
+            clk25Mhz : IN std_logic;
+            mouse_left : IN std_logic;
+            vert_sync : IN std_logic;
+            SW : IN std_logic_vector(9 downto 0);
+            KEY : IN std_logic_vector(3 DOWNTO 0);
+            level_two_enable : IN std_logic;
+            pixel_row, pixel_column	: IN std_logic_vector(9 DOWNTO 0);
+            pipe_1_enabled, pipe_2_enabled : OUT std_logic;
+            pipe_1_red, pipe_1_green, pipe_1_blue : OUT std_logic_vector(3 downto 0);
+            pipe_2_red, pipe_2_green, pipe_2_blue : OUT std_logic_vector(3 downto 0);
+            pipe_x_pos : OUT unsigned(10 downto 0);
+        );
+    end component LevelTwo;
     
     -- Collision values
     signal collided_pipe : std_logic := '0';
@@ -74,6 +90,18 @@ architecture behavior of GameRenderer is
     signal obstacle_2_enabled : std_logic := '0';
     signal obstacle_2_red, obstacle_2_green, obstacle_2_blue : std_logic_vector(3 downto 0);
     signal obstacle_x_pos : unsigned(10 downto 0);
+
+    -- Level One outputs
+    signal level_one_1_enabled, level_one_2_enabled : std_logic;
+    signal level_one_1_red, level_one_1_green, level_one_1_blue : std_logic_vector(3 downto 0);
+    signal level_one_2_red, level_one_2_green, level_one_2_blue : std_logic_vector(3 downto 0);
+    signal level_one_x_pos : unsigned(10 downto 0);
+
+    -- Level Two outputs
+    signal level_two_1_enabled, level_two_2_enabled : std_logic;
+    signal level_two_1_red, level_two_1_green, level_two_1_blue : std_logic_vector(3 downto 0);
+    signal level_two_2_red, level_two_2_green, level_two_2_blue : std_logic_vector(3 downto 0);
+    signal level_two_x_pos : unsigned(10 downto 0);
 
     signal last_key_3_state : std_logic := '1';
 
@@ -124,16 +152,58 @@ begin
         level_one_enable => level_one_enable,
         pixel_row => pixel_row,
         pixel_column => pixel_column,
-        pipe_1_red => obstacle_1_red,
-        pipe_1_green => obstacle_1_green,
-        pipe_1_blue => obstacle_1_blue,
-        pipe_1_enabled => obstacle_1_enabled,
-        pipe_2_red => obstacle_2_red,
-        pipe_2_green => obstacle_2_green,
-        pipe_2_blue => obstacle_2_blue,
-        pipe_2_enabled => obstacle_2_enabled,
-        pipe_x_pos => obstacle_x_pos
+        pipe_1_red => level_one_1_red,
+        pipe_1_green => level_one_1_green,
+        pipe_1_blue => level_one_1_blue,
+        pipe_1_enabled => level_one_1_enabled,
+        pipe_2_red => level_one_2_red,
+        pipe_2_green => level_one_2_green,
+        pipe_2_blue => level_one_2_blue,
+        pipe_2_enabled => level_one_2_enabled,
+        pipe_x_pos => level_one_x_pos
     );
+
+    LEVEL_TWO_COMPONENT : LevelTwo port map (
+        clk25Mhz => clk25Mhz,
+        mouse_left => mouse_left,
+        vert_sync => vert_sync,
+        SW => SW,
+        KEY => KEY,
+        level_two_enable => level_two_enable,
+        pixel_row => pixel_row,
+        pixel_column => pixel_column,
+        pipe_1_red => level_two_1_red,
+        pipe_1_green => level_two_1_green,
+        pipe_1_blue => level_two_1_blue,
+        pipe_1_enabled => level_two_1_enabled,
+        pipe_2_red => level_two_2_red,
+        pipe_2_green => level_two_2_green,
+        pipe_2_blue => level_two_2_blue,
+        pipe_2_enabled => level_two_2_enabled,
+        pipe_x_pos => level_two_x_pos
+    );
+
+    -- Multiplexer: select active level outputs
+    obstacle_1_enabled <= level_one_1_enabled when level_state = 1 else
+                          level_two_1_enabled when level_state = 2 else '0';
+    obstacle_1_red <= level_one_1_red when level_state = 1 else
+                      level_two_1_red when level_state = 2 else "0000";
+    obstacle_1_green <= level_one_1_green when level_state = 1 else
+                        level_two_1_green when level_state = 2 else "0000";
+    obstacle_1_blue <= level_one_1_blue when level_state = 1 else
+                       level_two_1_blue when level_state = 2 else "0000";
+
+    obstacle_2_enabled <= level_one_2_enabled when level_state = 1 else
+                          level_two_2_enabled when level_state = 2 else '0';
+    obstacle_2_red <= level_one_2_red when level_state = 1 else
+                      level_two_2_red when level_state = 2 else "0000";
+    obstacle_2_green <= level_one_2_green when level_state = 1 else
+                        level_two_2_green when level_state = 2 else "0000";
+    obstacle_2_blue <= level_one_2_blue when level_state = 1 else
+                       level_two_2_blue when level_state = 2 else "0000";
+
+    obstacle_x_pos <= level_one_x_pos when level_state = 1 else
+                      level_two_x_pos when level_state = 2 else (others => '0');
 
     -- Logic to determine output
     process (clk25Mhz)
@@ -192,13 +262,17 @@ begin
                     collided_pipe <= '0'; 
                 end if;
 
-
                 -- Score increment (one point per pipe pass):
                 if (obstacle_x_pos < to_unsigned(50, 11) and score_incremented = '0') then
                     score <= score + 1;
                     score_incremented <= '1';
                 elsif (obstacle_x_pos >= to_unsigned(50, 11)) then
                     score_incremented <= '0';
+                end if;
+
+                -- Level 1 completion condition
+                if score > 10 then
+                    level_state <= 2;
                 end if;
             end if;
 

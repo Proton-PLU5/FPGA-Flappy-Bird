@@ -7,6 +7,7 @@ entity LivesRenderer is
         red   : out std_logic_vector(3 downto 0);
         green : out std_logic_vector(3 downto 0);
         blue  : out std_logic_vector(3 downto 0);
+        no_lives_left : out std_logic;
 		transparent : out std_logic
     );
 end entity;
@@ -24,7 +25,6 @@ architecture behavior of LivesRenderer is
             red   : out std_logic_vector(3 downto 0);
             green : out std_logic_vector(3 downto 0);
             blue  : out std_logic_vector(3 downto 0);
-            no_lives_left : out std_logic;
             transparent : out std_logic
         );
     end component;

@@ -14,7 +14,7 @@ entity LevelOne is
         pipe_1_enabled, pipe_2_enabled : OUT std_logic;
         pipe_1_red, pipe_1_green, pipe_1_blue : OUT std_logic_vector(3 downto 0);
         pipe_2_red, pipe_2_green, pipe_2_blue : OUT std_logic_vector(3 downto 0);
-        pipe_x_pos : OUT unsigned(10 downto 0)
+        pipe_x_pos : OUT unsigned(10 downto 0);
     );
 end entity LevelOne;
 
@@ -95,7 +95,6 @@ begin
         height => pipe_2_height,
         gap => 150,
         reset => pipe_2_reset,
-		  level_one_enable => level_one_enable,
         end_reached => pipe_2_end_reached,
         enabled => pipe_2_enabled_s,
         x_pos => pipe_2_x_pos

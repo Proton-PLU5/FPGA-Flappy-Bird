@@ -8,9 +8,9 @@ entity LevelTwo is
         clk25Mhz : IN std_logic;
         mouse_left : IN std_logic;
         vert_sync : IN std_logic;
-		SW : IN std_logic_vector(9 downto 0);
-		KEY : IN std_logic_vector(3 DOWNTO 0);
-        level_two_enable : IN std_logic;
+		  SW : IN std_logic_vector(9 downto 0);
+		  KEY : IN std_logic_vector(3 DOWNTO 0);
+        level_two_enable : IN std_logic := '0';
         pixel_row, pixel_column	: IN std_logic_vector(9 DOWNTO 0);
         pipe_1_enabled, pipe_2_enabled : OUT std_logic;
         pipe_1_red, pipe_1_green, pipe_1_blue : OUT std_logic_vector(3 downto 0);
@@ -117,6 +117,7 @@ begin
         height => pipe_2_height,
         gap => 150,
         reset => pipe_2_reset,
+		  level_two_enable => level_two_enable,
         end_reached => pipe_2_end_reached,
         enabled => pipe_2_enabled_s,
         x_pos => pipe_2_x_pos

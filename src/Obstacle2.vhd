@@ -14,7 +14,7 @@ entity Obstacle2 is
         end_reached                 : out std_logic;
         x_pos                       : out unsigned(10 downto 0);
         enabled                     : out std_logic;
-        level_two_enable            : in std_logic;
+        level_two_enable            : in std_logic
     );
 end entity Obstacle2;
 

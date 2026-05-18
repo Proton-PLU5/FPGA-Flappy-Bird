@@ -52,7 +52,8 @@ architecture behavior of GameRenderer is
             gap                        : in integer range 0 to 480; -- This is the size of the gap in the pipe
             reset                      : in std_logic;
             end_reached                : out std_logic;
-            enabled                    : out std_logic;
+            enabled                    : in std_logic;
+            render                     : out std_logic;
             x_pos                      : out unsigned(10 downto 0)
         );
     end component Pipe;
@@ -67,7 +68,7 @@ architecture behavior of GameRenderer is
     end component LFSR;
     
     -- Collision values
-    signal pipe_collision_check : std_logic := '0';
+    signal collision_pending : std_logic := '0';
 
     -- Ball Values
     signal ball_enabled : std_logic := '0';
@@ -76,7 +77,7 @@ architecture behavior of GameRenderer is
     signal invincibility_flash : std_logic := '0';
 
     -- Pipe 1 Values
-    signal pipe_enabled : std_logic := '0';
+    signal pipe_render : std_logic := '0';
     signal pipe_end_reached : std_logic;
     signal pipe_x_pos : unsigned(10 downto 0);
     signal pipe_red, pipe_green, pipe_blue : std_logic_vector(3 downto 0);
@@ -84,7 +85,7 @@ architecture behavior of GameRenderer is
     signal pipe_height   : integer range 0 to 480 := 240;
 
     -- Pipe 2 Values
-    signal pipe2_enabled : std_logic := '0';
+    signal pipe2_render : std_logic := '0';
     signal pipe2_end_reached : std_logic;
     signal pipe2_x_pos : unsigned(10 downto 0);
     signal pipe2_red, pipe2_green, pipe2_blue : std_logic_vector(3 downto 0);
@@ -92,6 +93,7 @@ architecture behavior of GameRenderer is
     signal pipe2_height   : integer range 0 to 480 := 240;
 
     signal last_key_3_state : std_logic := '1';
+    signal last_vert_sync : std_logic := '0';
 
     --LSFR
     signal lfsr_out      : std_logic_vector(7 downto 0);
@@ -103,6 +105,7 @@ architecture behavior of GameRenderer is
 
     signal score : integer range 0 to 999 := 0;
     signal score_incremented : std_logic := '0';
+    signal pipe2_score_incremented : std_logic := '0';
 begin
 
     SCORE_COMPONENT : ScoreTextRenderer generic map (
@@ -144,8 +147,9 @@ begin
         gap => 100,
         reset => pipe_reset,
         end_reached => pipe_end_reached,
-        enabled => pipe_enabled,
-        x_pos => pipe_x_pos
+        enabled => enabled,
+        x_pos => pipe_x_pos,
+        render => pipe_render
     );
 
     PIPE2_COMPONENT : Pipe port map (
@@ -161,8 +165,9 @@ begin
         gap => 150,
         reset => pipe2_reset,
         end_reached => pipe2_end_reached,
-        enabled => pipe2_enabled,
-        x_pos => pipe2_x_pos
+        enabled => enabled,
+        x_pos => pipe2_x_pos,
+        render => pipe2_render
     );
 
     LFSR_COMPONENT : LFSR port map (
@@ -171,8 +176,6 @@ begin
         enable     => '1',
         random_out => lfsr_out
     );
-
-    pipe_collision_check <= '1' when pipe_enabled = '1' or pipe2_enabled = '1' else '0';
 
     -- Logic to determine output
     process (clk25Mhz)
@@ -206,11 +209,11 @@ begin
                     red <= "1111";
                     green <= "0000";
                     blue <= "0000";
-                elsif pipe_enabled = '1' then
+                elsif pipe_render = '1' then
                     red <= pipe_red;
                     green <= pipe_green;
                     blue <= pipe_blue;
-                elsif pipe2_enabled = '1' then
+                elsif pipe2_render = '1' then
                     red <= pipe2_red;
                     green <= pipe2_green;
                     blue <= pipe2_blue;
@@ -218,32 +221,60 @@ begin
                     red <= background_red;
                     green <= background_green;
                     blue <= background_blue;
+                end if;   
+                
+                -- Collision detection is pixel-based: if the player and either pipe
+                -- are enabled for the same pixel, latch a collision for the next frame.
+                if (ball_enabled = '1' and (pipe_render = '1' or pipe2_render = '1')) then
+                    collision_pending <= '1';
                 end if;
 
-                -- Collision pipe with player
+                if vert_sync = '1' and last_vert_sync = '0' then
+                    if collision_pending = '1' and invincibility = 0 then
+                        invincibility <= 300; -- gives 5 seconds of invincibility at 60fps
+                        score <= 0; -- reset score on collision
+                    elsif invincibility > 0 then
+                        invincibility <= invincibility - 1;
 
-                if (ball_enabled = '1' and pipe_collision_check = '1' and invincibility = 0) then
-                    invincibility <= 300; -- gives 5 seconds of invincibility at 60fps
-                    score <= 0; -- reset score on collision
-                elsif invincibility > 0 then
-                    invincibility <= invincibility - 1;
-
-                    -- Invincibility flash effect
-                    if invincibility mod 20 = 0 then
-                        invincibility_flash <= not invincibility_flash;
+                        -- Invincibility flash effect
+                        if invincibility mod 5 = 0 then
+                            invincibility_flash <= not invincibility_flash;
+                        end if;
+                    else
+                        -- reset flash when invincibility runs out
+                        invincibility_flash <= '0';
                     end if;
-                else
-                    -- reset flash when invincibility runs out
-                    invincibility_flash <= '0';
-                end if;
 
+                    -- Score increment: one point per pipe pass.
+                    if (pipe_x_pos < to_unsigned(50, 11) and score_incremented = '0') then
+                        score <= score + 1;
+                        score_incremented <= '1';
+                    elsif (pipe_x_pos >= to_unsigned(50, 11)) then
+                        score_incremented <= '0';
+                    end if;
 
-                -- Score increment (one point per pipe pass):
-                if (pipe_x_pos < to_unsigned(50, 11) and score_incremented = '0') then
-                    score <= score + 1;
-                    score_incremented <= '1';
-                elsif (pipe_x_pos >= to_unsigned(50, 11)) then
-                    score_incremented <= '0';
+                    if (pipe2_x_pos < to_unsigned(50, 11) and pipe2_score_incremented = '0') then
+                        score <= score + 1;
+                        pipe2_score_incremented <= '1';
+                    elsif (pipe2_x_pos >= to_unsigned(50, 11)) then
+                        pipe2_score_incremented <= '0';
+                    end if;
+
+                    -- Pipe 1 Randomiser
+                    pipe_reset <= '0';
+                    if pipe_end_reached = '1' then
+                        pipe_height <= to_integer(unsigned(lfsr_out)) * 280 / 256 + 100;
+                        pipe_reset <= '1';
+                    end if;
+
+                    -- Pipe 2 Randomiser
+                    pipe2_reset <= '0';
+                    if (pipe2_end_reached = '1' and pipe_x_pos = to_unsigned(320, 11)) then
+                        pipe2_height <= to_integer(unsigned(lfsr_out)) * 280 / 256 + 100;
+                        pipe2_reset <= '1';
+                    end if;
+
+                    collision_pending <= '0';
                 end if;
             end if;
 
@@ -254,30 +285,8 @@ begin
                 request_back <= '0';
             end if;
 
+            last_vert_sync <= vert_sync;
             last_key_3_state <= KEY(3);
         end if;
     end process;
-
-    PIPE_HEIGHT_RANDOMISER : process (vert_sync)
-    begin
-        if rising_edge(vert_sync) then
-            pipe_reset <= '0';
-            if pipe_end_reached = '1' then
-                pipe_height <= to_integer(unsigned(lfsr_out)) * 280 / 256 + 100;
-                pipe_reset <= '1';
-            end if;
-        end if;
-    end process PIPE_HEIGHT_RANDOMISER;
-
-    PIPE2_HEIGHT_RANDOMISER : process (vert_sync)
-    begin
-        if rising_edge(vert_sync) then
-            pipe2_reset <= '0';
-            if (pipe2_end_reached = '1' and pipe_x_pos = to_unsigned(320, 11)) then
-                pipe2_height <= to_integer(unsigned(lfsr_out)) * 280 / 256 + 100;
-                pipe2_reset <= '1';
-            end if;
-        end if;
-    end process PIPE2_HEIGHT_RANDOMISER;
-    
 end architecture behavior;

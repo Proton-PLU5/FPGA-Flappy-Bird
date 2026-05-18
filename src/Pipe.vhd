@@ -12,12 +12,13 @@ entity Pipe is
         reset                       : in std_logic;
         end_reached                 : out std_logic;
         x_pos                       : out unsigned(10 downto 0);
-        enabled                     : out std_logic
+        render                     : out std_logic;
+        enabled                    : in std_logic
     );
 end entity Pipe;
 
 architecture behaviour of Pipe is
-    signal render : std_logic;
+    signal render_out : std_logic;
     signal pipe_x_pos : unsigned(10 downto 0) := to_unsigned(640, 11); -- Start off-screen right
     signal pipe_top_y_pos : unsigned(9 downto 0);
     signal pipe_bottom_y_pos : unsigned(9 downto 0);
@@ -27,8 +28,8 @@ begin
     pipe_top_y_pos <= to_unsigned(height, 10) - to_unsigned(gap/2, 10);
     pipe_bottom_y_pos <= to_unsigned(height, 10) + to_unsigned(gap/2, 10);
 
-    -- Render logic
-    render <= '1' when (
+    -- render_out logic
+    render_out <= '1' when (
         (pipe_x_pos <= unsigned(pixel_column) + pipe_width) and (unsigned(pixel_column) <= pipe_x_pos + pipe_width)
         and ( (unsigned(pixel_row) <= pipe_top_y_pos) or (unsigned(pixel_row) >= pipe_bottom_y_pos) )
     ) else '0';
@@ -48,7 +49,7 @@ begin
         end if;
     end process PIPE_CONTROLLER;
 
-    enabled <= render;
+    render <= render_out;
     red <= (others => '0');
     green <= (others => '1');
     blue <= (others => '0');

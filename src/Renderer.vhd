@@ -122,7 +122,7 @@ begin
 
             -- Level transition logic (Only updates if currently in the play state)
             if state = 1 then
-                if current_game_score > 10 then
+                if current_game_score = 10 then
                     level_state_s <= 2;
                 end if;
             else

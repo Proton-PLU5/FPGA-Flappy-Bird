@@ -79,9 +79,7 @@ begin
                     cooldown <= cooldown - 1;
                 end if;
             end if;
-		  else
-				active <= '0';
-        end if; 
+        end if;
     end process;
 
     enabled <= render;

@@ -67,11 +67,13 @@ architecture behavior of GameRenderer is
     end component LFSR;
     
     -- Collision values
-        signal collided_pipe : std_logic := '0';
+    signal pipe_collision_check : std_logic := '0';
 
     -- Ball Values
     signal ball_enabled : std_logic := '0';
     signal ball_red, ball_green, ball_blue : std_logic_vector(3 downto 0);
+    signal invincibility : integer range 0 to 300 := 0; -- frames of invincibility after pipe collision.
+    signal invincibility_flash : std_logic := '0';
 
     -- Pipe 1 Values
     signal pipe_enabled : std_logic := '0';
@@ -170,6 +172,8 @@ begin
         random_out => lfsr_out
     );
 
+    pipe_collision_check <= '1' when pipe_enabled = '1' or pipe2_enabled = '1' else '0';
+
     -- Logic to determine output
     process (clk25Mhz)
     begin
@@ -192,8 +196,9 @@ begin
                 else 
                     background_blue <= "0000";
                 end if;
-                
-                if (ball_enabled = '1') then
+
+                -- Render priority: Ball > Score > Pipes > Background
+                if (ball_enabled = '1' and invincibility_flash = '0') then
                     red <= ball_red;
                     green <= ball_green;
                     blue <= ball_blue;
@@ -217,13 +222,19 @@ begin
 
                 -- Collision pipe with player
 
-                if (ball_enabled = '1' and pipe_enabled = '1' and collided_pipe = '0')  then -- don't allow score reset if already colliding
-                    score <= 0; 
-                    collided_pipe <= '1';
-                elsif (ball_enabled = '1' and pipe_enabled = '1' and collided_pipe = '1') then
-                    collided_pipe <= '1';
-                elsif (ball_enabled = '1' and pipe_enabled = '0') then
-                    collided_pipe <= '0'; 
+                if (ball_enabled = '1' and pipe_collision_check = '1' and invincibility = 0) then
+                    invincibility <= 300; -- gives 5 seconds of invincibility at 60fps
+                    score <= 0; -- reset score on collision
+                elsif invincibility > 0 then
+                    invincibility <= invincibility - 1;
+
+                    -- Invincibility flash effect
+                    if invincibility mod 20 = 0 then
+                        invincibility_flash <= not invincibility_flash;
+                    end if;
+                else
+                    -- reset flash when invincibility runs out
+                    invincibility_flash <= '0';
                 end if;
 
 

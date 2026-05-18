@@ -74,6 +74,8 @@ architecture behavior of GameRenderer is
             pipe_1_red, pipe_1_green, pipe_1_blue : OUT std_logic_vector(3 downto 0);
             pipe_2_red, pipe_2_green, pipe_2_blue : OUT std_logic_vector(3 downto 0);
             pipe_x_pos : OUT unsigned(10 downto 0);
+            powerup_enabled : OUT std_logic;
+            powerup_red, powerup_green, powerup_blue : OUT std_logic_vector(3 downto 0)
         );
     end component LevelTwo;
     
@@ -102,6 +104,10 @@ architecture behavior of GameRenderer is
     signal level_two_1_red, level_two_1_green, level_two_1_blue : std_logic_vector(3 downto 0);
     signal level_two_2_red, level_two_2_green, level_two_2_blue : std_logic_vector(3 downto 0);
     signal level_two_x_pos : unsigned(10 downto 0);
+
+    -- Power Up outputs
+    signal powerup_enabled : std_logic;
+    signal powerup_red, powerup_green, powerup_blue : std_logic_vector(3 downto 0);
 
     signal last_key_3_state : std_logic := '1';
 
@@ -180,7 +186,11 @@ begin
         pipe_2_green => level_two_2_green,
         pipe_2_blue => level_two_2_blue,
         pipe_2_enabled => level_two_2_enabled,
-        pipe_x_pos => level_two_x_pos
+        pipe_x_pos => level_two_x_pos,
+        powerup_enabled => powerup_enabled,
+        powerup_red => powerup_red,
+        powerup_green => powerup_green,
+        powerup_blue => powerup_blue
     );
 
     -- Multiplexer: select active level outputs
@@ -240,6 +250,10 @@ begin
                     red <= obstacle_1_red;
                     green <= obstacle_1_green;
                     blue <= obstacle_1_blue;
+                elsif powerup_enabled = '1' then
+                    red <= powerup_red;
+                    green <= powerup_green;
+                    blue <= powerup_blue;
                 elsif obstacle_2_enabled = '1' then
                     red <= obstacle_2_red;
                     green <= obstacle_2_green;

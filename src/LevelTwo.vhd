@@ -16,6 +16,8 @@ entity LevelTwo is
         pipe_1_red, pipe_1_green, pipe_1_blue : OUT std_logic_vector(3 downto 0);
         pipe_2_red, pipe_2_green, pipe_2_blue : OUT std_logic_vector(3 downto 0);
         pipe_x_pos : OUT unsigned(10 downto 0);
+        powerup_enabled : OUT std_logic;
+        powerup_red, powerup_green, powerup_blue : OUT std_logic_vector(3 downto 0)
     );
 end entity LevelTwo;
 
@@ -34,6 +36,19 @@ architecture behavior of LevelTwo is
             x_pos                      : out unsigned(10 downto 0)
         );
     end component Obstacle2;
+
+    component PowerUp is
+        port (
+            clk, vert_sync, mouse_left  : in std_logic;
+            pixel_row, pixel_column     : in std_logic_vector(9 downto 0);
+            red, green, blue            : out std_logic_vector(3 downto 0);
+            reset                       : in std_logic;
+            enabled                     : out std_logic;
+            x_pos                       : out unsigned(10 downto 0);
+            y_pos                       : out unsigned(9 downto 0);
+            level_two_enable            : in std_logic
+        );
+    end component PowerUp;
 
 	component LFSR is
         port (
@@ -59,6 +74,12 @@ architecture behavior of LevelTwo is
     signal pipe_2_red_s, pipe_2_green_s, pipe_2_blue_s : std_logic_vector(3 downto 0);
     signal pipe_2_reset : std_logic := '0';
     signal pipe_2_height   : integer range 0 to 480 := 240;
+
+    signal powerup_enabled_s : std_logic := '0';
+    signal powerup_red_s, powerup_green_s, powerup_blue_s : std_logic_vector(3 downto 0);
+    signal powerup_reset : std_logic := '0';
+    signal powerup_x_pos : unsigned(10 downto 0);
+    signal powerup_y_pos : unsigned(9 downto 0);
 
     signal last_key_3_state : std_logic := '1';
 
@@ -108,6 +129,22 @@ begin
         random_out => lfsr_out
     );
 
+    POWERUP_COMPONENT : PowerUp port map (
+        clk => clk25Mhz,
+        vert_sync => vert_sync,
+        mouse_left => mouse_left,
+        pixel_row => pixel_row,
+        pixel_column => pixel_column,
+        red => powerup_red_s,
+        green => powerup_green_s,
+        blue => powerup_blue_s,
+        reset => powerup_reset,
+        enabled => powerup_enabled_s,
+        x_pos => powerup_x_pos,
+        y_pos => powerup_y_pos,
+        level_two_enable => level_two_enable
+    );
+
     PIPE_HEIGHT_RANDOMISER : process (vert_sync)
     begin
         if rising_edge(vert_sync) then
@@ -143,4 +180,8 @@ begin
     pipe_2_green <= pipe_2_green_s;
     pipe_2_blue <= pipe_2_blue_s;
     pipe_x_pos <= pipe_1_x_pos;
+    powerup_enabled <= powerup_enabled_s;
+    powerup_red <= powerup_red_s;
+    powerup_green <= powerup_green_s;
+    powerup_blue <= powerup_blue_s;
 end architecture behavior;

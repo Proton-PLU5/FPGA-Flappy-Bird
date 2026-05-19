@@ -36,14 +36,14 @@ begin
         and ( (unsigned(pixel_row) <= pipe_top_y_pos) or (unsigned(pixel_row) >= pipe_bottom_y_pos) )
     ) else '0';
 
-    PIPE_CONTROLLER : process (vert_sync, reset)
+    PIPE_CONTROLLER : process (vert_sync)
     begin
-        if level_two_enable = '1' then
-            if reset = '1' then
-                pipe_x_pos <= to_unsigned(640, 11); -- Reset to right edge
-                end_reached <= '0';
-            elsif rising_edge(vert_sync) then
-                if (pipe_x_pos <= to_unsigned(0, 11)) then
+        if rising_edge(vert_sync) then
+            if level_two_enable = '1' then
+                if reset = '1' then
+                    pipe_x_pos <= to_unsigned(640, 11); -- Reset to right edge
+                    end_reached <= '0';
+                elsif (pipe_x_pos <= to_unsigned(0, 11)) then
                     end_reached <= '1';
                 else
                     pipe_x_pos <= pipe_x_pos - to_unsigned(2, 11);
@@ -53,6 +53,7 @@ begin
         end if;
     end process PIPE_CONTROLLER;
 
+	 enabled <= render_out;
     render <= render_out;
     red <= (others => '1');
     green <= (others => '0');

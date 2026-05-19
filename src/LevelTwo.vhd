@@ -65,7 +65,7 @@ architecture behavior of LevelTwo is
     -- Pipe 1 Values
     signal pipe_1_enabled_s : std_logic := '0';
     signal pipe_1_end_reached : std_logic;
-    signal pipe_1_x_pos : unsigned(10 downto 0);
+    signal pipe_1_x_pos_s : unsigned(10 downto 0);
     signal pipe_1_red_s, pipe_1_green_s, pipe_1_blue_s : std_logic_vector(3 downto 0);
     signal pipe_1_reset : std_logic := '0';
     signal pipe_1_height   : integer range 0 to 480 := 240;
@@ -73,7 +73,7 @@ architecture behavior of LevelTwo is
     -- Pipe 2 Values
     signal pipe_2_enabled_s : std_logic := '0';
     signal pipe_2_end_reached : std_logic;
-    signal pipe_2_x_pos : unsigned(10 downto 0);
+    signal pipe_2_x_pos_s : unsigned(10 downto 0);
     signal pipe_2_red_s, pipe_2_green_s, pipe_2_blue_s : std_logic_vector(3 downto 0);
     signal pipe_2_reset : std_logic := '0';
     signal pipe_2_height   : integer range 0 to 480 := 240;
@@ -108,7 +108,7 @@ begin
         level_two_enable => level_two_enable,
         end_reached => pipe_1_end_reached,
         enabled => pipe_1_enabled_s,
-        x_pos => pipe_1_x_pos
+        x_pos => pipe_1_x_pos_s,
         render => pipe_1_render_s
     );
 
@@ -127,7 +127,7 @@ begin
 		level_two_enable => level_two_enable,
         end_reached => pipe_2_end_reached,
         enabled => pipe_2_enabled_s,
-        x_pos => pipe_2_x_pos
+        x_pos => pipe_2_x_pos_s,
         render => pipe_2_render_s
     );
 
@@ -172,7 +172,7 @@ begin
         if rising_edge(vert_sync) then
             if level_two_enable = '1' then
                 pipe_2_reset <= '0';
-                if (pipe_2_end_reached = '1' and pipe_1_x_pos = to_unsigned(320, 11)) then
+                if (pipe_2_end_reached = '1' and pipe_1_x_pos_s = to_unsigned(320, 11)) then
                     pipe_2_height <= to_integer(unsigned(lfsr_out)) * 280 / 256 + 100;
                     pipe_2_reset <= '1';
                 end if;
@@ -188,8 +188,8 @@ begin
     pipe_2_red <= pipe_2_red_s;
     pipe_2_green <= pipe_2_green_s;
     pipe_2_blue <= pipe_2_blue_s;
-    pipe_x_pos <= pipe_1_x_pos;
-    pipe_x_pos <= pipe_2_x_pos;
+    pipe_1_x_pos <= pipe_1_x_pos_s;
+    pipe_2_x_pos <= pipe_2_x_pos_s;
     powerup_enabled <= powerup_enabled_s;
     powerup_red <= powerup_red_s;
     powerup_green <= powerup_green_s;

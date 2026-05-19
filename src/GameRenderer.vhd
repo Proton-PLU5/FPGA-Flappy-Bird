@@ -58,7 +58,8 @@ architecture behavior of GameRenderer is
             pipe_1_enabled, pipe_2_enabled : OUT std_logic;
             pipe_1_red, pipe_1_green, pipe_1_blue : OUT std_logic_vector(3 downto 0);
             pipe_2_red, pipe_2_green, pipe_2_blue : OUT std_logic_vector(3 downto 0);
-            pipe_x_pos : OUT unsigned(10 downto 0);
+            pipe_1_x_pos : OUT unsigned(10 downto 0);
+            pipe_2_x_pos : OUT unsigned(10 downto 0);
             pipe_1_render, pipe_2_render : OUT std_logic        
         );
     end component LevelOne;
@@ -75,9 +76,10 @@ architecture behavior of GameRenderer is
             pipe_1_enabled, pipe_2_enabled : OUT std_logic;
             pipe_1_red, pipe_1_green, pipe_1_blue : OUT std_logic_vector(3 downto 0);
             pipe_2_red, pipe_2_green, pipe_2_blue : OUT std_logic_vector(3 downto 0);
-            pipe_x_pos : OUT unsigned(10 downto 0);
+            pipe_1_x_pos : OUT unsigned(10 downto 0);
+            pipe_2_x_pos : OUT unsigned(10 downto 0);
             powerup_enabled : OUT std_logic;
-            powerup_red, powerup_green, powerup_blue : OUT std_logic_vector(3 downto 0)
+            powerup_red, powerup_green, powerup_blue : OUT std_logic_vector(3 downto 0);
             pipe_1_render, pipe_2_render : OUT std_logic        
         );
     end component LevelTwo;
@@ -102,18 +104,23 @@ architecture behavior of GameRenderer is
 
     signal obstacle_1_x_pos : unsigned(10 downto 0);
     signal obstacle_2_x_pos : unsigned(10 downto 0);
+	 
+    signal obstacle_1_score_incremented : std_logic := '0';
+    signal obstacle_2_score_incremented : std_logic := '0';
 
     -- Level One outputs
     signal level_one_1_enabled, level_one_2_enabled : std_logic;
     signal level_one_1_red, level_one_1_green, level_one_1_blue : std_logic_vector(3 downto 0);
     signal level_one_2_red, level_one_2_green, level_one_2_blue : std_logic_vector(3 downto 0);
-    signal level_one_x_pos : unsigned(10 downto 0);
+    signal level_one_1_x_pos, level_one_2_x_pos : unsigned(10 downto 0);
+	 signal level_one_1_render, level_one_2_render : std_logic;
 
     -- Level Two outputs
     signal level_two_1_enabled, level_two_2_enabled : std_logic;
     signal level_two_1_red, level_two_1_green, level_two_1_blue : std_logic_vector(3 downto 0);
     signal level_two_2_red, level_two_2_green, level_two_2_blue : std_logic_vector(3 downto 0);
-    signal level_two_x_pos : unsigned(10 downto 0);
+    signal level_two_1_x_pos, level_two_2_x_pos : unsigned(10 downto 0);
+	 signal level_two_1_render, level_two_2_render : std_logic;
 
     -- Power Up outputs
     signal powerup_enabled : std_logic;
@@ -134,9 +141,6 @@ architecture behavior of GameRenderer is
     
     -- TEMPORARY: For score changing
     signal mouse_down : std_logic := '0';
-
-    signal obstacle_1_score_incremented : std_logic := '0';
-    signal obstacle_2_score_incremented : std_logic := '0';
 
 begin
     level_one_enable   <= level_one_enable_s;
@@ -191,8 +195,8 @@ begin
         pipe_2_enabled => level_one_2_enabled,
 		pipe_1_x_pos => level_one_1_x_pos,
 		pipe_2_x_pos => level_one_2_x_pos,
-        pipe_1_render => obstacle_1_render,
-        pipe_2_render => obstacle_2_render
+        pipe_1_render => level_one_1_render,
+        pipe_2_render => level_one_2_render
     );
 
     LEVEL_TWO_COMPONENT : LevelTwo port map (
@@ -218,8 +222,8 @@ begin
         powerup_red => powerup_red,
 		powerup_green => powerup_green,
 		powerup_blue => powerup_blue,
-        pipe_1_render => obstacle_1_render,
-        pipe_2_render => obstacle_2_render
+        pipe_1_render => level_two_1_render,
+        pipe_2_render => level_two_2_render
     );
 
     -- Multiplexer
@@ -245,6 +249,11 @@ begin
                           level_two_1_x_pos when level_state = 2 else (others => '0');
     obstacle_2_x_pos     <= level_one_2_x_pos when level_state = 1 else
                           level_two_2_x_pos when level_state = 2 else (others => '0');
+
+    obstacle_1_render     <= level_one_1_render when level_state = 1 else
+                          level_two_1_render when level_state = 2 else '0';
+    obstacle_2_render     <= level_one_2_render when level_state = 1 else
+                          level_two_2_render when level_state = 2 else '0';
 
     -- Logic to determine output
     process (clk25Mhz)
@@ -291,7 +300,8 @@ begin
                 if vert_sync = '1' and last_vert_sync = '0' then
                     if collision_pending = '1' and invincibility = 0 then
                         invincibility <= 300; -- gives 5 seconds of invincibility at 60fps
-                        score <= 0; -- reset score on collision
+								if score > 0 then
+									score <= score - 1; -- subtract score on collision
                     elsif invincibility > 0 then
                         invincibility <= invincibility - 1;
 
@@ -326,7 +336,7 @@ begin
                 --While the game is disabled (on Title Screen), constantly hold the score at 0.
                 score <= 0;
                 mouse_down <= '0';
-                collided_pipe <= '0';
+                collision_pending <= '0';
                 
             end if;
 

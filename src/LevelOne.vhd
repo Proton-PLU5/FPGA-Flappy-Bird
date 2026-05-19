@@ -86,7 +86,7 @@ begin
         reset => pipe_1_reset,
         level_one_enable => level_one_enable,
         end_reached => pipe_1_end_reached,
-        enabled => pipe_1_enabled_s,
+        enabled => pipe_1_enabled_s and paused = '0',
         x_pos => pipe_1_x_pos_s,
         render => pipe_1_render_s
     );
@@ -105,7 +105,7 @@ begin
         reset => pipe_2_reset,
 		level_one_enable => level_one_enable,
         end_reached => pipe_2_end_reached,
-        enabled => pipe_2_enabled_s,
+        enabled => pipe_2_enabled_s and paused = '0',
         x_pos => pipe_2_x_pos_s,
         render => pipe_2_render_s
     );

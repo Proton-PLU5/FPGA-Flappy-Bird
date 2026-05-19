@@ -26,7 +26,8 @@ architecture behavior of GameRenderer is
             pixel_row, pixel_column : IN std_logic_vector(9 DOWNTO 0);
             KEY : IN std_logic_vector(3 DOWNTO 0);
             red, green, blue : OUT std_logic_vector(3 downto 0);
-            enabled : OUT std_logic
+            enabled : IN std_logic;
+            render : OUT std_logic
         );
     end component Player;
 
@@ -55,6 +56,7 @@ architecture behavior of GameRenderer is
             KEY : IN std_logic_vector(3 DOWNTO 0);
             level_one_enable : IN std_logic;
             pixel_row, pixel_column : IN std_logic_vector(9 DOWNTO 0);
+            paused : IN std_logic;
             pipe_1_enabled, pipe_2_enabled : OUT std_logic;
             pipe_1_red, pipe_1_green, pipe_1_blue : OUT std_logic_vector(3 downto 0);
             pipe_2_red, pipe_2_green, pipe_2_blue : OUT std_logic_vector(3 downto 0);
@@ -73,6 +75,7 @@ architecture behavior of GameRenderer is
             KEY : IN std_logic_vector(3 DOWNTO 0);
             level_two_enable : IN std_logic := '0';
             pixel_row, pixel_column : IN std_logic_vector(9 DOWNTO 0);
+            paused : IN std_logic;
             pipe_1_enabled, pipe_2_enabled : OUT std_logic;
             pipe_1_red, pipe_1_green, pipe_1_blue : OUT std_logic_vector(3 downto 0);
             pipe_2_red, pipe_2_green, pipe_2_blue : OUT std_logic_vector(3 downto 0);
@@ -84,11 +87,15 @@ architecture behavior of GameRenderer is
         );
     end component LevelTwo;
      
+    -- Game Logic Values
+    signal paused : std_logic := '0';
+    signal prev_paused : std_logic := '0';
+
     -- Collision values
     signal collision_pending : std_logic := '0';
 
     -- Ball Values
-    signal ball_enabled : std_logic := '0';
+    signal player_render : std_logic := '0';
     signal ball_red, ball_green, ball_blue : std_logic_vector(3 downto 0);
     signal invincibility : integer range 0 to 300 := 0; -- frames of invincibility after pipe collision.
     signal invincibility_flash : std_logic := '0';
@@ -120,7 +127,7 @@ architecture behavior of GameRenderer is
     signal level_two_1_red, level_two_1_green, level_two_1_blue : std_logic_vector(3 downto 0);
     signal level_two_2_red, level_two_2_green, level_two_2_blue : std_logic_vector(3 downto 0);
     signal level_two_1_x_pos, level_two_2_x_pos : unsigned(10 downto 0);
-	 signal level_two_1_render, level_two_2_render : std_logic;
+	signal level_two_1_render, level_two_2_render : std_logic;
 
     -- Power Up outputs
     signal powerup_enabled : std_logic;
@@ -172,7 +179,8 @@ begin
         red => ball_red,
         green => ball_green,
         blue => ball_blue,
-        enabled => ball_enabled
+        render => player_render,
+        enabled => enabled and paused = '0'
     );
 
     LEVEL_ONE_COMPONENT : LevelOne port map (
@@ -195,7 +203,8 @@ begin
 		pipe_1_x_pos => level_one_1_x_pos,
 		pipe_2_x_pos => level_one_2_x_pos,
         pipe_1_render => level_one_1_render,
-        pipe_2_render => level_one_2_render
+        pipe_2_render => level_one_2_render,
+        paused => paused
     );
 
     LEVEL_TWO_COMPONENT : LevelTwo port map (
@@ -222,7 +231,8 @@ begin
 		powerup_green => powerup_green,
 		powerup_blue => powerup_blue,
         pipe_1_render => level_two_1_render,
-        pipe_2_render => level_two_2_render
+        pipe_2_render => level_two_2_render,
+        paused => paused
     );
 
     -- Multiplexer
@@ -264,7 +274,7 @@ begin
                 if (SW(2) = '1') then background_blue <= "1111"; else background_blue <= "0000"; end if;
                 
                 -- Render priority: Ball > Score > Pipes > Background
-                if (ball_enabled = '1' and invincibility_flash = '0') then
+                if (player_render = '1' and invincibility_flash = '0') then
                     red <= ball_red;
 					green <= ball_green;
 					blue <= ball_blue;
@@ -292,7 +302,7 @@ begin
                 
                 -- Collision detection is pixel-based: if the player and either pipe
                 -- are enabled for the same pixel, latch a collision for the next frame.
-                if (ball_enabled = '1' and (obstacle_1_render = '1' or obstacle_2_render = '1')) then
+                if (player_render = '1' and (obstacle_1_render = '1' or obstacle_2_render = '1')) then
                     collision_pending <= '1';
                 end if;
 
@@ -355,6 +365,14 @@ begin
     LEVEL_SELECT : process (clk25Mhz)
     begin
         if rising_edge(clk25Mhz) then
+
+            if (KEY(0) = '0' and prev_paused = '0') then
+                paused <= not paused;
+                prev_paused <= '1';
+            elsif (KEY(0) = '1' and prev_paused = '1') then
+                prev_paused <= '0';
+            end if;
+
             if level_state = 0 then
                 level_one_enable_s   <= '0';
                 level_two_enable_s   <= '0';

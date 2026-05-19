@@ -11,6 +11,7 @@ entity LevelOne is
 		KEY : IN std_logic_vector(3 DOWNTO 0);
         level_one_enable : IN std_logic;
         pixel_row, pixel_column	: IN std_logic_vector(9 DOWNTO 0);
+        paused : IN std_logic;
         pipe_1_enabled, pipe_2_enabled : OUT std_logic;
         pipe_1_red, pipe_1_green, pipe_1_blue : OUT std_logic_vector(3 downto 0);
         pipe_2_red, pipe_2_green, pipe_2_blue : OUT std_logic_vector(3 downto 0);
@@ -125,6 +126,8 @@ begin
                     pipe_1_height <= to_integer(unsigned(lfsr_out)) * 280 / 256 + 100;
                     pipe_1_reset <= '1';
                 end if;
+            elsif (paused = '0') then
+                pipe_1_reset <= '1'; -- Reset the pipe when the level is not enabled
             end if;
         end if;
     end process PIPE_HEIGHT_RANDOMISER;
@@ -138,6 +141,8 @@ begin
                     pipe_2_height <= to_integer(unsigned(lfsr_out)) * 280 / 256 + 100;
                     pipe_2_reset <= '1';
                 end if;
+            elsif (paused = '0') then
+                pipe_2_reset <= '1'; -- Reset the pipe when the level is not enabled
             end if;
         end if;
     end process PIPE_2_HEIGHT_RANDOMISER;

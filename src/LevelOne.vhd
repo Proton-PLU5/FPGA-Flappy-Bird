@@ -14,23 +14,26 @@ entity LevelOne is
         pipe_1_enabled, pipe_2_enabled : OUT std_logic;
         pipe_1_red, pipe_1_green, pipe_1_blue : OUT std_logic_vector(3 downto 0);
         pipe_2_red, pipe_2_green, pipe_2_blue : OUT std_logic_vector(3 downto 0);
-        pipe_x_pos : OUT unsigned(10 downto 0)
+        pipe_1_x_pos : OUT unsigned(10 downto 0);
+        pipe_2_x_pos : OUT unsigned(10 downto 0);
+        pipe_1_render, pipe_2_render : OUT std_logic
     );
 end entity LevelOne;
 
 architecture behavior of LevelOne is
     component Pipe is 
         port (
-            clk, vert_sync, mouse_left : in std_logic;
-            pixel_row, pixel_column    : in std_logic_vector(9 downto 0);
-            red, green, blue           : out std_logic_vector(3 downto 0);
-            height                     : in integer range 0 to 480; -- Height of the centre of the gap in the pipe
-            gap                        : in integer range 0 to 480; -- This is the size of the gap in the pipe
-            reset                      : in std_logic;
-            level_one_enable           : in std_logic;
-            end_reached                : out std_logic;
-            enabled                    : out std_logic;
-            x_pos                      : out unsigned(10 downto 0)
+            clk, vert_sync, mouse_left  : in std_logic;
+            pixel_row, pixel_column     : in std_logic_vector(9 downto 0);
+            red, green, blue            : out std_logic_vector(3 downto 0);
+            height                      : in integer range 0 to 480; -- Height of the centre of the gap in the pipe
+            gap                         : in integer range 0 to 480; -- This is the size of the gap in the pipe
+            reset                       : in std_logic;
+            end_reached                 : out std_logic;
+            x_pos                       : out unsigned(10 downto 0);
+            enabled                     : out std_logic;
+            render                      : out std_logic;
+            level_one_enable            : in std_logic
         );
     end component Pipe;
 
@@ -61,6 +64,9 @@ architecture behavior of LevelOne is
 
     signal last_key_3_state : std_logic := '1';
 
+    signal pipe_1_render_s : std_logic;
+    signal pipe_2_render_s : std_logic;
+
     --LSFR
     signal lfsr_out      : std_logic_vector(7 downto 0);
 
@@ -80,7 +86,8 @@ begin
         level_one_enable => level_one_enable,
         end_reached => pipe_1_end_reached,
         enabled => pipe_1_enabled_s,
-        x_pos => pipe_1_x_pos
+        x_pos => pipe_1_x_pos,
+        render => pipe_1_render_s
     );
 
     PIPE2_COMPONENT : Pipe port map (
@@ -95,10 +102,11 @@ begin
         height => pipe_2_height,
         gap => 150,
         reset => pipe_2_reset,
-		  level_one_enable => level_one_enable,
+		level_one_enable => level_one_enable,
         end_reached => pipe_2_end_reached,
         enabled => pipe_2_enabled_s,
         x_pos => pipe_2_x_pos
+        render => pipe_2_render_s
     );
 
     LFSR_COMPONENT : LFSR port map (
@@ -143,4 +151,7 @@ begin
     pipe_2_green <= pipe_2_green_s;
     pipe_2_blue <= pipe_2_blue_s;
     pipe_x_pos <= pipe_1_x_pos;
+    pipe_x_pos <= pipe_2_x_pos;
+    pipe_1_render <= pipe_1_render_s;
+    pipe_2_render <= pipe_2_render_s;
 end architecture behavior;

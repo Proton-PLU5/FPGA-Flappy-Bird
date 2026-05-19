@@ -35,9 +35,8 @@ architecture behavior of LevelTwo is
             reset                       : in std_logic;
             end_reached                 : out std_logic;
             x_pos                       : out unsigned(10 downto 0);
-            enabled                     : out std_logic;
+            enabled                     : in std_logic;
             render                      : out std_logic;
-            level_two_enable            : in std_logic
         );
     end component Obstacle2;
 
@@ -65,7 +64,6 @@ architecture behavior of LevelTwo is
 
     -- Pipe 1 Values
     signal pipe_1_enabled_s : std_logic := '0';
-    signal pipe_1_level_enable_s : std_logic := '0';
     signal pipe_1_end_reached : std_logic;
     signal pipe_1_x_pos_s : unsigned(10 downto 0);
     signal pipe_1_red_s, pipe_1_green_s, pipe_1_blue_s : std_logic_vector(3 downto 0);
@@ -74,7 +72,6 @@ architecture behavior of LevelTwo is
 
     -- Pipe 2 Values
     signal pipe_2_enabled_s : std_logic := '0';
-    signal pipe_2_level_enable_s : std_logic := '0';
     signal pipe_2_end_reached : std_logic;
     signal pipe_2_x_pos_s : unsigned(10 downto 0);
     signal pipe_2_red_s, pipe_2_green_s, pipe_2_blue_s : std_logic_vector(3 downto 0);
@@ -96,8 +93,8 @@ architecture behavior of LevelTwo is
     signal lfsr_out      : std_logic_vector(7 downto 0);
 
 begin
-    pipe_1_level_enable_s <= level_two_enable and not paused;
-    pipe_2_level_enable_s <= level_two_enable and not paused;
+    pipe_1_enabled_s <= level_two_enable and not paused;
+    pipe_2_enabled_s <= level_two_enable and not paused;
 
     PIPE_COMPONENT : Obstacle2 port map (
         clk => clk25Mhz,
@@ -111,7 +108,6 @@ begin
         height => pipe_1_height,
         gap => 100,
         reset => pipe_1_reset,
-        level_two_enable => level_two_enable,
         end_reached => pipe_1_end_reached,
         enabled => pipe_1_enabled_s,
         x_pos => pipe_1_x_pos_s,
@@ -130,7 +126,6 @@ begin
         height => pipe_2_height,
         gap => 150,
         reset => pipe_2_reset,
-        level_two_enable => pipe_2_level_enable_s,
         end_reached => pipe_2_end_reached,
         enabled => pipe_2_enabled_s,
         x_pos => pipe_2_x_pos_s,
@@ -163,13 +158,13 @@ begin
     PIPE_HEIGHT_RANDOMISER : process (vert_sync)
     begin
         if rising_edge(vert_sync) then
-            if pipe_1_level_enable_s = '1' then
+            if level_two_enable = '1' then
                 pipe_1_reset <= '0';
                 if pipe_1_end_reached = '1' then
                     pipe_1_height <= to_integer(unsigned(lfsr_out)) * 280 / 256 + 100;
                     pipe_1_reset <= '1';
                 end if;
-            elsif (paused = '0') then
+            else
                 pipe_1_reset <= '1'; -- Reset the pipe when the level is not enabled
             end if;
         end if;
@@ -178,13 +173,13 @@ begin
     PIPE_2_HEIGHT_RANDOMISER : process (vert_sync)
     begin
         if rising_edge(vert_sync) then
-            if pipe_2_level_enable_s = '1' then
+            if level_two_enable = '1' then
                 pipe_2_reset <= '0';
                 if (pipe_2_end_reached = '1' and pipe_1_x_pos_s = to_unsigned(320, 11)) then
                     pipe_2_height <= to_integer(unsigned(lfsr_out)) * 280 / 256 + 100;
                     pipe_2_reset <= '1';
                 end if;
-            elsif (paused = '0') then
+            else
                 pipe_2_reset <= '1'; -- Reset the pipe when the level is not enabled
             end if;
         end if;

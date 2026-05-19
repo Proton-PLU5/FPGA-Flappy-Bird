@@ -65,6 +65,21 @@ architecture behavior of GameRenderer is
         random_out : OUT std_logic_vector(7 downto 0)
     );
     end component LFSR;
+
+    component LivesRenderer is
+        port (
+        clk : in std_logic;
+        pixel_row    : in std_logic_vector(9 downto 0);
+        pixel_column : in std_logic_vector(9 downto 0);
+        collision_check : in std_logic;
+        red   : out std_logic_vector(3 downto 0);
+        green : out std_logic_vector(3 downto 0);
+        blue  : out std_logic_vector(3 downto 0);
+        enabled : out std_logic;
+        no_lives_left : out std_logic
+		  );
+    end component LivesRenderer;
+
     
     -- Collision values
         signal collided_pipe : std_logic := '0';
@@ -88,6 +103,10 @@ architecture behavior of GameRenderer is
     signal pipe2_red, pipe2_green, pipe2_blue : std_logic_vector(3 downto 0);
     signal pipe2_reset : std_logic := '0';
     signal pipe2_height   : integer range 0 to 480 := 240;
+
+    -- Lives Values
+    signal lives_red, lives_green, lives_blue : std_logic_vector(3 downto 0);
+    signal lives_enabled : std_logic := '0';
 
     signal last_key_3_state : std_logic := '1';
 
@@ -127,7 +146,7 @@ begin
         green => ball_green,
         blue => ball_blue,
         enabled => ball_enabled
-    );
+    ); 
 
     PIPE_COMPONENT : Pipe port map (
         clk => clk25Mhz,
@@ -170,6 +189,18 @@ begin
         random_out => lfsr_out
     );
 
+    LIVES_COMPONENT : LivesRenderer port map (
+        clk => clk25Mhz,
+        pixel_row => pixel_row,
+        pixel_column => pixel_column,
+        collision_check => collided_pipe,
+        red => lives_red,
+        green => lives_green,
+        blue => lives_blue,
+        enabled => lives_enabled,
+        no_lives_left => open
+    );
+
     -- Logic to determine output
     process (clk25Mhz)
     begin
@@ -209,6 +240,10 @@ begin
                     red <= pipe2_red;
                     green <= pipe2_green;
                     blue <= pipe2_blue;
+                elsif lives_enabled = '1' then
+                    red <= lives_red;
+                    green <= lives_green;
+                    blue <= lives_blue;
                 else
                     red <= background_red;
                     green <= background_green;
@@ -225,7 +260,6 @@ begin
                 elsif (ball_enabled = '1' and pipe_enabled = '0') then
                     collided_pipe <= '0'; 
                 end if;
-
 
                 -- Score increment (one point per pipe pass):
                 if (pipe_x_pos < to_unsigned(50, 11) and score_incremented = '0') then

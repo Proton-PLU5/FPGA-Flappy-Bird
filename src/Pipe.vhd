@@ -13,7 +13,7 @@ entity Pipe is
         end_reached                 : out std_logic;
         x_pos                       : out unsigned(10 downto 0);
         enabled                     : in std_logic;
-        render                      : out std_logic;
+        render                      : out std_logic
     );
 end entity Pipe;
 

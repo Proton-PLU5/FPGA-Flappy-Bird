@@ -49,6 +49,7 @@ architecture behavior of LevelOne is
 
     -- Pipe 1 Values
     signal pipe_1_enabled_s : std_logic := '0';
+    signal pipe_1_level_enable_s : std_logic := '0';
     signal pipe_1_end_reached : std_logic;
     signal pipe_1_x_pos_s : unsigned(10 downto 0);
     signal pipe_1_red_s, pipe_1_green_s, pipe_1_blue_s : std_logic_vector(3 downto 0);
@@ -57,6 +58,7 @@ architecture behavior of LevelOne is
 
     -- Pipe 2 Values
     signal pipe_2_enabled_s : std_logic := '0';
+    signal pipe_2_level_enable_s : std_logic := '0';
     signal pipe_2_end_reached : std_logic;
     signal pipe_2_x_pos_s : unsigned(10 downto 0);
     signal pipe_2_red_s, pipe_2_green_s, pipe_2_blue_s : std_logic_vector(3 downto 0);
@@ -72,6 +74,9 @@ architecture behavior of LevelOne is
     signal lfsr_out      : std_logic_vector(7 downto 0);
 
 begin
+    pipe_1_level_enable_s <= level_one_enable and not paused;
+    pipe_2_level_enable_s <= level_one_enable and not paused;
+
     PIPE_COMPONENT : Pipe port map (
         clk => clk25Mhz,
         vert_sync => vert_sync,
@@ -84,9 +89,9 @@ begin
         height => pipe_1_height,
         gap => 100,
         reset => pipe_1_reset,
-        level_one_enable => level_one_enable,
+        level_one_enable => pipe_1_level_enable_s,
         end_reached => pipe_1_end_reached,
-        enabled => pipe_1_enabled_s and paused = '0',
+        enabled => pipe_1_enabled_s,
         x_pos => pipe_1_x_pos_s,
         render => pipe_1_render_s
     );
@@ -103,9 +108,9 @@ begin
         height => pipe_2_height,
         gap => 150,
         reset => pipe_2_reset,
-		level_one_enable => level_one_enable,
+        level_one_enable => pipe_2_level_enable_s,
         end_reached => pipe_2_end_reached,
-        enabled => pipe_2_enabled_s and paused = '0',
+        enabled => pipe_2_enabled_s,
         x_pos => pipe_2_x_pos_s,
         render => pipe_2_render_s
     );
@@ -120,7 +125,7 @@ begin
     PIPE_HEIGHT_RANDOMISER : process (vert_sync)
     begin
         if rising_edge(vert_sync) then
-            if level_one_enable = '1' then
+            if pipe_1_level_enable_s = '1' then
                 pipe_1_reset <= '0';
                 if pipe_1_end_reached = '1' then
                     pipe_1_height <= to_integer(unsigned(lfsr_out)) * 280 / 256 + 100;
@@ -135,7 +140,7 @@ begin
     PIPE_2_HEIGHT_RANDOMISER : process (vert_sync)
     begin
         if rising_edge(vert_sync) then
-            if level_one_enable = '1' then
+            if pipe_2_level_enable_s = '1' then
                 pipe_2_reset <= '0';
                 if (pipe_2_end_reached = '1' and pipe_1_x_pos_s = to_unsigned(320, 11)) then
                     pipe_2_height <= to_integer(unsigned(lfsr_out)) * 280 / 256 + 100;

@@ -154,6 +154,7 @@ begin
     level_three_enable <= level_three_enable_s;
     level_four_enable  <= level_four_enable_s;
     score_out          <= score; 
+    player_enabled     <= enabled and paused = '0';
 
     SCORE_COMPONENT : ScoreTextRenderer
 	 generic map (
@@ -180,7 +181,7 @@ begin
         green => ball_green,
         blue => ball_blue,
         render => player_render,
-        enabled => enabled and paused = '0'
+        enabled => player_enabled
     );
 
     LEVEL_ONE_COMPONENT : LevelOne port map (

@@ -158,13 +158,13 @@ begin
     PIPE_HEIGHT_RANDOMISER : process (vert_sync)
     begin
         if rising_edge(vert_sync) then
-            if level_two_enable = '1' then
+            if pipe_1_enabled_s = '1' then
                 pipe_1_reset <= '0';
                 if pipe_1_end_reached = '1' then
                     pipe_1_height <= to_integer(unsigned(lfsr_out)) * 280 / 256 + 100;
                     pipe_1_reset <= '1';
                 end if;
-            else
+            elsif (level_two_enable = '0') then
                 pipe_1_reset <= '1'; -- Reset the pipe when the level is not enabled
             end if;
         end if;
@@ -173,13 +173,13 @@ begin
     PIPE_2_HEIGHT_RANDOMISER : process (vert_sync)
     begin
         if rising_edge(vert_sync) then
-            if level_two_enable = '1' then
+            if pipe_2_enabled_s = '1' then
                 pipe_2_reset <= '0';
                 if (pipe_2_end_reached = '1' and pipe_1_x_pos_s = to_unsigned(320, 11)) then
                     pipe_2_height <= to_integer(unsigned(lfsr_out)) * 280 / 256 + 100;
                     pipe_2_reset <= '1';
                 end if;
-            else
+            elsif (level_two_enable = '0') then
                 pipe_2_reset <= '1'; -- Reset the pipe when the level is not enabled
             end if;
         end if;

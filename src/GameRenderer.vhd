@@ -130,8 +130,7 @@ architecture behavior of GameRenderer is
     signal last_vert_sync : std_logic := '0';
 
     -- Level Enables (Internal driving signals)
-    signal level_one_enable_s : std_logic := '1';
-    signal level_two_enable_s, level_three_enable_s, level_four_enable_s : std_logic := '0';
+    signal level_one_enable_s, level_two_enable_s, level_three_enable_s, level_four_enable_s : std_logic := '0';
 
     -- Background Values (Black)
     signal background_red, background_green, background_blue : std_logic_vector(3 downto 0) := "0000";
@@ -273,7 +272,7 @@ begin
                     red <= "1111";
 					green <= "0000";
 					blue <= "0000";
-                elsif obstacle_1_enabled = '1' then
+                elsif obstacle_1_render = '1' then
                     red <= obstacle_1_red;
 					green <= obstacle_1_green;
 					blue <= obstacle_1_blue;
@@ -281,7 +280,7 @@ begin
                     red <= powerup_red;
 					green <= powerup_green;
 					blue <= powerup_blue;
-                elsif obstacle_2_enabled = '1' then
+                elsif obstacle_2_render = '1' then
                     red <= obstacle_2_red;
 					green <= obstacle_2_green;
 					blue <= obstacle_2_blue;
@@ -302,6 +301,7 @@ begin
                         invincibility <= 300; -- gives 5 seconds of invincibility at 60fps
 								if score > 0 then
 									score <= score - 1; -- subtract score on collision
+								end if;
                     elsif invincibility > 0 then
                         invincibility <= invincibility - 1;
 
@@ -316,7 +316,7 @@ begin
 
                     -- Score increment: one point per pipe pass.
                     if (obstacle_1_x_pos < to_unsigned(50, 11) and obstacle_1_score_incremented = '0') then
-                        score <= score + 1;
+                        score <= score + 2;
                         obstacle_1_score_incremented <= '1';
                     elsif (obstacle_1_x_pos >= to_unsigned(50, 11)) then
                         obstacle_1_score_incremented <= '0';
@@ -355,7 +355,12 @@ begin
     LEVEL_SELECT : process (clk25Mhz)
     begin
         if rising_edge(clk25Mhz) then
-            if level_state = 1 then
+            if level_state = 0 then
+                level_one_enable_s   <= '0';
+                level_two_enable_s   <= '0';
+                level_three_enable_s <= '0';
+                level_four_enable_s  <= '0';
+            elsif level_state = 1 then
                 level_one_enable_s   <= '1';
                 level_two_enable_s   <= '0';
                 level_three_enable_s <= '0';

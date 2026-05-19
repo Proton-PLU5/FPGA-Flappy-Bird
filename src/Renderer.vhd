@@ -51,13 +51,15 @@ architecture behaviour of Renderer is
 
     signal play_state : std_logic := '0';
     signal title_state : std_logic := '1';
-    signal state : integer range 0 to 1 := 0; -- 0 for title, 1 for play
+    signal state : integer range 0 to 2 := 0; -- 0 for title, 1 for play, 2 for pause
 
     signal title_start_game : std_logic := '0';
     signal game_request_back : std_logic := '0';
-    
+
+    signal last_key_1_state : std_logic := '1';
+	 
     -- Level tracking signals
-    signal level_state_s : integer range 1 to 4 := 1;
+    signal level_state_s : integer range 0 to 4 := 0;
     signal current_game_score  : integer range 0 to 999 := 0;
 
     -- Dummy signals to map unused level enable outputs
@@ -104,35 +106,49 @@ begin
 
     -- Centralized Game State Machine (Screens & Game Levels)
 	 -- title_start_game and game_request_back take priority, then manual KEY overrides (KEY(2) -> play, KEY(3) -> title)
-    process(clk25Mhz)
-    begin
-        if rising_edge(clk25Mhz) then
-            -- Title to game routing logic
-            if title_start_game = '1' then
-                state <= 1; 
-                level_state_s <= 1; -- Reset game to Level 1 on new start
-            elsif game_request_back = '1' then
-                state <= 0; 
-            elsif KEY(2) = '0' then
-                state <= 1;
-                level_state_s <= 1;
-            elsif KEY(3) = '0' then
-                state <= 0;
-            end if;
+		process(clk25Mhz)
+		begin
+			 if rising_edge(clk25Mhz) then
+				  if title_start_game = '1' then
+						state <= 1; 
+						level_state_s <= 1; -- Reset game to Level 1 on new start
+				  elsif game_request_back = '1' then
+						state <= 0; 
+						level_state_s <= 0; --Pause game when returning to title
 
-            -- Level transition logic (Only updates if currently in the play state)
-            if state = 1 then
-                if current_game_score = 10 then
-                    level_state_s <= 2;
-                end if;
-            else
-                level_state_s <= 1;
-            end if;
-        end if;
-     end process;
+				  -- Manual key overrides
+				  elsif KEY(2) = '0' then    -- Manual play
+						state <= 1;
+						level_state_s <= 1;
+				  elsif KEY(3) = '0' then    -- Manual title
+						state <= 0;
+						level_state_s <= 0;
+				  elsif KEY(1) = '0' and last_key_1_state = '1' then    -- Manual pause
+						if state = 1 then
+							 state <= 2;        -- Capture the pause state flip
+						elsif state = 2 then
+							 state <= 1;        -- Unpause back to play state
+						end if;
+						
+				  -- Level transition logic (Only updates if currently in the play state)
+				  else
+						if state = 1 then
+							 if current_game_score >= 10 then
+								  level_state_s <= 2; -- Transition to Level 2
+							 else
+								  level_state_s <= 1; -- Stay on Level 1
+							 end if;
+						else
+							 level_state_s <= 0;
+						end if;
+				  end if;
+				  
+				  last_key_1_state <= KEY(1);
+			 end if;
+		end process;
 
     title_state <= '1' when state = 0 else '0';
-    play_state  <= '1' when state = 1 else '0';
+    play_state  <= '1' when state = 1 or state = 2 else '0';
 
     red   <= red_play   WHEN play_state = '1' ELSE red_title;
     green <= green_play WHEN play_state = '1' ELSE green_title;

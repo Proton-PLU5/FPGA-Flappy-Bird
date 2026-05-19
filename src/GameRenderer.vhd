@@ -147,6 +147,8 @@ architecture behavior of GameRenderer is
     
     -- TEMPORARY: For score changing
     signal mouse_down : std_logic := '0';
+	 
+	 signal player_enabled : std_logic;
 
 begin
     level_one_enable   <= level_one_enable_s;
@@ -154,7 +156,7 @@ begin
     level_three_enable <= level_three_enable_s;
     level_four_enable  <= level_four_enable_s;
     score_out          <= score; 
-    player_enabled     <= enabled and paused = '0';
+    player_enabled <= enabled and (not paused);
 
     SCORE_COMPONENT : ScoreTextRenderer
 	 generic map (

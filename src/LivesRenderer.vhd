@@ -6,10 +6,10 @@ USE  IEEE.STD_LOGIC_SIGNED.all;
 
 entity LivesRenderer is
     port (
-        clk: in std_logic;
+        clk, reset: in std_logic;
         pixel_row    : in std_logic_vector(9 downto 0);
         pixel_column : in std_logic_vector(9 downto 0);
-        collision_check : in std_logic;
+        collision_count : in integer range 0 to 3;
         red   : out std_logic_vector(3 downto 0);
         green : out std_logic_vector(3 downto 0);
         blue  : out std_logic_vector(3 downto 0);
@@ -47,10 +47,6 @@ architecture behavior of LivesRenderer is
     signal start_x3 : std_logic_vector(9 downto 0) := CONV_STD_LOGIC_VECTOR(90, 10);
     signal start_y3 : std_logic_vector(9 downto 0) := CONV_STD_LOGIC_VECTOR(10, 10);
     signal sprite_id3 : integer := 3;
-
-    signal life_lost1 : std_logic := '0';
-    signal life_lost2 : std_logic := '0';
-    signal life_lost3 : std_logic := '0';
 
     signal render1 : std_logic;
     signal render2 : std_logic;
@@ -141,20 +137,21 @@ begin
     COLLISION: process(clk)
     begin 
         if rising_edge(clk) then
-            if (collision_check = '1') then
-                if (life_lost1 = '0') then
-                    sprite_id1 <= 4; -- change to empty heart
-                    life_lost1 <= '1';
-                elsif (life_lost2 = '0' and life_lost1 = '1') then -- only lose life 2 if life 1 is already lost
-                    sprite_id2 <= 4; 
-                    life_lost2 <= '1';
-                elsif (life_lost3 = '0' and life_lost2 = '1') then
-                    sprite_id3 <= 4; 
-                    life_lost3 <= '1';
-                elsif (life_lost1 = '1' and life_lost2 = '1' and life_lost3 = '1') then -- set a flag when all lives lost
-                    no_lives_left <= '1';
-                end if;
+
+            if (collision_count = 0 or reset = '1') then
+                sprite_id1 <= 3; -- full heart
+                sprite_id2 <= 3; 
+                sprite_id3 <= 3;
+                no_lives_left <= '0';
+            elsif (collision_count = 1) then
+                sprite_id3 <= 4; -- empty heart
+            elsif (collision_count = 2) then
+                sprite_id2 <= 4;
+            elsif (collision_count = 3) then
+                sprite_id1 <= 4;
+                no_lives_left <= '1';
             end if;
+
         end if;
     end process;
 

@@ -2,7 +2,8 @@ library IEEE;
 use IEEE.STD_LOGIC_1164.all;
 use IEEE.NUMERIC_STD.all;
 
-entity Pipe is 
+--Placeholder to test level 2; This is just pipe but red
+entity Obstacle2 is 
     port (
         clk, vert_sync, mouse_left  : in std_logic;
         pixel_row, pixel_column     : in std_logic_vector(9 downto 0);
@@ -14,11 +15,11 @@ entity Pipe is
         x_pos                       : out unsigned(10 downto 0);
         enabled                     : out std_logic;
         render                      : out std_logic;
-        level_one_enable            : in std_logic
+        level_two_enable            : in std_logic
     );
-end entity Pipe;
+end entity Obstacle2;
 
-architecture behaviour of Pipe is
+architecture behaviour of Obstacle2 is
     signal render_out : std_logic;
     signal pipe_x_pos : unsigned(10 downto 0) := to_unsigned(640, 11); -- Start off-screen right
     signal pipe_top_y_pos : unsigned(9 downto 0);
@@ -38,7 +39,7 @@ begin
     PIPE_CONTROLLER : process (vert_sync)
     begin
         if rising_edge(vert_sync) then
-            if level_one_enable = '1' then
+            if level_two_enable = '1' then
                 if reset = '1' then
                     pipe_x_pos <= to_unsigned(640, 11); -- Reset to right edge
                     end_reached <= '0';
@@ -54,8 +55,8 @@ begin
 
 	 enabled <= render_out;
     render <= render_out;
-    red <= (others => '0');
-    green <= (others => '1');
+    red <= (others => '1');
+    green <= (others => '0');
     blue <= (others => '0');
     x_pos <= pipe_x_pos;
 end architecture behaviour;

@@ -228,6 +228,10 @@ begin
                     red <= ball_red;
                     green <= ball_green;
                     blue <= ball_blue;
+                elsif lives_enabled = '1' then
+                    red <= lives_red;
+                    green <= lives_green;
+                    blue <= lives_blue;
                 elsif score_enable = '1' then
                     red <= "1111";
                     green <= "0000";
@@ -240,10 +244,6 @@ begin
                     red <= pipe2_red;
                     green <= pipe2_green;
                     blue <= pipe2_blue;
-                elsif lives_enabled = '1' then
-                    red <= lives_red;
-                    green <= lives_green;
-                    blue <= lives_blue;
                 else
                     red <= background_red;
                     green <= background_green;

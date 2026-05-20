@@ -52,7 +52,9 @@ architecture behavior of LivesRenderer is
     signal life_lost2 : std_logic := '0';
     signal life_lost3 : std_logic := '0';
 
-    signal render : std_logic;
+    signal render1 : std_logic;
+    signal render2 : std_logic;
+    signal render3 : std_logic;
 
     signal red1, green1, blue1 : std_logic_vector(3 downto 0);
     signal red2, green2, blue2 : std_logic_vector(3 downto 0);
@@ -102,38 +104,39 @@ begin
         transparent => transparent3
     );
 
-    render <= '1' when (
-        (
-            ('0' & pixel_column >= '0' & start_x1) and
-            ('0' & pixel_column <  '0' & start_x1 + CONV_STD_LOGIC_VECTOR(32,10)) and
-            ('0' & pixel_row    >= '0' & start_y1) and
-            ('0' & pixel_row    <  '0' & start_y1 + CONV_STD_LOGIC_VECTOR(32,10)) -- LIFE1 render bounds
-        )
-
-        or
-        (
-            ('0' & pixel_column >= '0' & start_x2) and
-            ('0' & pixel_column <  '0' & start_x2 + CONV_STD_LOGIC_VECTOR(32,10)) and
-            ('0' & pixel_row    >= '0' & start_y2) and
-            ('0' & pixel_row    <  '0' & start_y2 + CONV_STD_LOGIC_VECTOR(32,10)) -- LIFE2 render bounds
-        )
-
-        or
-
-        (
-            ('0' & pixel_column >= '0' & start_x3) and
-            ('0' & pixel_column <  '0' & start_x3 + CONV_STD_LOGIC_VECTOR(32,10)) and
-            ('0' & pixel_row    >= '0' & start_y3) and
-            ('0' & pixel_row    <  '0' & start_y3 + CONV_STD_LOGIC_VECTOR(32,10)) -- LIFE3 render bounds
-        )
-
+    render1 <= '1' when (
+        ('0' & pixel_column >= '0' & start_x1) and
+        ('0' & pixel_column <  '0' & start_x1 + CONV_STD_LOGIC_VECTOR(32,10)) and
+        ('0' & pixel_row    >= '0' & start_y1) and
+        ('0' & pixel_row    <  '0' & start_y1 + CONV_STD_LOGIC_VECTOR(32,10)) -- LIFE1 render bounds
     ) else '0';
 
+    render2 <= '1' when (
+        ('0' & pixel_column >= '0' & start_x2) and
+        ('0' & pixel_column <  '0' & start_x2 + CONV_STD_LOGIC_VECTOR(32,10)) and
+        ('0' & pixel_row    >= '0' & start_y2) and
+        ('0' & pixel_row    <  '0' & start_y2 + CONV_STD_LOGIC_VECTOR(32,10)) -- LIFE2 render bounds
+    ) else '0';
+
+    render3 <= '1' when (
+        ('0' & pixel_column >= '0' & start_x3) and
+        ('0' & pixel_column <  '0' & start_x3 + CONV_STD_LOGIC_VECTOR(32,10)) and
+        ('0' & pixel_row    >= '0' & start_y3) and
+        ('0' & pixel_row    <  '0' & start_y3 + CONV_STD_LOGIC_VECTOR(32,10)) -- LIFE3 render bounds
+    ) else '0';
     
-    red <= red1 or red2 or red3;
-    green <= green1 or green2 or green3;
-    blue <= blue1 or blue2 or blue3;
-    transparent <= transparent1 or transparent2 or transparent3;
+    red <= red1 when render1 = '1' else
+           red2 when render2 = '1' else
+           red3 when render3 = '1' else
+           (others => '0');
+    green <= green1 when render1 = '1' else
+             green2 when render2 = '1' else
+             green3 when render3 = '1' else
+             (others => '0');
+    blue <= blue1 when render1 = '1' else
+            blue2 when render2 = '1' else
+            blue3 when render3 = '1' else
+            (others => '0');
 
     COLLISION: process(clk)
     begin 
@@ -142,19 +145,19 @@ begin
                 if (life_lost1 = '0') then
                     sprite_id1 <= 4; -- change to empty heart
                     life_lost1 <= '1';
-                elsif (life_lost2 = '0' and life_lost1 = '1') then
+                elsif (life_lost2 = '0' and life_lost1 = '1') then -- only lose life 2 if life 1 is already lost
                     sprite_id2 <= 4; 
                     life_lost2 <= '1';
                 elsif (life_lost3 = '0' and life_lost2 = '1') then
                     sprite_id3 <= 4; 
                     life_lost3 <= '1';
-                elsif (life_lost1 = '1' and life_lost2 = '1' and life_lost3 = '1') then
+                elsif (life_lost1 = '1' and life_lost2 = '1' and life_lost3 = '1') then -- set a flag when all lives lost
                     no_lives_left <= '1';
                 end if;
             end if;
         end if;
     end process;
 
-    enabled <= (render and not transparent1) or (render and not transparent2) or (render and not transparent3);
+    enabled <= (render1 and not transparent1) or (render2 and not transparent2) or (render3 and not transparent3);
 
 end architecture;

@@ -55,8 +55,6 @@ architecture behaviour of Renderer is
 
     signal title_start_game : std_logic := '0';
     signal game_request_back : std_logic := '0';
-
-    signal last_key_1_state : std_logic := '1';
 	 
     -- Level tracking signals
     signal level_state_s : integer range 0 to 4 := 0;
@@ -123,12 +121,6 @@ begin
 				  elsif KEY(3) = '0' then    -- Manual title
 						state <= 0;
 						level_state_s <= 0;
-				  elsif KEY(1) = '0' and last_key_1_state = '1' then    -- Manual pause
-						if state = 1 then
-							 state <= 2;        -- Capture the pause state flip
-						elsif state = 2 then
-							 state <= 1;        -- Unpause back to play state
-						end if;
 						
 				  -- Level transition logic (Only updates if currently in the play state)
 				  else
@@ -143,7 +135,6 @@ begin
 						end if;
 				  end if;
 				  
-				  last_key_1_state <= KEY(1);
 			 end if;
 		end process;
 

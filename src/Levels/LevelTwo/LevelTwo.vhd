@@ -24,7 +24,7 @@ entity LevelTwo is
 end entity LevelTwo;
 
 architecture behavior of LevelTwo is
-    component Obstacle2 is 
+    component OffsetPipe is 
         port (
             clk, vert_sync, mouse_left  : in std_logic;
             pixel_row, pixel_column     : in std_logic_vector(9 downto 0);
@@ -38,7 +38,7 @@ architecture behavior of LevelTwo is
             render                      : out std_logic;
             level_two_enable            : in std_logic
         );
-    end component Obstacle2;
+    end component OffsetPipe;
 
     component PowerUp is
         port (
@@ -93,7 +93,7 @@ architecture behavior of LevelTwo is
     signal lfsr_out      : std_logic_vector(7 downto 0);
 
 begin
-    PIPE_COMPONENT : Obstacle2 port map (
+    PIPE_COMPONENT : OffsetPipe port map (
         clk => clk25Mhz,
         vert_sync => vert_sync,
         mouse_left => mouse_left,
@@ -112,7 +112,7 @@ begin
         render => pipe_1_render_s
     );
 
-    PIPE2_COMPONENT : Obstacle2 port map (
+    PIPE2_COMPONENT : OffsetPipe port map (
         clk => clk25Mhz,
         vert_sync => vert_sync,
         mouse_left => mouse_left,

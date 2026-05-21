@@ -23,6 +23,9 @@ end entity LevelOne;
 
 architecture behavior of LevelOne is
     component Pipe is 
+        generic (
+            START_OFFSET : integer := 0
+        );
         port (
             clk, vert_sync, mouse_left  : in std_logic;
             pixel_row, pixel_column     : in std_logic_vector(9 downto 0);
@@ -74,7 +77,9 @@ begin
     pipe_1_enabled_s <= level_one_enable and not paused;
     pipe_2_enabled_s <= level_one_enable and not paused;
 
-    PIPE_COMPONENT : Pipe port map (
+    PIPE_COMPONENT : Pipe
+        generic map ( START_OFFSET => 0 )
+        port map (
         clk => clk25Mhz,
         vert_sync => vert_sync,
         mouse_left => mouse_left,
@@ -92,7 +97,9 @@ begin
         render => pipe_1_render_s
     );
 
-    PIPE2_COMPONENT : Pipe port map (
+    PIPE2_COMPONENT : Pipe
+        generic map ( START_OFFSET => 200 )
+        port map (
         clk => clk25Mhz,
         vert_sync => vert_sync,
         mouse_left => mouse_left,

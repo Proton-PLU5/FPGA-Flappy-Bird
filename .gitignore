@@ -6,3 +6,4 @@ cr_ie_info.json
 .qsys_edit/filters.xml
 .qsys_edit/preferences.xml
 emulator/*
+*.bak

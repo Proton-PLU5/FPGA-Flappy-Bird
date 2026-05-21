@@ -156,6 +156,7 @@ architecture behavior of GameRenderer is
     -- Background Values (Black)
     signal background_red, background_green, background_blue : std_logic_vector(3 downto 0) := "0000";
 
+    -- Score Values
     signal score_enable : std_logic := '0';
     signal score : integer range 0 to 999 := 0;
     
@@ -286,6 +287,17 @@ begin
         blue => lives_blue,
         enabled => lives_enabled,
         no_lives_left => no_lives_left
+    );
+
+    BOSS_COMPONENT : BossRenderer port map (
+        clk25Mhz => clk25Mhz,
+        vert_sync => vert_sync,
+        pixel_row => pixel_row,
+        pixel_column => pixel_column,
+        red => boss_red,
+        green => boss_green,
+        blue => boss_blue,
+        enabled => boss_enabled
     );
 
     -- Logic to determine output

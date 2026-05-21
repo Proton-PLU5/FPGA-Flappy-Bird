@@ -59,4 +59,10 @@ begin
         blue => sprite_blue,
         transparent => sprite_transparent
     );
+
+    -- Output if enabled and not transparent
+    red <= sprite_red
+    green <= sprite_green
+    blue <= sprite_blue
+    transparent <= sprite_transparent
 end architecture behaviour;

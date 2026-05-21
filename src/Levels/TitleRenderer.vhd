@@ -19,7 +19,6 @@ end entity TitleRenderer;
 
 architecture behaviour of TitleRenderer is
     component title_display is
-	 
 			generic (
 				text_string : string := "FLAPPY BOSS";
 				text_size : integer := 11;
@@ -36,6 +35,17 @@ architecture behaviour of TitleRenderer is
         );
     end component title_display;
 
+    component TileRenderer is
+        port (
+            clk, vert_sync, mouse_left  : in std_logic;
+            pixel_row, pixel_column     : in std_logic_vector(9 downto 0);
+            red, green, blue            : out std_logic_vector(3 downto 0);
+            reset                       : in std_logic;
+            enabled                     : in std_logic;
+            tile_id                     : in integer range 0 to 255
+        );
+    end component TileRenderer;
+
     signal main_title_enable : std_logic;
     signal sub_title_enable : std_logic;
     signal training_text_enable : std_logic;
@@ -47,6 +57,9 @@ architecture behaviour of TitleRenderer is
     signal selected_option : integer range 0 to 2 := 0; -- 0 for training, 1 for play, 2 for settings
     signal last_key_1_state : std_logic := '1';
     signal last_key_3_state : std_logic := '1';
+
+    -- Background tile
+    signal background_red, background_green, background_blue : std_logic_vector(3 downto 0);
 begin
     
     MAIN_TITLE : title_display port map (
@@ -108,6 +121,20 @@ begin
         text_row => selected_text_row,
         text_col_start => 252
     );
+
+    TILE_RENDERER : TileRenderer port map (
+        clk => clk25Mhz,
+        vert_sync => vert_sync,
+        mouse_left => mouse_left,
+        pixel_row => pixel_row,
+        pixel_column => pixel_column,
+        red => background_red,
+        green => background_green,
+        blue => background_blue,
+        reset => '0',
+        enabled => enabled,
+        tile_id => 5
+    );
 			
 
     -- Logic to determine output
@@ -156,9 +183,9 @@ begin
                     green <= "0000";
                     blue  <= "0000";
                 else
-                    red   <= "0000";
-                    green <= "0000";
-                    blue  <= "0000";
+                    red   <= background_red;
+                    green <= background_green;
+                    blue  <= background_blue;
                 end if;
             end if;
         end if;

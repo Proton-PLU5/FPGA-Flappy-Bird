@@ -107,34 +107,25 @@ begin
 		process(clk25Mhz)
 		begin
 			 if rising_edge(clk25Mhz) then
-				  if title_start_game = '1' then
-						state <= 1; 
-						level_state_s <= 1; -- Reset game to Level 1 on new start
-				  elsif game_request_back = '1' then
-						state <= 0; 
-						level_state_s <= 0; --Pause game when returning to title
-
-				  -- Manual key overrides
-				  elsif KEY(2) = '0' then    -- Manual play
-						state <= 1;
-						level_state_s <= 1;
-				  elsif KEY(3) = '0' then    -- Manual title
-						state <= 0;
-						level_state_s <= 0;
-						
-				  -- Level transition logic (Only updates if currently in the play state)
-				  else
-						if state = 1 then
-							 if current_game_score >= 10 then
-								  level_state_s <= 2; -- Transition to Level 2
-							 else
-								  level_state_s <= 1; -- Stay on Level 1
-							 end if;
-						else
-							 level_state_s <= 0;
-						end if;
-				  end if;
-				  
+                    if title_start_game = '1' then
+                        state <= 1; 
+                        level_state_s <= 1; -- Reset game to Level 1 on new start
+                    elsif game_request_back = '1' then
+                        state <= 0; 
+                        level_state_s <= 0; --Pause game when returning to title
+                            
+                    -- Level transition logic (Only updates if currently in the play state)
+                    else
+                        if state = 1 then
+                            if current_game_score >= 10 then
+                                level_state_s <= 2; -- Transition to Level 2
+                            else
+                                level_state_s <= 1; -- Stay on Level 1
+                            end if;
+                        else
+                            level_state_s <= 0;
+                        end if;
+                    end if;
 			 end if;
 		end process;
 

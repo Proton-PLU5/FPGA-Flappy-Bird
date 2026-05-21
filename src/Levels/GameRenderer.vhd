@@ -104,6 +104,7 @@ architecture behavior of GameRenderer is
     -- Game Logic Values
     signal paused : std_logic := '0';
     signal prev_paused : std_logic := '0';
+    signal prev_enabled : std_logic := '0';
 
     -- Collision values
     signal collision_pending : std_logic := '0';
@@ -397,22 +398,29 @@ begin
 
             -- Return handling (only when game is enabled to avoid conflicts with title menu)
             if enabled = '1' then
-                if KEY(3) = '0' and last_key_3_state = '1' then
-                    -- press edge: request back and record that key is down
-                    request_back <= '1';
-                    last_key_3_state <= '0';
-                elsif KEY(3) = '1' and last_key_3_state = '0' then
-                    -- release edge: clear request and restore last state
+                -- if we just entered enabled state, initialize last_key_3_state to current key
+                if prev_enabled = '0' then
+                    last_key_3_state <= KEY(3);
                     request_back <= '0';
-                    last_key_3_state <= '1';
                 else
-                    request_back <= '0';
+                    if KEY(3) = '0' and last_key_3_state = '1' then
+                        -- press edge: request back and record that key is down
+                        request_back <= '1';
+                        last_key_3_state <= '0';
+                    elsif KEY(3) = '1' and last_key_3_state = '0' then
+                        -- release edge: clear request and restore last state
+                        request_back <= '0';
+                        last_key_3_state <= '1';
+                    else
+                        request_back <= '0';
+                    end if;
                 end if;
             else
                 request_back <= '0';
             end if;
 
             last_vert_sync <= vert_sync;
+            prev_enabled <= enabled;
         end if;
     end process;
 

@@ -37,25 +37,27 @@ architecture behaviour of TileRenderer is
     constant TILE_W : integer := 64;
     constant TILE_H : integer := 64;
 
-    -- Local pixel offset within the current tile (0..63 for both x and y)
-    signal local_x : std_logic_vector(9 downto 0);
-    signal local_y : std_logic_vector(9 downto 0);
-begin
-    -- Compute the local offset within the tile (modulo operation)
-    local_x <= std_logic_vector(
-                    to_unsigned( to_integer(unsigned(pixel_column)) mod TILE_W, 10)
-                );
 
-    local_y <= std_logic_vector(
-                    to_unsigned( to_integer(unsigned(pixel_row)) mod TILE_H, 10)
-                );
+    signal tile_start_x : std_logic_vector(9 downto 0);
+    signal tile_start_y : std_logic_vector(9 downto 0);
+
+begin
+    -- Compute the tile origin (top-left corner) in screen coordinates so
+    -- SpriteRenderer can use it as the sprite's screen position.
+    tile_start_x <= std_logic_vector(
+                        to_unsigned( (to_integer(unsigned(pixel_column)) / TILE_W) * TILE_W, 10)
+                    );
+
+    tile_start_y <= std_logic_vector(
+                        to_unsigned( (to_integer(unsigned(pixel_row)) / TILE_H) * TILE_H, 10)
+                    );
 
     SPRITE_RENDERER : SpriteRenderer port map (
         clk => clk,
         pixel_row => pixel_row,
         pixel_column => pixel_column,
-        start_x => local_x,    -- Pass local offset within tile (0..63)
-        start_y => local_y,    -- Pass local offset within tile (0..63)
+        start_x => tile_start_x,
+        start_y => tile_start_y,
         sprite_id => tile_id,  -- Use the provided tile_id
         red => sprite_red,
         green => sprite_green,

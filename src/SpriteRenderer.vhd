@@ -69,6 +69,12 @@ begin
                 when 2 =>
                     width := FLAPPY_BIRD_WIDTH;
                     height := FLAPPY_BIRD_HEIGHT;
+                when 3 =>
+                    width := FULL_HEART_WIDTH;
+                    height := FULL_HEART_HEIGHT;
+                when 4 =>
+                    width := EMPTY_HEART_WIDTH;
+                    height := EMPTY_HEART_HEIGHT;
                 when others =>
                     width := SKELETRON_HEAD_WIDTH;
                     height := SKELETRON_HEAD_HEIGHT;
@@ -101,6 +107,12 @@ begin
                     when 2 =>
                         palette_index := FLAPPY_BIRD_DATA(addr);
                         color := FLAPPY_BIRD_PALETTE(palette_index);
+                    when 3 =>
+                        palette_index := FULL_HEART_DATA(addr);
+                        color := FULL_HEART_PALETTE(palette_index);
+                    when 4 =>
+                        palette_index := EMPTY_HEART_DATA(addr);
+                        color := EMPTY_HEART_PALETTE(palette_index);
                     when others =>
                         palette_index := SKELETRON_HEAD_DATA(addr);
                         color := SKELETRON_HEAD_PALETTE(palette_index);

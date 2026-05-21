@@ -83,9 +83,24 @@ architecture behavior of GameRenderer is
             pipe_1_render, pipe_2_render : OUT std_logic        
         );
     end component LevelTwo;
+
+    component LivesRenderer is
+        port (
+            clk, reset: in std_logic;
+            pixel_row    : in std_logic_vector(9 downto 0);
+            pixel_column : in std_logic_vector(9 downto 0);
+            collision_count : in integer range 0 to 3;
+            red   : out std_logic_vector(3 downto 0);
+            green : out std_logic_vector(3 downto 0);
+            blue  : out std_logic_vector(3 downto 0);
+            enabled : out std_logic;
+            no_lives_left : out std_logic
+        );
+    end component LivesRenderer;
      
     -- Collision values
     signal collision_pending : std_logic := '0';
+    signal collision_count : integer range 0 to 3 := 0; -- counts number of collisions for life rendering
 
     -- Ball Values
     signal ball_enabled : std_logic := '0';
@@ -125,6 +140,12 @@ architecture behavior of GameRenderer is
     -- Power Up outputs
     signal powerup_enabled : std_logic;
     signal powerup_red, powerup_green, powerup_blue : std_logic_vector(3 downto 0);
+
+    -- Lives Values
+    signal lives_red, lives_green, lives_blue : std_logic_vector(3 downto 0);
+    signal lives_enabled : std_logic := '0';
+    signal lives_reset : std_logic := '0';
+    signal no_lives_left : std_logic;
 
     signal last_key_3_state : std_logic := '1';
     signal last_vert_sync : std_logic := '0';
@@ -173,7 +194,7 @@ begin
         green => ball_green,
         blue => ball_blue,
         enabled => ball_enabled
-    );
+    ); 
 
     LEVEL_ONE_COMPONENT : LevelOne port map (
         clk25Mhz => clk25Mhz,
@@ -254,6 +275,19 @@ begin
     obstacle_2_render     <= level_one_2_render when level_state = 1 else
                           level_two_2_render when level_state = 2 else '0';
 
+    LIVES_COMPONENT : LivesRenderer port map (
+        clk => clk25Mhz,
+        reset => lives_reset,
+        pixel_row => pixel_row,
+        pixel_column => pixel_column,
+        collision_count => collision_count,
+        red => lives_red,
+        green => lives_green,
+        blue => lives_blue,
+        enabled => lives_enabled,
+        no_lives_left => no_lives_left
+    );
+
     -- Logic to determine output
     process (clk25Mhz)
     begin
@@ -272,6 +306,10 @@ begin
                     red <= "1111";
 					green <= "0000";
 					blue <= "0000";
+                elsif lives_enabled = '1' then
+                    red <= lives_red;
+                    green <= lives_green;
+                    blue <= lives_blue;
                 elsif obstacle_1_render = '1' then
                     red <= obstacle_1_red;
 					green <= obstacle_1_green;
@@ -299,8 +337,11 @@ begin
                 if vert_sync = '1' and last_vert_sync = '0' then
                     if collision_pending = '1' and invincibility = 0 then
                         invincibility <= 300; -- gives 5 seconds of invincibility at 60fps
-								if score > 0 then
-									score <= score - 1; -- subtract score on collision
+								if no_lives_left = '0' then
+									collision_count <= collision_count + 1; -- add to counter of collisions
+                                else
+                                    collision_count <= 0; -- reset collision count if no lives left
+                                    -- GAME OVER CONDITION HERE :)
 								end if;
                     elsif invincibility > 0 then
                         invincibility <= invincibility - 1;

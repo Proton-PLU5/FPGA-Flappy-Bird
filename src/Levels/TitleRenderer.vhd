@@ -155,21 +155,24 @@ begin
                             selected_option <= 0;
                             selected_text_row <= 260;
                     end case;
-                end if;
-                last_key_1_state <= KEY(1);
 
-                -- start button (KEY(3)) edge detect: assert only on press-edge when PLAY selected
+                    last_key_1_state <= '0';
+                elsif KEY(1) = '1' and last_key_1_state = '0' then
+                    last_key_1_state <= '1';
+                end if;
+
+                -- start button
                 if KEY(3) = '0' and last_key_3_state = '1' then
                     if selected_option = 1 then
                         start_game <= '1';
                     else
                         start_game <= '0';
                     end if;
+                    last_key_3_state <= '0';
                 elsif KEY(3) = '1' and last_key_3_state = '0' then
-                    -- on release, de-assert start_game
                     start_game <= '0';
+                    last_key_3_state <= '1';
                 end if;
-                last_key_3_state <= KEY(3);
 
                 -- color logic can stay here (it will be updated each clock)
                 if (sub_title_enable = '1' or training_text_enable = '1'

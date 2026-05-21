@@ -302,17 +302,6 @@ begin
         no_lives_left => no_lives_left
     );
 
-    BOSS_COMPONENT : BossRenderer port map (
-        clk25Mhz => clk25Mhz,
-        vert_sync => vert_sync,
-        pixel_row => pixel_row,
-        pixel_column => pixel_column,
-        red => boss_red,
-        green => boss_green,
-        blue => boss_blue,
-        enabled => boss_enabled
-    );
-
     -- Logic to determine output
     process (clk25Mhz)
     begin

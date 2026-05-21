@@ -11,6 +11,7 @@ entity LevelOne is
 		KEY : IN std_logic_vector(3 DOWNTO 0);
         level_one_enable : IN std_logic;
         pixel_row, pixel_column	: IN std_logic_vector(9 DOWNTO 0);
+        paused : IN std_logic;
         pipe_1_enabled, pipe_2_enabled : OUT std_logic;
         pipe_1_red, pipe_1_green, pipe_1_blue : OUT std_logic_vector(3 downto 0);
         pipe_2_red, pipe_2_green, pipe_2_blue : OUT std_logic_vector(3 downto 0);
@@ -31,9 +32,8 @@ architecture behavior of LevelOne is
             reset                       : in std_logic;
             end_reached                 : out std_logic;
             x_pos                       : out unsigned(10 downto 0);
-            enabled                     : out std_logic;
-            render                      : out std_logic;
-            level_one_enable            : in std_logic
+            enabled                     : in std_logic;
+            render                      : out std_logic
         );
     end component Pipe;
 
@@ -71,6 +71,9 @@ architecture behavior of LevelOne is
     signal lfsr_out      : std_logic_vector(7 downto 0);
 
 begin
+    pipe_1_enabled_s <= level_one_enable and not paused;
+    pipe_2_enabled_s <= level_one_enable and not paused;
+
     PIPE_COMPONENT : Pipe port map (
         clk => clk25Mhz,
         vert_sync => vert_sync,
@@ -83,7 +86,6 @@ begin
         height => pipe_1_height,
         gap => 100,
         reset => pipe_1_reset,
-        level_one_enable => level_one_enable,
         end_reached => pipe_1_end_reached,
         enabled => pipe_1_enabled_s,
         x_pos => pipe_1_x_pos_s,
@@ -102,7 +104,6 @@ begin
         height => pipe_2_height,
         gap => 150,
         reset => pipe_2_reset,
-		level_one_enable => level_one_enable,
         end_reached => pipe_2_end_reached,
         enabled => pipe_2_enabled_s,
         x_pos => pipe_2_x_pos_s,
@@ -125,6 +126,8 @@ begin
                     pipe_1_height <= to_integer(unsigned(lfsr_out)) * 280 / 256 + 100;
                     pipe_1_reset <= '1';
                 end if;
+            elsif (level_one_enable = '0') then
+                pipe_1_reset <= '1'; -- Reset the pipe when the level is not enabled
             end if;
         end if;
     end process PIPE_HEIGHT_RANDOMISER;
@@ -138,6 +141,8 @@ begin
                     pipe_2_height <= to_integer(unsigned(lfsr_out)) * 280 / 256 + 100;
                     pipe_2_reset <= '1';
                 end if;
+            elsif (level_one_enable = '0') then
+                pipe_2_reset <= '1'; -- Reset the pipe when the level is not enabled
             end if;
         end if;
     end process PIPE_2_HEIGHT_RANDOMISER;

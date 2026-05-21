@@ -26,6 +26,9 @@ end entity LevelTwo;
 
 architecture behavior of LevelTwo is
     component OffsetPipe is 
+        generic (
+            START_OFFSET : integer := 0
+        );
         port (
             clk, vert_sync, mouse_left  : in std_logic;
             pixel_row, pixel_column     : in std_logic_vector(9 downto 0);
@@ -99,7 +102,9 @@ begin
     pipe_1_enabled_s <= level_two_enable and not paused;
     pipe_2_enabled_s <= level_two_enable and not paused;
 
-    PIPE_COMPONENT : OffsetPipe port map (
+    PIPE_COMPONENT : OffsetPipe
+        generic map ( START_OFFSET => 0 )
+        port map (
         clk => clk25Mhz,
         vert_sync => vert_sync,
         mouse_left => mouse_left,
@@ -118,7 +123,9 @@ begin
         part_to_render => pipe_1_part_to_render
     );
 
-    PIPE2_COMPONENT : OffsetPipe port map (
+    PIPE2_COMPONENT : OffsetPipe
+        generic map ( START_OFFSET => 200 )
+        port map (
         clk => clk25Mhz,
         vert_sync => vert_sync,
         mouse_left => mouse_left,

@@ -4,6 +4,9 @@ use IEEE.NUMERIC_STD.all;
 
 --Placeholder to test level 2; This is just pipe but red
 entity OffsetPipe is 
+    generic (
+        START_OFFSET : integer := 0
+    );
     port (
         clk, vert_sync, mouse_left  : in std_logic;
         pixel_row, pixel_column     : in std_logic_vector(9 downto 0);
@@ -15,13 +18,13 @@ entity OffsetPipe is
         x_pos                       : out unsigned(10 downto 0);
         enabled                     : in std_logic;
         render                      : out std_logic;
-        part_to_render              : in std_logic 
+        part_to_render              : in std_logic
     );
 end entity OffsetPipe;
 
 architecture behaviour of OffsetPipe is
     signal render_out : std_logic;
-    signal pipe_x_pos : unsigned(10 downto 0) := to_unsigned(640, 11); -- Start off-screen right
+    signal pipe_x_pos : unsigned(10 downto 0) := to_unsigned(640 + START_OFFSET, 11); -- Start off-screen right
     signal pipe_top_y_pos : unsigned(9 downto 0);
     signal pipe_bottom_y_pos : unsigned(9 downto 0);
     signal pipe_width : unsigned(9 downto 0) := to_unsigned(25,10);
@@ -38,25 +41,33 @@ begin
     PIPE_CONTROLLER : process (vert_sync)
     begin
         if rising_edge(vert_sync) then
+            -- handle reset unconditionally so it works even when menu/paused
             if reset = '1' then
                 end_reached <= '0';
-                pipe_x_pos <= to_unsigned(640, 11);
+
+                -- Reset pipe positions
+                pipe_x_pos <= to_unsigned(640 + START_OFFSET, 11);
                 pipe_top_y_pos <= to_unsigned(height, 10) - to_unsigned(gap/2, 10);
                 pipe_bottom_y_pos <= to_unsigned(height, 10) + to_unsigned(gap/2, 10);
+
             elsif enabled = '1' then
                 if pipe_x_pos <= to_unsigned(0, 11) then
                     end_reached <= '1';
+                    pipe_x_pos <= to_unsigned(640 + START_OFFSET, 11); -- respawn immediately
                 else
                     pipe_x_pos <= pipe_x_pos - to_unsigned(2, 11);
                     end_reached <= '0';
-
+                    
+                    -- The "Jump" logic: only apply while enabled and as it approaches
                     if pipe_x_pos <= to_unsigned(50, 11) then
-                        pipe_top_y_pos <= pipe_top_y_pos - to_unsigned(40, 10);
-                        pipe_bottom_y_pos <= pipe_bottom_y_pos - to_unsigned(40, 10);
+                        pipe_top_y_pos <= pipe_top_y_pos - to_unsigned(40, 10);  -- Push up by 40 pixels
+                        pipe_bottom_y_pos <= pipe_bottom_y_pos - to_unsigned(40, 10);  -- Adjust bottom position accordingly
                     end if;
                 end if;
+
             else
-                end_reached <= '0';
+                -- paused/title: freeze position
+                null;
             end if;
         end if;
     end process PIPE_CONTROLLER;

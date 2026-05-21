@@ -395,15 +395,24 @@ begin
                 
             end if;
 
-            -- Return handling 
-            if KEY(3) = '0' and last_key_3_state = '1' then
-                request_back <= '1';
+            -- Return handling (only when game is enabled to avoid conflicts with title menu)
+            if enabled = '1' then
+                if KEY(3) = '0' and last_key_3_state = '1' then
+                    -- press edge: request back and record that key is down
+                    request_back <= '1';
+                    last_key_3_state <= '0';
+                elsif KEY(3) = '1' and last_key_3_state = '0' then
+                    -- release edge: clear request and restore last state
+                    request_back <= '0';
+                    last_key_3_state <= '1';
+                else
+                    request_back <= '0';
+                end if;
             else
                 request_back <= '0';
             end if;
 
             last_vert_sync <= vert_sync;
-            last_key_3_state <= KEY(3);
         end if;
     end process;
 

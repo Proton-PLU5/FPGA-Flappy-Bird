@@ -115,15 +115,9 @@ begin
                         level_state_s <= 0; --Pause game when returning to title
                             
                     -- Level transition logic (Only updates if currently in the play state)
-                    else
-                        if state = 1 then
-                            if current_game_score >= 10 then
-                                level_state_s <= 2; -- Transition to Level 2
-                            else
-                                level_state_s <= 1; -- Stay on Level 1
-                            end if;
-                        else
-                            level_state_s <= 0;
+                    elsif state = 1 and level_state_s = 1 then
+                        if current_game_score >= 10 then
+                            level_state_s <= 2; -- Transition to Level 2 (once set, stays at 2)
                         end if;
                     end if;
 			 end if;

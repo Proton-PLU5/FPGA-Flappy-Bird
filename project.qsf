@@ -464,6 +464,15 @@ set_location_assignment PIN_C9 -to VGA_R[2]
 set_location_assignment PIN_A5 -to VGA_R[3]
 set_location_assignment PIN_G8 -to VGA_VS
 set_global_assignment -name VHDL_FILE src/Boss/BossRenderer.vhd
+set_global_assignment -name VHDL_FILE src/LivesRenderer.vhd
+set_global_assignment -name VHDL_FILE src/vgatest.vhd
+set_global_assignment -name VHDL_FILE src/clicked_bouncy_ball.vhd
+set_global_assignment -name VHDL_FILE src/bouncy_ball.vhd
+set_global_assignment -name VHDL_FILE src/ball.vhd
+set_global_assignment -name VHDL_FILE src/PowerUp.vhd
+set_global_assignment -name VHDL_FILE src/Obstacle2.vhd
+set_global_assignment -name VHDL_FILE src/LevelTwo.vhd
+set_global_assignment -name VHDL_FILE src/LevelOne.vhd
 set_global_assignment -name VHDL_FILE src/ScoreComponent.vhd
 set_global_assignment -name VHDL_FILE src/BCD_Counter.vhd
 set_global_assignment -name VHDL_FILE src/SpriteRenderer.vhd

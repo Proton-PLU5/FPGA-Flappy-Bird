@@ -188,7 +188,8 @@ begin
         if rising_edge(vert_sync) then
             if pipe_2_enabled_s = '1' then
                 pipe_2_reset <= '0';
-                if (pipe_2_end_reached = '1' and pipe_1_x_pos_s = to_unsigned(320, 11)) then
+                -- Spawn pipe_2 when pipe_1 reaches mid-screen (consistent 320px spacing = 1/2 screen width)
+                if (pipe_2_end_reached = '1' and pipe_1_x_pos_s <= to_unsigned(320, 11)) then
                     pipe_2_height <= to_integer(unsigned(lfsr_out)) * 280 / 256 + 100;
                     pipe_2_reset <= '1';
 

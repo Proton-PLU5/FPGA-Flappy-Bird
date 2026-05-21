@@ -463,6 +463,7 @@ set_location_assignment PIN_B10 -to VGA_R[1]
 set_location_assignment PIN_C9 -to VGA_R[2]
 set_location_assignment PIN_A5 -to VGA_R[3]
 set_location_assignment PIN_G8 -to VGA_VS
+set_global_assignment -name VHDL_FILE src/Utilities/TileRenderer.vhd
 set_global_assignment -name VHDL_FILE utils/outputs/sprite_data_pkg.vhd
 set_global_assignment -name VHDL_FILE src/Unused/vgatest.vhd
 set_global_assignment -name VHDL_FILE src/Unused/clicked_bouncy_ball.vhd

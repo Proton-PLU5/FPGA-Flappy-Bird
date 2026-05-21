@@ -42,7 +42,8 @@ architecture behaviour of TitleRenderer is
             red, green, blue            : out std_logic_vector(3 downto 0);
             reset                       : in std_logic;
             enabled                     : in std_logic;
-            tile_id                     : in integer range 0 to 255
+            tile_id                     : in integer range 0 to 255;
+				transparent : out std_logic
         );
     end component TileRenderer;
 
@@ -133,7 +134,8 @@ begin
         blue => background_blue,
         reset => '0',
         enabled => enabled,
-        tile_id => 5
+        tile_id => 5,
+		  transparent => open
     );
 			
 

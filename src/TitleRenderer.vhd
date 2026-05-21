@@ -115,30 +115,33 @@ begin
     begin
         if rising_edge(clk25Mhz) then
             if enabled = '1' then
+                -- navigation button using KEY1 
                 if KEY(1) = '0' and last_key_1_state = '1' then
                     case selected_option is
-                    when 0 =>
-                        selected_option <= 1;
-                        selected_text_row <= 300;
-                    when 1 =>
-                        selected_option <= 2;
-                        selected_text_row <= 340;
-                    when others =>
-                        selected_option <= 0;
-                        selected_text_row <= 260;
+                        when 0 =>
+                            selected_option <= 1;
+                            selected_text_row <= 300;
+                        when 1 =>
+                            selected_option <= 2;
+                            selected_text_row <= 340;
+                        when others =>
+                            selected_option <= 0;
+                            selected_text_row <= 260;
                     end case;
                 end if;
-                -- update previous-key snapshot
                 last_key_1_state <= KEY(1);
-            
-                -- Goto play mode if KEY(3) is pressed while "PLAY MODE" is selected
-                if KEY(3) = '0' and last_key_3_state = '1' and selected_option = 1 then
-                    start_game <= '1';
-                else
+
+                -- start button (KEY(3)) edge detect: assert only on press-edge when PLAY selected
+                if KEY(3) = '0' and last_key_3_state = '1' then
+                    if selected_option = 1 then
+                        start_game <= '1';
+                    else
+                        start_game <= '0';
+                    end if;
+                elsif KEY(3) = '1' and last_key_3_state = '0' then
+                    -- on release, de-assert start_game
                     start_game <= '0';
                 end if;
-
-                -- update previous-key snapshot for KEY(3)
                 last_key_3_state <= KEY(3);
 
                 -- color logic can stay here (it will be updated each clock)

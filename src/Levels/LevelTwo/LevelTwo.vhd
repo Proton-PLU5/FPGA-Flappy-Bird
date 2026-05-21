@@ -36,7 +36,8 @@ architecture behavior of LevelTwo is
             end_reached                 : out std_logic;
             x_pos                       : out unsigned(10 downto 0);
             enabled                     : in std_logic;
-            render                      : out std_logic
+            render                      : out std_logic;
+            part_to_render              : in std_logic
         );
     end component OffsetPipe;
 
@@ -69,7 +70,8 @@ architecture behavior of LevelTwo is
     signal pipe_1_red_s, pipe_1_green_s, pipe_1_blue_s : std_logic_vector(3 downto 0);
     signal pipe_1_reset : std_logic := '0';
     signal pipe_1_height   : integer range 0 to 480 := 240;
-
+    signal pipe_1_part_to_render : std_logic := '0'; 
+    
     -- Pipe 2 Values
     signal pipe_2_enabled_s : std_logic := '0';
     signal pipe_2_end_reached : std_logic;
@@ -77,6 +79,7 @@ architecture behavior of LevelTwo is
     signal pipe_2_red_s, pipe_2_green_s, pipe_2_blue_s : std_logic_vector(3 downto 0);
     signal pipe_2_reset : std_logic := '0';
     signal pipe_2_height   : integer range 0 to 480 := 240;
+    signal pipe_2_part_to_render : std_logic := '0'; 
 
     signal powerup_enabled_s : std_logic := '0';
     signal powerup_red_s, powerup_green_s, powerup_blue_s : std_logic_vector(3 downto 0);
@@ -111,7 +114,8 @@ begin
         end_reached => pipe_1_end_reached,
         enabled => pipe_1_enabled_s,
         x_pos => pipe_1_x_pos_s,
-        render => pipe_1_render_s
+        render => pipe_1_render_s,
+        part_to_render => pipe_1_part_to_render
     );
 
     PIPE2_COMPONENT : OffsetPipe port map (
@@ -129,7 +133,8 @@ begin
         end_reached => pipe_2_end_reached,
         enabled => pipe_2_enabled_s,
         x_pos => pipe_2_x_pos_s,
-        render => pipe_2_render_s
+        render => pipe_2_render_s,
+        part_to_render => pipe_2_part_to_render
     );
 
     LFSR_COMPONENT : LFSR port map (
@@ -163,6 +168,7 @@ begin
                 if pipe_1_end_reached = '1' then
                     pipe_1_height <= to_integer(unsigned(lfsr_out)) * 280 / 256 + 100;
                     pipe_1_reset <= '1';
+
                 end if;
             elsif (level_two_enable = '0') then
                 pipe_1_reset <= '1'; -- Reset the pipe when the level is not enabled
@@ -178,6 +184,14 @@ begin
                 if (pipe_2_end_reached = '1' and pipe_1_x_pos_s = to_unsigned(320, 11)) then
                     pipe_2_height <= to_integer(unsigned(lfsr_out)) * 280 / 256 + 100;
                     pipe_2_reset <= '1';
+
+                    -- Radomly decide which part of the pipe to render
+                    -- 50/50 chance, so if LSFR output is less than 1/2 of its max value, render top part, otherwise render bottom part
+                    if unsigned(lfsr_out) < 128 then
+                        pipe_2_part_to_render <= '0'; -- Render top part
+                    else
+                        pipe_2_part_to_render <= '1'; -- Render bottom part
+                    end if;
                 end if;
             elsif (level_two_enable = '0') then
                 pipe_2_reset <= '1'; -- Reset the pipe when the level is not enabled

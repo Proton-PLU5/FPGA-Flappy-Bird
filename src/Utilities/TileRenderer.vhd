@@ -33,8 +33,8 @@ architecture behaviour of TileRenderer is
     signal sprite_transparent : std_logic;
 
     -- Tile metadata
-    constant TILE_W : integer := 16;
-    constant TILE_H : integer := 16;
+    constant TILE_W : integer := 64;
+    constant TILE_H : integer := 64;
 
     signal tile_start_x : std_logic_vector(9 downto 0);
     signal tile_start_y : std_logic_vector(9 downto 0);

@@ -101,7 +101,7 @@ architecture behavior of LevelTwo is
 
 begin
     pipe_1_enabled_s <= level_two_enable and not paused;
-    pipe_2_enabled_s <= level_two_enable and not paused;
+    pipe_2_enabled_s <= level_two_enable and not paused and pipe_1_x_pos_s = to_unsigned(320, 11); -- Spawn pipe 2 when pipe 1 reaches mid-screen
 
     PIPE_COMPONENT : OffsetPipe
         generic map ( START_OFFSET => 0 )

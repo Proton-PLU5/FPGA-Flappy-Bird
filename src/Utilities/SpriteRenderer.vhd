@@ -78,6 +78,9 @@ begin
                 when 5 =>
                     width := BLUE_BRICK_TILE_WIDTH;
                     height := BLUE_BRICK_TILE_HEIGHT;
+                when 6 =>
+                    width := L3SKULL_WIDTH;
+                    height := L3SKULL_HEIGHT;
                 when others =>
                     width := SKELETRON_HEAD_WIDTH;
                     height := SKELETRON_HEAD_HEIGHT;
@@ -119,6 +122,9 @@ begin
                     when 5 =>
                         palette_index := BLUE_BRICK_TILE_DATA(addr);
                         color := BLUE_BRICK_TILE_PALETTE(palette_index);
+                    when 6 =>
+                        palette_index := L3SKULL_DATA(addr);
+                        color := L3SKULL_PALETTE(palette_index);
                     when others =>
                         palette_index := SKELETRON_HEAD_DATA(addr);
                         color := SKELETRON_HEAD_PALETTE(palette_index);

@@ -14,7 +14,8 @@ entity GameRenderer is
         request_back : OUT std_logic;
         enabled : IN std_logic;
         game_over : OUT std_logic;
-        score_out   : OUT integer range 0 to 999
+        score_out   : OUT integer range 0 to 999;
+        powerup_out : OUT integer
     );
 end entity GameRenderer;
 
@@ -88,6 +89,27 @@ architecture behavior of GameRenderer is
         );
     end component LevelTwo;
 
+    component LevelThree is
+        port (
+            clk25Mhz : IN std_logic;
+            mouse_left : IN std_logic;
+            vert_sync : IN std_logic;
+            SW : IN std_logic_vector(9 downto 0);
+            KEY : IN std_logic_vector(3 DOWNTO 0);
+            level_three_enable : IN std_logic := '0';
+            pixel_row, pixel_column	: IN std_logic_vector(9 DOWNTO 0);
+            paused : IN std_logic;
+            skull_1_enabled : OUT std_logic;
+            skull_1_red, skull_1_green, skull_1_blue : OUT std_logic_vector(3 downto 0);
+            skull_1_x_pos : OUT unsigned(10 downto 0);
+            powerup_render : OUT std_logic;
+            powerup_red, powerup_green, powerup_blue : OUT std_logic_vector(3 downto 0);
+            powerup_collect : IN std_logic;
+            powerup_count : OUT integer;
+            skull_1_render : OUT std_logic  
+        );
+    end component LevelThree;
+
     component LivesRenderer is
         port (
             clk, reset: in std_logic;
@@ -108,9 +130,11 @@ architecture behavior of GameRenderer is
     signal prev_enabled : std_logic := '0';
 
     -- Collision values
-    signal collision_pending : std_logic := '0';
+    signal obstacle_collision_pending : std_logic := '0';
     signal collision_count : integer range 0 to 3 := 0; -- counts number of collisions for life rendering
     signal game_over_s : std_logic := '0'; -- internal signal to track game over state
+    signal powerup_collision_pending : std_logic := '0';
+    signal powerup_collected : std_logic := '0';
 
     -- Ball Values
     signal player_render : std_logic := '0';
@@ -147,9 +171,23 @@ architecture behavior of GameRenderer is
     signal level_two_1_x_pos, level_two_2_x_pos : unsigned(10 downto 0);
 	signal level_two_1_render, level_two_2_render : std_logic;
 
+    -- Level Three outputs
+    signal level_three_1_enabled, level_three_2_enabled : std_logic;
+    signal level_three_1_red, level_three_1_green, level_three_1_blue : std_logic_vector(3 downto 0);
+    signal level_three_2_red, level_three_2_green, level_three_2_blue : std_logic_vector(3 downto 0);
+    signal level_three_1_x_pos, level_three_2_x_pos : unsigned(10 downto 0);
+    signal level_three_1_render, level_three_2_render : std_logic;
+
     -- Power Up outputs
-    signal powerup_enabled : std_logic;
-    signal powerup_red, powerup_green, powerup_blue : std_logic_vector(3 downto 0);
+    signal level_two_powerup_render : std_logic := '0';
+    signal level_two_powerup_red, level_two_powerup_green, level_two_powerup_blue : std_logic_vector(3 downto 0);
+    signal level_two_powerup_count : integer := 0;
+    signal level_two_powerup_collect_s : std_logic := '0';
+
+    signal level_three_powerup_render : std_logic := '0';
+    signal level_three_powerup_red, level_three_powerup_green, level_three_powerup_blue : std_logic_vector(3 downto 0);
+    signal level_three_powerup_count : integer := 0;
+    signal level_three_powerup_collect_s : std_logic := '0';
 
     -- Lives Values
     signal lives_red, lives_green, lives_blue : std_logic_vector(3 downto 0);
@@ -264,34 +302,84 @@ begin
         player_y_pos => player_y_pos
     );
 
+     LEVEL_THREE_COMPONENT : LevelThree port map (
+        clk25Mhz => clk25Mhz,
+        mouse_left => mouse_left,
+        vert_sync => vert_sync,
+        SW => SW,
+        KEY => KEY,
+        level_three_enable => level_three_enabled,
+        pixel_row => pixel_row,
+        pixel_column => pixel_column,
+        skull_1_red => level_three_1_red,
+        skull_1_green => level_three_1_green,
+        skull_1_blue => level_three_1_blue,
+        skull_1_enabled => level_three_1_enabled,
+        skull_1_x_pos => level_three_1_x_pos,
+        powerup_render => level_two_powerup_render,
+        powerup_red => level_two_powerup_red,
+ 		powerup_green => level_two_powerup_green,
+ 		powerup_blue => level_two_powerup_blue,
+        powerup_collect => level_two_powerup_collect_s,
+        powerup_count => level_two_powerup_count,
+        skull_1_render => level_three_1_render,
+        paused => paused
+    );
+
     -- Multiplexer
     obstacle_1_enabled  <= level_one_1_enabled when level_state = 1 else
-                          level_two_1_enabled when level_state = 2 else '0';
+                           level_two_1_enabled when level_state = 2 else
+                           level_three_1_enabled when level_state = 3 else '0';
     obstacle_1_red      <= level_one_1_red when level_state = 1 else
-                          level_two_1_red when level_state = 2 else "0000";
+                           level_two_1_red when level_state = 2 else 
+                           level_three_1_red when level_state = 3 else "0000";
     obstacle_1_green    <= level_one_1_green when level_state = 1 else
-                          level_two_1_green when level_state = 2 else "0000";
+                           level_two_1_green when level_state = 2 else
+                           level_three_1_green when level_state = 3 else "0000";
     obstacle_1_blue     <= level_one_1_blue when level_state = 1 else
-                          level_two_1_blue when level_state = 2 else "0000";
+                           level_two_1_blue when level_state = 2 else
+                           level_three_1_blue when level_state = 3 else "0000";
 
     obstacle_2_enabled  <= level_one_2_enabled when level_state = 1 else
-                          level_two_2_enabled when level_state = 2 else '0';
+                           level_two_2_enabled when level_state = 2 else 
+                           level_three_2_enabled when level_state = 3 else '0';
     obstacle_2_red      <= level_one_2_red when level_state = 1 else
-                          level_two_2_red when level_state = 2 else "0000";
+                           level_two_2_red when level_state = 2 else
+                           level_three_2_red when level_state = 3 else "0000";
     obstacle_2_green    <= level_one_2_green when level_state = 1 else
-                          level_two_2_green when level_state = 2 else "0000";
+                           level_two_2_green when level_state = 2 else 
+                           level_three_2_green when level_state = 3 else "0000";
     obstacle_2_blue     <= level_one_2_blue when level_state = 1 else
-                          level_two_2_blue when level_state = 2 else "0000";
+                           level_two_2_blue when level_state = 2 else 
+                           level_three_2_blue when level_state = 3 else "0000";
 
     obstacle_1_x_pos    <= level_one_1_x_pos when level_state = 1 else
-                          level_two_1_x_pos when level_state = 2 else (others => '0');
+                           level_two_1_x_pos when level_state = 2 else 
+                           level_three_1_x_pos when level_state = 3 else (others => '0');
     obstacle_2_x_pos    <= level_one_2_x_pos when level_state = 1 else
-                          level_two_2_x_pos when level_state = 2 else (others => '0');
+                           level_two_2_x_pos when level_state = 2 else 
+                           level_three_2_x_pos when level_state = 3 else (others => '0');
 
     obstacle_1_render   <= level_one_1_render when level_state = 1 else
-                          level_two_1_render when level_state = 2 else '0';
+                           level_two_1_render when level_state = 2 else 
+                           level_three_1_render when level_state = 3 else '0';
     obstacle_2_render   <= level_one_2_render when level_state = 1 else
-                          level_two_2_render when level_state = 2 else '0';
+                           level_two_2_render when level_state = 2 else 
+                           level_three_2_render when level_state = 3 else '0';
+
+    -- Route active level's power-up outputs to renderer
+    powerup_render      <= level_two_powerup_render when level_state = 2 else
+                           level_three_powerup_render when level_state = 3 else '0';
+    powerup_red         <= level_two_powerup_red when level_state = 2 else
+                           level_three_powerup_red when level_state = 3 else "0000";
+    powerup_green       <= level_two_powerup_green when level_state = 2 else
+                           level_three_powerup_green when level_state = 3 else "0000";
+    powerup_blue        <= level_two_powerup_blue when level_state = 2 else
+                           level_three_powerup_blue when level_state = 3 else "0000";
+    powerup_out         <= level_two_powerup_count when level_state = 2 else
+                           level_three_powerup_count when level_state = 3 else 0;
+    powerup_collect_s   <= level_two_powerup_collect_s  when level_state = 2 else
+                            level_three_powerup_collect_s when level_state = 3 else '0';
 
     LIVES_COMPONENT : LivesRenderer port map (
         clk => clk25Mhz,
@@ -376,18 +464,25 @@ begin
                 
                 -- Collision detection is pixel-based: if the player and either pipe
                 -- are enabled for the same pixel, latch a collision for the next frame.
+
+                --Obstacles
                 if (player_render = '1' and (obstacle_1_render = '1' or obstacle_2_render = '1')) then
-                    collision_pending <= '1';
+                    obstacle_collision_pending <= '1';
+                end if;
+
+                --Powerups
+                if (player_render = '1' and powerup_render = '1') then
+                    powerup_collision_pending <= '1';
                 end if;
 
                 if vert_sync = '1' and last_vert_sync = '0' then
-                    if collision_pending = '1' and invincibility = 0 then
+                    if obstacle_collision_pending = '1' and invincibility = 0 then
                         invincibility <= 300; -- gives 5 seconds of invincibility at 60fps
 								if no_lives_left = '0' then
 									collision_count <= collision_count + 1; -- add to counter of collisions
                                 else
                                     collision_count <= 0; -- reset collision count if no lives left
-                                    game_over_s <= '1'; -- signal game over to title/gameover renderer
+                                    -- GAME OVER CONDITION HERE :)
 								end if;
                     elsif invincibility > 0 then
                         invincibility <= invincibility - 1;
@@ -401,6 +496,18 @@ begin
                         invincibility_flash <= '0';
                     end if;
 
+                    powerup_collect_s <= '0';
+
+                    if powerup_collision_pending = '1' then
+                        if powerup_collected = '0' then
+                            score <= score + 50;
+                            powerup_collect_s <= '1'; -- Send signal to despawn powerup
+                            powerup_collected <= '1'; -- Set protection gate
+                        end if;
+                    else
+                        powerup_collected <= '0';
+                    end if;
+
                     -- Score increment: one point per pipe pass.
                     if (obstacle_1_x_pos < to_unsigned(50, 11) and obstacle_1_score_incremented = '0') then
                         score <= score + 2;
@@ -410,20 +517,31 @@ begin
                     end if;
 
                     if (obstacle_2_x_pos < to_unsigned(50, 11) and obstacle_2_score_incremented = '0') then
-                        score <= score + 1;
+                        score <= score + 2;
                         obstacle_2_score_incremented <= '1';
                     elsif (obstacle_2_x_pos >= to_unsigned(50, 11)) then
                         obstacle_2_score_incremented <= '0';
                     end if;
 
-                    collision_pending <= '0';
+                    obstacle_collision_pending <= '0';
+                    powerup_collision_pending <= '0';
                 end if;
 					 
 				else
                 --While the game is disabled (on Title Screen), constantly hold the score at 0.
                 score <= 0;
                 mouse_down <= '0';
-                collision_pending <= '0';
+                obstacle_collision_pending <= '0';
+                powerup_collision_pending <= '0';
+                
+            end if;
+					 
+				else
+                --While the game is disabled (on Title Screen), constantly hold the score at 0.
+                score <= 0;
+                mouse_down <= '0';
+                obstacle_collision_pending <= '0';
+                powerup_collision_pending <= '0';
                 game_over_s <= '0';
             end if;
 
@@ -493,9 +611,9 @@ begin
                 case (score) is
                     when 0 to 10 =>
                         level_state <= 1; -- Level One
-                    when 11 to 30 =>
+                    when 11 to 160 =>
                         level_state <= 2; -- Level Two
-                    when 31 to 60 =>
+                    when 161 to 310 =>
                         level_state <= 3; -- Level Three
                     when others =>
                         level_state <= 4; -- Level Four

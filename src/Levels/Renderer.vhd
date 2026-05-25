@@ -24,6 +24,7 @@ architecture behaviour of Renderer is
             KEY : IN std_logic_vector(3 DOWNTO 0);
             pixel_row, pixel_column : IN std_logic_vector(9 DOWNTO 0);
             red, green, blue : OUT std_logic_vector(3 downto 0);
+            training_mode_selected : IN std_logic; 
             request_back : OUT std_logic;
             enabled : IN std_logic;
             game_over : OUT std_logic;
@@ -71,6 +72,7 @@ architecture behaviour of Renderer is
     signal title_proceed : std_logic := '0'; -- Signal to indicate user wants to proceed from title screen
     signal game_request_back : std_logic := '0'; -- Signal from GameRenderer to request going back to title screen
     signal fsm_state : integer range 0 to 3 := 0; -- 0 for title, 1 for game, 2 for gameover, 3 for settings (if implemented)
+    signal training_mode : std_logic := '0'; -- Signal to indicate if training mode is selected, passed to game renderer
 	 
     -- Screen signals
     signal game_enabled : std_logic := '0';
@@ -128,6 +130,7 @@ begin
         red => red_gameover,
         green => green_gameover,
         blue => blue_gameover,
+        training_mode_selected => training_mode, -- Pass through training mode selection for potential use in game over screen
         request_back => gameover_request_back,
         enabled => gameover_enabled
     );
@@ -139,8 +142,13 @@ begin
             case fsm_state is
                 when 0 => -- Title screen
                     if title_proceed = '1' and title_selected_mode = 1 then
+                        training_mode <= '0'; -- Set play mode for game renderer
+                        fsm_state <= 1; -- Move to game screen
+                    elsif title_proceed = '1' and title_selected_mode = 0  then
+                        training_mode <= '1'; -- Set training mode for game renderer
                         fsm_state <= 1; -- Move to game screen
                     end if;
+
 
                     red <= red_title;
                     green <= green_title;

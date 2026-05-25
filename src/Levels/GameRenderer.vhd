@@ -13,6 +13,7 @@ entity GameRenderer is
         red, green, blue : OUT std_logic_vector(3 downto 0);
         request_back : OUT std_logic;
         enabled : IN std_logic;
+        game_over : OUT std_logic;
         score_out   : OUT integer range 0 to 999
     );
 end entity GameRenderer;
@@ -107,6 +108,7 @@ architecture behavior of GameRenderer is
     -- Collision values
     signal collision_pending : std_logic := '0';
     signal collision_count : integer range 0 to 3 := 0; -- counts number of collisions for life rendering
+    signal game_over_s : std_logic := '0'; -- internal signal to track game over state
 
     -- Ball Values
     signal player_render : std_logic := '0';
@@ -380,7 +382,7 @@ begin
 									collision_count <= collision_count + 1; -- add to counter of collisions
                                 else
                                     collision_count <= 0; -- reset collision count if no lives left
-                                    -- GAME OVER CONDITION HERE :)
+                                    game_over_s <= '1'; -- signal game over to title/gameover renderer
 								end if;
                     elsif invincibility > 0 then
                         invincibility <= invincibility - 1;
@@ -417,10 +419,12 @@ begin
                 score <= 0;
                 mouse_down <= '0';
                 collision_pending <= '0';
+                game_over_s <= '0';
             end if;
 
             last_vert_sync <= vert_sync;
         end if;
+        game_over <= game_over_s; 
     end process;
 
     LEVEL_SELECT : process (clk25Mhz)

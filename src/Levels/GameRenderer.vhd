@@ -189,12 +189,10 @@ architecture behavior of GameRenderer is
     signal level_two_powerup_render : std_logic := '0';
     signal level_two_powerup_red, level_two_powerup_green, level_two_powerup_blue : std_logic_vector(3 downto 0);
     signal level_two_powerup_count : integer := 0;
-    signal level_two_powerup_collect_s : std_logic := '0';
 
     signal level_three_powerup_render : std_logic := '0';
     signal level_three_powerup_red, level_three_powerup_green, level_three_powerup_blue : std_logic_vector(3 downto 0);
     signal level_three_powerup_count : integer := 0;
-    signal level_three_powerup_collect_s : std_logic := '0';
 
     -- Lives Values
     signal lives_red, lives_green, lives_blue : std_logic_vector(3 downto 0);
@@ -303,7 +301,7 @@ begin
         powerup_red => level_two_powerup_red,
  		powerup_green => level_two_powerup_green,
  		powerup_blue => level_two_powerup_blue,
-        powerup_collect => level_two_powerup_collect_s,
+        powerup_collect => powerup_collect_s,
         powerup_count => level_two_powerup_count,
         pipe_1_render => level_two_1_render,
         pipe_2_render => level_two_2_render,
@@ -329,7 +327,7 @@ begin
         powerup_red => level_three_powerup_red,
  		powerup_green => level_three_powerup_green,
  		powerup_blue => level_three_powerup_blue,
-        powerup_collect => level_three_powerup_collect_s,
+        powerup_collect => powerup_collect_s,
         powerup_count => level_three_powerup_count,
         skull_1_render => level_three_1_render,
         paused => paused
@@ -387,8 +385,6 @@ begin
                            level_three_powerup_blue when level_state = 3 else "0000";
     powerup_out         <= level_two_powerup_count when level_state = 2 else
                            level_three_powerup_count when level_state = 3 else 0;
-    powerup_collect_s   <= level_two_powerup_collect_s  when level_state = 2 else
-                            level_three_powerup_collect_s when level_state = 3 else '0';
 
     LIVES_COMPONENT : LivesRenderer port map (
         clk => clk25Mhz,

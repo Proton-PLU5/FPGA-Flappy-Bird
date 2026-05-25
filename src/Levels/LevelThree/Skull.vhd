@@ -23,7 +23,7 @@ architecture behaviour of Skull is
     constant SKULL_HEIGHT  : integer := 28;
     constant SPEED         : integer := 2;
 
-    signal skull_x_pos : unsigned(9 downto 0) := to_unsigned(SCREEN_WIDTH, 10); -- Start offscreen right
+    signal skull_x_pos : unsigned(10 downto 0) := to_unsigned(SCREEN_WIDTH, 11); -- Start offscreen right
     signal skull_y_pos : integer range 0 to 480 := 0;
 
     signal render_s : std_logic;
@@ -37,9 +37,9 @@ architecture behaviour of Skull is
 			pixel_row    : in std_logic_vector(9 downto 0);
 			pixel_column : in std_logic_vector(9 downto 0);
 
-			start_x  : in std_logic_vector(9 downto 0);
-			start_y  : in std_logic_vector(9 downto 0);
-			sprite_id : in integer;
+			start_x  : in std_logic_vector(10 downto 0);
+			start_y  : in std_logic_vector(10 downto 0);
+         sprite_id : in integer range 0 to 7;
 
 			red   : out std_logic_vector(3 downto 0);
 			green : out std_logic_vector(3 downto 0);
@@ -62,7 +62,7 @@ begin
         pixel_row => pixel_row,
         pixel_column => pixel_column,
         start_x => std_logic_vector(skull_x_pos),
-        start_y      => std_logic_vector(to_unsigned(skull_y_pos, 10)),
+        start_y      => '0' & std_logic_vector(to_unsigned(skull_y_pos, 10)),
         sprite_id => 6,
         red => red_s,
         blue => blue_s,

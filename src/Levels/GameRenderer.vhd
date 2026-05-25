@@ -69,23 +69,25 @@ architecture behavior of GameRenderer is
 
     component LevelTwo is
         port (
-            clk25Mhz : IN std_logic;
-            mouse_left : IN std_logic;
-            vert_sync : IN std_logic;
-            SW : IN std_logic_vector(9 downto 0);
-            KEY : IN std_logic_vector(3 DOWNTO 0);
-            level_two_enable : IN std_logic := '0';
-            pixel_row, pixel_column : IN std_logic_vector(9 DOWNTO 0);
-            paused : IN std_logic;
-            pipe_1_enabled, pipe_2_enabled : OUT std_logic;
-            pipe_1_red, pipe_1_green, pipe_1_blue : OUT std_logic_vector(3 downto 0);
-            pipe_2_red, pipe_2_green, pipe_2_blue : OUT std_logic_vector(3 downto 0);
-            pipe_1_x_pos : OUT unsigned(10 downto 0);
-            pipe_2_x_pos : OUT unsigned(10 downto 0);
-            powerup_enabled : OUT std_logic;
-            powerup_red, powerup_green, powerup_blue : OUT std_logic_vector(3 downto 0);
-            pipe_1_render, pipe_2_render : OUT std_logic;
-            player_y_pos : IN unsigned(9 downto 0)      
+			  clk25Mhz : IN std_logic;
+			  mouse_left : IN std_logic;
+			  vert_sync : IN std_logic;
+			  SW : IN std_logic_vector(9 downto 0);
+			  KEY : IN std_logic_vector(3 DOWNTO 0);
+			  level_two_enable : IN std_logic := '0';
+			  pixel_row, pixel_column	: IN std_logic_vector(9 DOWNTO 0);
+			  paused : IN std_logic;
+			  pipe_1_enabled, pipe_2_enabled : OUT std_logic;
+			  pipe_1_red, pipe_1_green, pipe_1_blue : OUT std_logic_vector(3 downto 0);
+			  pipe_2_red, pipe_2_green, pipe_2_blue : OUT std_logic_vector(3 downto 0);
+			  pipe_1_x_pos : OUT unsigned(10 downto 0);
+			  pipe_2_x_pos : OUT unsigned(10 downto 0);
+			  powerup_render : OUT std_logic;
+			  powerup_red, powerup_green, powerup_blue : OUT std_logic_vector(3 downto 0);
+			  powerup_collect : IN std_logic;
+			  powerup_count : OUT integer;
+			  pipe_1_render, pipe_2_render : OUT std_logic;
+			  player_y_pos : IN unsigned(9 downto 0)        
         );
     end component LevelTwo;
 
@@ -156,6 +158,11 @@ architecture behavior of GameRenderer is
 	 
     signal obstacle_1_score_incremented : std_logic := '0';
     signal obstacle_2_score_incremented : std_logic := '0';
+	 
+	 --Powerup signals
+	 signal powerup_render : std_logic;
+	 signal powerup_red, powerup_green, powerup_blue : std_logic_vector(3 downto 0);
+	 signal powerup_collect_s : std_logic := '0';
 
     -- Level One outputs
     signal level_one_1_enabled, level_one_2_enabled : std_logic;
@@ -292,10 +299,12 @@ begin
         pipe_2_enabled => level_two_2_enabled,
 		pipe_1_x_pos => level_two_1_x_pos,
 		pipe_2_x_pos => level_two_2_x_pos,
-        powerup_enabled => powerup_enabled,
-        powerup_red => powerup_red,
-		powerup_green => powerup_green,
-		powerup_blue => powerup_blue,
+        powerup_render => level_two_powerup_render,
+        powerup_red => level_two_powerup_red,
+ 		powerup_green => level_two_powerup_green,
+ 		powerup_blue => level_two_powerup_blue,
+        powerup_collect => level_two_powerup_collect_s,
+        powerup_count => level_two_powerup_count,
         pipe_1_render => level_two_1_render,
         pipe_2_render => level_two_2_render,
         paused => paused,
@@ -316,12 +325,12 @@ begin
         skull_1_blue => level_three_1_blue,
         skull_1_enabled => level_three_1_enabled,
         skull_1_x_pos => level_three_1_x_pos,
-        powerup_render => level_two_powerup_render,
-        powerup_red => level_two_powerup_red,
- 		powerup_green => level_two_powerup_green,
- 		powerup_blue => level_two_powerup_blue,
-        powerup_collect => level_two_powerup_collect_s,
-        powerup_count => level_two_powerup_count,
+        powerup_render => level_three_powerup_render,
+        powerup_red => level_three_powerup_red,
+ 		powerup_green => level_three_powerup_green,
+ 		powerup_blue => level_three_powerup_blue,
+        powerup_collect => level_three_powerup_collect_s,
+        powerup_count => level_three_powerup_count,
         skull_1_render => level_three_1_render,
         paused => paused
     );
@@ -448,7 +457,7 @@ begin
                     red <= obstacle_1_red;
 					green <= obstacle_1_green;
 					blue <= obstacle_1_blue;
-                elsif powerup_enabled = '1' then
+                elsif powerup_render = '1' then
                     red <= powerup_red;
 					green <= powerup_green;
 					blue <= powerup_blue;
@@ -533,22 +542,13 @@ begin
                 mouse_down <= '0';
                 obstacle_collision_pending <= '0';
                 powerup_collision_pending <= '0';
-                
-            end if;
-					 
-				else
-                --While the game is disabled (on Title Screen), constantly hold the score at 0.
-                score <= 0;
-                mouse_down <= '0';
-                obstacle_collision_pending <= '0';
-                powerup_collision_pending <= '0';
                 game_over_s <= '0';
             end if;
 
             last_vert_sync <= vert_sync;
         end if;
         game_over <= game_over_s; 
-    end process;
+    end process GAME_LOGIC;
 
     LEVEL_SELECT : process (clk25Mhz)
         variable manual_level_change : std_logic;

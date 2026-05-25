@@ -384,7 +384,7 @@ begin
 
                 if vert_sync = '1' and last_vert_sync = '0' then
                     if collision_pending = '1' and invincibility = 0 then
-                        invincibility <= 300; -- gives 5 seconds of invincibility at 60fps
+                        invincibility <= 200; -- gives 5 seconds of invincibility at 60fps
 								if no_lives_left = '0' then
 									collision_count <= collision_count + 1; -- add to counter of collisions
                                 else
@@ -399,7 +399,7 @@ begin
                             invincibility_flash <= not invincibility_flash;
                         end if;
                     elsif (SW(6) = '0') then
-                        invincibility <= 300;
+                        invincibility <= 200;
                     else
                         -- reset flash when invincibility runs out
                         invincibility_flash <= '0';

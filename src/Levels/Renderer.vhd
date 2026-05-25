@@ -98,6 +98,7 @@ begin
         green            => green_play,
         blue             => blue_play,
         request_back     => game_request_back,
+        training_mode_selected => training_mode,
         enabled          => game_enabled,
         game_over        => game_over_s,
         score_out        => current_game_score  -- Exposing score to control path
@@ -130,7 +131,6 @@ begin
         red => red_gameover,
         green => green_gameover,
         blue => blue_gameover,
-        training_mode_selected => training_mode, -- Pass through training mode selection for potential use in game over screen
         request_back => gameover_request_back,
         enabled => gameover_enabled
     );

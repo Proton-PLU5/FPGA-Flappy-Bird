@@ -26,9 +26,7 @@ architecture behaviour of Renderer is
             red, green, blue : OUT std_logic_vector(3 downto 0);
             request_back : OUT std_logic;
             enabled : IN std_logic;
-            level_state : IN integer range 1 to 4;
-            score_out   : OUT integer range 0 to 999;
-            level_one_enable, level_two_enable, level_three_enable, level_four_enable : out std_logic
+            score_out   : OUT integer range 0 to 999
         );
     end component GameRenderer;
 
@@ -41,7 +39,8 @@ architecture behaviour of Renderer is
             KEY : IN std_logic_vector(3 DOWNTO 0);
             pixel_row, pixel_column : IN std_logic_vector(9 DOWNTO 0);
             red, green, blue : OUT std_logic_vector(3 downto 0);
-            start_game : OUT std_logic;
+            selected_mode : OUT integer range 0 to 2;
+            proceed : OUT std_logic;
             enabled : IN std_logic
         );
     end component TitleRenderer;
@@ -49,19 +48,20 @@ architecture behaviour of Renderer is
     signal red_play, green_play, blue_play : std_logic_vector(3 downto 0);
     signal red_title, green_title, blue_title : std_logic_vector(3 downto 0);
 
-    signal play_state : std_logic := '0';
-    signal title_state : std_logic := '1';
-    signal state : integer range 0 to 2 := 0; -- 0 for title, 1 for play, 2 for pause
-
-    signal title_start_game : std_logic := '0';
-    signal game_request_back : std_logic := '0';
+    -- FSM control signals
+    signal title_selected_mode : integer range 0 to 2 := 0; -- 0 for training, 1 for play, 2 for settings
+    signal title_proceed : std_logic := '0'; -- Signal to indicate user wants to proceed from title screen
+    signal game_request_back : std_logic := '0'; -- Signal from GameRenderer to request going back to title screen
+    signal fsm_state : integer range 0 to 2 := 0; -- 0 for title, 1 for game, 2 for settings
 	 
-    -- Level tracking signals
-    signal level_state_s : integer range 0 to 4 := 0;
+    -- Screen signals
+    signal game_enabled : std_logic := '0';
+    signal title_enabled : std_logic := '0';
+
     signal current_game_score  : integer range 0 to 999 := 0;
 
     -- Dummy signals to map unused level enable outputs
-    signal l1_en, l2_en, l3_en, l4_en : std_logic;
+    signal level_one_enable, level_two_enable, level_three_enable, level_four_enable : std_logic;
 begin
 
     GAME_RENDERER_COMPONENT : GameRenderer port map (
@@ -77,13 +77,8 @@ begin
         green            => green_play,
         blue             => blue_play,
         request_back     => game_request_back,
-        enabled          => play_state,
-        level_state      => level_state_s, -- Control path driving data path
-        score_out        => current_game_score,  -- Exposing score to control path
-        level_one_enable => l1_en,
-        level_two_enable => l2_en,
-        level_three_enable => l3_en,
-        level_four_enable => l4_en
+        enabled          => game_enabled,
+        score_out        => current_game_score  -- Exposing score to control path
     );
 
     TITLE_RENDERER_COMPONENT : TitleRenderer port map (
@@ -98,42 +93,42 @@ begin
         red => red_title,
         green => green_title,
         blue => blue_title,
-        start_game => title_start_game,
-        enabled => title_state
+        selected_mode => title_selected_mode,
+        proceed => title_proceed,
+        enabled => title_enabled
     );
-
-    -- Centralized Game State Machine (Screens & Game Levels)
-	 -- title_start_game and game_request_back take priority, then manual KEY overrides (KEY(2) -> play, KEY(3) -> title)
-		process(clk25Mhz)
-		begin
-			 if rising_edge(clk25Mhz) then
-                    if title_start_game = '1' then
-                        state <= 1; 
-                        level_state_s <= 1; -- Reset game to Level 1 on new start
-                    elsif game_request_back = '1' then
-                        state <= 0; 
-                        level_state_s <= 0; --Pause game when returning to title
-                            
-                    -- Level transition logic (Only updates if currently in the play state)
-                    else
-                        if state = 1 then
-                            if current_game_score >= 10 then
-                                level_state_s <= 2; -- Transition to Level 2
-                            else
-                                level_state_s <= 1; -- Stay on Level 1
-                            end if;
-                        else
-                            level_state_s <= 0;
-                        end if;
+    
+    -- FSM
+    process(clk25Mhz)
+    begin
+        if rising_edge(clk25Mhz) then
+            case fsm_state is
+                when 0 => -- Title screen
+                    if title_proceed = '1' and title_selected_mode = 1 then
+                        fsm_state <= 1; -- Move to game screen
                     end if;
-			 end if;
-		end process;
 
-    title_state <= '1' when state = 0 else '0';
-    play_state  <= '1' when state = 1 or state = 2 else '0';
+                    red <= red_title;
+                    green <= green_title;
+                    blue <= blue_title;
 
-    red   <= red_play   WHEN play_state = '1' ELSE red_title;
-    green <= green_play WHEN play_state = '1' ELSE green_title;
-    blue  <= blue_play  WHEN play_state = '1' ELSE blue_title;
+                    game_enabled <= '0';
+                    title_enabled <= '1';
+                when 1 => -- Game screen
+                    if game_request_back = '1' then
+                        fsm_state <= 0; -- Move back to title screen
+                    end if;
+
+                    red <= red_play;
+                    green <= green_play;
+                    blue <= blue_play;
+
+                    game_enabled <= '1';
+                    title_enabled <= '0';
+                when others =>
+                    fsm_state <= 0; -- Default back to title screen
+            end case;
+        end if;
+    end process;
 
 end architecture behaviour;

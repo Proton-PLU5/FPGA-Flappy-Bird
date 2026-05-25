@@ -10,7 +10,7 @@ entity TileRenderer is
         reset                       : in std_logic;
         enabled                     : in std_logic;
         tile_id                     : in integer range 0 to 255;
-		  transparent : out std_logic
+		transparent : out std_logic
     );
 end entity TileRenderer;
 
@@ -37,9 +37,13 @@ architecture behaviour of TileRenderer is
     constant TILE_W : integer := 64;
     constant TILE_H : integer := 64;
 
+
     signal tile_start_x : std_logic_vector(9 downto 0);
     signal tile_start_y : std_logic_vector(9 downto 0);
+
 begin
+    -- Compute the tile origin (top-left corner) in screen coordinates so
+    -- SpriteRenderer can use it as the sprite's screen position.
     tile_start_x <= std_logic_vector(
                         to_unsigned( (to_integer(unsigned(pixel_column)) / TILE_W) * TILE_W, 10)
                     );

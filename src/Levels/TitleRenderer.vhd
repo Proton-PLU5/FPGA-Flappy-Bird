@@ -12,7 +12,8 @@ entity TitleRenderer is
 	    KEY : IN std_logic_vector(3 DOWNTO 0);
         pixel_row, pixel_column	: IN std_logic_vector(9 DOWNTO 0);
         red, green, blue : OUT std_logic_vector(3 downto 0);
-        start_game : OUT std_logic;
+        selected_mode : OUT integer range 0 to 2; -- 0 for training, 1 for play, 2 for settings
+        proceed : OUT std_logic;
         enabled : IN std_logic
     );
 end entity TitleRenderer;
@@ -166,13 +167,13 @@ begin
                 -- start button
                 if KEY(3) = '0' and last_key_3_state = '1' then
                     if selected_option = 1 then
-                        start_game <= '1';
+                        proceed <= '1';
                     else
-                        start_game <= '0';
+                        proceed <= '0';
                     end if;
                     last_key_3_state <= '0';
                 elsif KEY(3) = '1' and last_key_3_state = '0' then
-                    start_game <= '0';
+                    proceed <= '0';
                     last_key_3_state <= '1';
                 end if;
 
@@ -192,7 +193,13 @@ begin
                     green <= background_green;
                     blue  <= background_blue;
                 end if;
+            else
+                -- if enable is off, reset the proceed signal.
+                -- IMPORTANT! If we don't do this, then we can never return to the title!!
+                proceed <= '0';
             end if;
         end if;
     end process;
+    
+    selected_mode <= selected_option;
 end architecture behaviour;

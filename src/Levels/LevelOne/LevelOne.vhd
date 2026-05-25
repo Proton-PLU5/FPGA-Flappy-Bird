@@ -64,6 +64,7 @@ architecture behavior of LevelOne is
     signal pipe_2_red_s, pipe_2_green_s, pipe_2_blue_s : std_logic_vector(3 downto 0);
     signal pipe_2_reset : std_logic := '0';
     signal pipe_2_height   : integer range 0 to 480 := 240;
+    signal pipe_2_waiting : std_logic := '0';
 
     signal last_key_3_state : std_logic := '1';
 
@@ -75,7 +76,7 @@ architecture behavior of LevelOne is
 
 begin
     pipe_1_enabled_s <= level_one_enable and not paused;
-    pipe_2_enabled_s <= level_one_enable and not paused;
+    pipe_2_enabled_s <= level_one_enable and not paused and pipe_1_x_pos_s = to_unsigned(320, 11); -- Spawn pipe 2 when pipe 1 reaches mid-screen
 
     PIPE_COMPONENT : Pipe
         generic map ( START_OFFSET => 0 )
@@ -144,12 +145,19 @@ begin
         if rising_edge(vert_sync) then
             if level_one_enable = '1' then
                 pipe_2_reset <= '0';
-                if (pipe_2_end_reached = '1' and pipe_1_x_pos_s = to_unsigned(320, 11)) then
+                if pipe_2_end_reached = '1' then
+                    pipe_2_waiting <= '1';
+                end if;
+
+                -- Spawn pipe_2 when pipe_1 reaches mid-screen (consistent 320px spacing = 1/2 screen width)
+                if (pipe_2_waiting = '1' and pipe_1_x_pos_s <= to_unsigned(320, 11)) then
                     pipe_2_height <= to_integer(unsigned(lfsr_out)) * 280 / 256 + 100;
                     pipe_2_reset <= '1';
+                    pipe_2_waiting <= '0';
                 end if;
             elsif (level_one_enable = '0') then
                 pipe_2_reset <= '1'; -- Reset the pipe when the level is not enabled
+                pipe_2_waiting <= '0';
             end if;
         end if;
     end process PIPE_2_HEIGHT_RANDOMISER;

@@ -13,9 +13,7 @@ entity GameRenderer is
         red, green, blue : OUT std_logic_vector(3 downto 0);
         request_back : OUT std_logic;
         enabled : IN std_logic;
-        level_state : IN integer range 1 to 4;
-        score_out   : OUT integer range 0 to 999;
-        level_one_enable, level_two_enable, level_three_enable, level_four_enable : out std_logic
+        score_out   : OUT integer range 0 to 999
     );
 end entity GameRenderer;
 
@@ -27,7 +25,8 @@ architecture behavior of GameRenderer is
             KEY : IN std_logic_vector(3 DOWNTO 0);
             red, green, blue : OUT std_logic_vector(3 downto 0);
             enabled : IN std_logic;
-            render : OUT std_logic
+            render : OUT std_logic;
+            player_y_pos : OUT unsigned(9 downto 0)
         );
     end component Player;
 
@@ -83,7 +82,8 @@ architecture behavior of GameRenderer is
             pipe_2_x_pos : OUT unsigned(10 downto 0);
             powerup_enabled : OUT std_logic;
             powerup_red, powerup_green, powerup_blue : OUT std_logic_vector(3 downto 0);
-            pipe_1_render, pipe_2_render : OUT std_logic        
+            pipe_1_render, pipe_2_render : OUT std_logic;
+            player_y_pos : IN unsigned(9 downto 0)      
         );
     end component LevelTwo;
 
@@ -104,6 +104,7 @@ architecture behavior of GameRenderer is
     -- Game Logic Values
     signal paused : std_logic := '0';
     signal prev_paused : std_logic := '0';
+    signal prev_enabled : std_logic := '0';
 
     -- Collision values
     signal collision_pending : std_logic := '0';
@@ -135,7 +136,7 @@ architecture behavior of GameRenderer is
     signal level_one_1_red, level_one_1_green, level_one_1_blue : std_logic_vector(3 downto 0);
     signal level_one_2_red, level_one_2_green, level_one_2_blue : std_logic_vector(3 downto 0);
     signal level_one_1_x_pos, level_one_2_x_pos : unsigned(10 downto 0);
-	 signal level_one_1_render, level_one_2_render : std_logic;
+	signal level_one_1_render, level_one_2_render : std_logic;
 
     -- Level Two outputs
     signal level_two_1_enabled, level_two_2_enabled : std_logic;
@@ -155,10 +156,12 @@ architecture behavior of GameRenderer is
     signal no_lives_left : std_logic;
 
     signal last_key_3_state : std_logic := '1';
+    signal last_key_2_state : std_logic := '1';
     signal last_vert_sync : std_logic := '0';
 
     -- Level Enables (Internal driving signals)
-    signal level_one_enable_s, level_two_enable_s, level_three_enable_s, level_four_enable_s : std_logic := '0';
+    signal level_state : integer range 1 to 4 := 1;
+    signal level_one_enabled, level_two_enabled, level_three_enabled, level_four_enabled : std_logic := '0';
 
     -- Background Values (Black)
     signal background_red, background_green, background_blue : std_logic_vector(3 downto 0) := "0000";
@@ -169,14 +172,11 @@ architecture behavior of GameRenderer is
     
     -- TEMPORARY: For score changing
     signal mouse_down : std_logic := '0';
-	 
+	
+    signal player_y_pos : unsigned(9 downto 0);
 	signal player_enabled : std_logic;
 
 begin
-    level_one_enable   <= level_one_enable_s;
-    level_two_enable   <= level_two_enable_s;
-    level_three_enable <= level_three_enable_s;
-    level_four_enable  <= level_four_enable_s;
     score_out          <= score; 
     player_enabled <= enabled and (not paused);
 
@@ -205,7 +205,8 @@ begin
         green => ball_green,
         blue => ball_blue,
         render => player_render,
-        enabled => player_enabled
+        enabled => player_enabled,
+        player_y_pos => player_y_pos
     );
 
     LEVEL_ONE_COMPONENT : LevelOne port map (
@@ -214,7 +215,7 @@ begin
 		vert_sync => vert_sync,
         SW => SW,
 		KEY => KEY,
-		level_one_enable => level_one_enable_s,
+		level_one_enable => level_one_enabled,
         pixel_row => pixel_row,
 		pixel_column => pixel_column,
         pipe_1_red => level_one_1_red,
@@ -238,7 +239,7 @@ begin
 		vert_sync => vert_sync,
         SW => SW,
 		KEY => KEY,
-		level_two_enable => level_two_enable_s,
+		level_two_enable => level_two_enabled,
         pixel_row => pixel_row,
 		pixel_column => pixel_column,
         pipe_1_red => level_two_1_red,
@@ -257,36 +258,37 @@ begin
 		powerup_blue => powerup_blue,
         pipe_1_render => level_two_1_render,
         pipe_2_render => level_two_2_render,
-        paused => paused
+        paused => paused,
+        player_y_pos => player_y_pos
     );
 
     -- Multiplexer
-    obstacle_1_enabled <= level_one_1_enabled when level_state = 1 else
+    obstacle_1_enabled  <= level_one_1_enabled when level_state = 1 else
                           level_two_1_enabled when level_state = 2 else '0';
-    obstacle_1_red     <= level_one_1_red when level_state = 1 else
+    obstacle_1_red      <= level_one_1_red when level_state = 1 else
                           level_two_1_red when level_state = 2 else "0000";
-    obstacle_1_green   <= level_one_1_green when level_state = 1 else
+    obstacle_1_green    <= level_one_1_green when level_state = 1 else
                           level_two_1_green when level_state = 2 else "0000";
-    obstacle_1_blue    <= level_one_1_blue when level_state = 1 else
+    obstacle_1_blue     <= level_one_1_blue when level_state = 1 else
                           level_two_1_blue when level_state = 2 else "0000";
 
-    obstacle_2_enabled <= level_one_2_enabled when level_state = 1 else
+    obstacle_2_enabled  <= level_one_2_enabled when level_state = 1 else
                           level_two_2_enabled when level_state = 2 else '0';
-    obstacle_2_red     <= level_one_2_red when level_state = 1 else
+    obstacle_2_red      <= level_one_2_red when level_state = 1 else
                           level_two_2_red when level_state = 2 else "0000";
-    obstacle_2_green   <= level_one_2_green when level_state = 1 else
+    obstacle_2_green    <= level_one_2_green when level_state = 1 else
                           level_two_2_green when level_state = 2 else "0000";
-    obstacle_2_blue    <= level_one_2_blue when level_state = 1 else
+    obstacle_2_blue     <= level_one_2_blue when level_state = 1 else
                           level_two_2_blue when level_state = 2 else "0000";
 
-    obstacle_1_x_pos     <= level_one_1_x_pos when level_state = 1 else
+    obstacle_1_x_pos    <= level_one_1_x_pos when level_state = 1 else
                           level_two_1_x_pos when level_state = 2 else (others => '0');
-    obstacle_2_x_pos     <= level_one_2_x_pos when level_state = 1 else
+    obstacle_2_x_pos    <= level_one_2_x_pos when level_state = 1 else
                           level_two_2_x_pos when level_state = 2 else (others => '0');
 
-    obstacle_1_render     <= level_one_1_render when level_state = 1 else
+    obstacle_1_render   <= level_one_1_render when level_state = 1 else
                           level_two_1_render when level_state = 2 else '0';
-    obstacle_2_render     <= level_one_2_render when level_state = 1 else
+    obstacle_2_render   <= level_one_2_render when level_state = 1 else
                           level_two_2_render when level_state = 2 else '0';
 
     LIVES_COMPONENT : LivesRenderer port map (
@@ -302,8 +304,36 @@ begin
         no_lives_left => no_lives_left
     );
 
-    -- Logic to determine output
-    process (clk25Mhz)
+    
+    GAME_UI : process (clk25Mhz)
+    begin
+        if rising_edge(clk25Mhz) then
+            if (enabled = '1') then
+                if prev_enabled = '0' then
+                    -- Initialize key state on enable to avoid immediate back request
+                    last_key_3_state <= KEY(3);
+                    request_back <= '0';
+                else
+                    -- Handle return to title screen
+                    if KEY(3) = '0' and last_key_3_state = '1' then
+                        request_back <= '1';
+                        last_key_3_state <= '0';
+                    elsif KEY(3) = '1' and last_key_3_state = '0' then
+                        request_back <= '0';
+                        last_key_3_state <= '1';
+                    end if;
+                end if;
+            else
+                -- IMPORTANT: when disabled reset otherwise we can't return to the game!
+                request_back <= '0';
+                last_key_3_state <= '1';
+            end if;
+
+            prev_enabled <= enabled;
+        end if;
+    end process;
+
+    GAME_LOGIC : process (clk25Mhz)
     begin
         if rising_edge(clk25Mhz) then
             if enabled = '1' then
@@ -392,24 +422,17 @@ begin
                 score <= 0;
                 mouse_down <= '0';
                 collision_pending <= '0';
-                
-            end if;
-
-            -- Return handling 
-            if KEY(3) = '0' and last_key_3_state = '1' then
-                request_back <= '1';
-            else
-                request_back <= '0';
             end if;
 
             last_vert_sync <= vert_sync;
-            last_key_3_state <= KEY(3);
         end if;
     end process;
 
     LEVEL_SELECT : process (clk25Mhz)
+        variable manual_level_change : std_logic;
     begin
         if rising_edge(clk25Mhz) then
+            manual_level_change := '0';
 
             if (KEY(0) = '0' and prev_paused = '0') then
                 paused <= not paused;
@@ -418,31 +441,59 @@ begin
                 prev_paused <= '0';
             end if;
 
-            if level_state = 0 then
-                level_one_enable_s   <= '0';
-                level_two_enable_s   <= '0';
-                level_three_enable_s <= '0';
-                level_four_enable_s  <= '0';
-            elsif level_state = 1 then
-                level_one_enable_s   <= '1';
-                level_two_enable_s   <= '0';
-                level_three_enable_s <= '0';
-                level_four_enable_s  <= '0';
-            elsif level_state = 2 then
-                level_one_enable_s   <= '0';
-                level_two_enable_s   <= '1';
-                level_three_enable_s <= '0';
-                level_four_enable_s  <= '0';
-            elsif level_state = 3 then
-                level_one_enable_s   <= '0';
-                level_two_enable_s   <= '0';
-                level_three_enable_s <= '1';
-                level_four_enable_s  <= '0';
-            elsif level_state = 4 then
-                level_one_enable_s   <= '0';
-                level_two_enable_s   <= '0';
-                level_three_enable_s <= '0';
-                level_four_enable_s  <= '1';
+            case (level_state) is
+                when 1 =>
+                    level_one_enabled <= '1';
+                    level_two_enabled <= '0';
+                    level_three_enabled <= '0';
+                    level_four_enabled <= '0';
+                when 2 =>
+                    level_one_enabled <= '0';
+                    level_two_enabled <= '1';
+                    level_three_enabled <= '0';
+                    level_four_enabled <= '0';
+                when 3 =>
+                    level_one_enabled <= '0';
+                    level_two_enabled <= '0';
+                    level_three_enabled <= '1';
+                    level_four_enabled <= '0';
+                when others =>
+                    level_one_enabled <= '0';
+                    level_two_enabled <= '0';
+                    level_three_enabled <= '0';
+                    level_four_enabled <= '1';
+            end case;
+
+            -- Manual level selection via switches
+            case (SW(9) & SW(8) & SW(7)) is
+                when "001" =>
+                    level_state <= 1;
+                    manual_level_change := '1';
+                when "011" =>
+                    level_state <= 2;
+                    manual_level_change := '1';
+                when "101" =>
+                    level_state <= 3;
+                    manual_level_change := '1';
+                when "111" =>
+                    level_state <= 4;
+                    manual_level_change := '1';
+                when others =>
+                    manual_level_change := '0';
+            end case;
+
+            -- Automated level progression based on score
+            if manual_level_change = '0' then
+                case (score) is
+                    when 0 to 10 =>
+                        level_state <= 1; -- Level One
+                    when 11 to 30 =>
+                        level_state <= 2; -- Level Two
+                    when 31 to 60 =>
+                        level_state <= 3; -- Level Three
+                    when others =>
+                        level_state <= 4; -- Level Four
+                end case;
             end if;
         end if;
     end process LEVEL_SELECT;

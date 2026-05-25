@@ -5,12 +5,13 @@ USE  IEEE.STD_LOGIC_SIGNED.all;
 
 entity Player is
     port (
-        clk, vert_sync, mouse_left	: IN std_logic;
-        pixel_row, pixel_column	: IN std_logic_vector(9 DOWNTO 0);
-		KEY : IN std_logic_vector(3 DOWNTO 0);
-		red, green, blue : OUT std_logic_vector(3 downto 0);
-        render : OUT std_logic;
-        enabled : IN std_logic
+            clk, vert_sync, mouse_left	: IN std_logic;
+            pixel_row, pixel_column	: IN std_logic_vector(9 DOWNTO 0);
+            KEY : IN std_logic_vector(3 DOWNTO 0);
+            red, green, blue : OUT std_logic_vector(3 downto 0);
+            render : OUT std_logic;
+            enabled : IN std_logic;
+            player_y_pos : OUT unsigned(9 downto 0)
         );
 end entity Player;
 
@@ -110,4 +111,5 @@ begin
     
     -- glad we did it like this, cuz its so easy to do transparency!
     render <= render_out and not transparent;
+    player_y_pos <= unsigned(ball_y_pos);
 end architecture behavior;

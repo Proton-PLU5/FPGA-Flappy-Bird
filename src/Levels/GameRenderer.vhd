@@ -26,7 +26,8 @@ architecture behavior of GameRenderer is
             KEY : IN std_logic_vector(3 DOWNTO 0);
             red, green, blue : OUT std_logic_vector(3 downto 0);
             enabled : IN std_logic;
-            render : OUT std_logic
+            render : OUT std_logic;
+            player_y_pos : OUT unsigned(9 downto 0)
         );
     end component Player;
 
@@ -82,7 +83,8 @@ architecture behavior of GameRenderer is
             pipe_2_x_pos : OUT unsigned(10 downto 0);
             powerup_enabled : OUT std_logic;
             powerup_red, powerup_green, powerup_blue : OUT std_logic_vector(3 downto 0);
-            pipe_1_render, pipe_2_render : OUT std_logic        
+            pipe_1_render, pipe_2_render : OUT std_logic;
+            player_y_pos : IN unsigned(9 downto 0)      
         );
     end component LevelTwo;
 
@@ -172,7 +174,8 @@ architecture behavior of GameRenderer is
     
     -- TEMPORARY: For score changing
     signal mouse_down : std_logic := '0';
-	 
+	
+    signal player_y_pos : unsigned(9 downto 0);
 	signal player_enabled : std_logic;
 
 begin
@@ -204,7 +207,8 @@ begin
         green => ball_green,
         blue => ball_blue,
         render => player_render,
-        enabled => player_enabled
+        enabled => player_enabled,
+        player_y_pos => player_y_pos
     );
 
     LEVEL_ONE_COMPONENT : LevelOne port map (
@@ -256,7 +260,8 @@ begin
 		powerup_blue => powerup_blue,
         pipe_1_render => level_two_1_render,
         pipe_2_render => level_two_2_render,
-        paused => paused
+        paused => paused,
+        player_y_pos => player_y_pos
     );
 
     -- Multiplexer
@@ -463,18 +468,23 @@ begin
                     level_four_enabled <= '1';
             end case;
 
-            -- Level Switching for testing purposes (KEY2)
-            if KEY(2) = '0' and last_key_2_state = '1' then
-                if level_state = 4 then
+            -- Manual level selection via switches
+            case (SW(9) & SW(8) & SW(7)) is
+                when "001" =>
                     level_state <= 1;
-                else
-                    level_state <= level_state + 1;
-                end if;
-                last_key_2_state <= '0';
-                manual_level_change := '1';
-            elsif KEY(2) = '1' and last_key_2_state = '0' then
-                last_key_2_state <= '1';
-            end if;
+                    manual_level_change := '1';
+                when "011" =>
+                    level_state <= 2;
+                    manual_level_change := '1';
+                when "101" =>
+                    level_state <= 3;
+                    manual_level_change := '1';
+                when "111" =>
+                    level_state <= 4;
+                    manual_level_change := '1';
+                when others =>
+                    manual_level_change := '0';
+            end case;
 
             -- Automated level progression based on score
             if manual_level_change = '0' then

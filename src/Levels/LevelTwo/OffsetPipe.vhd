@@ -18,7 +18,8 @@ entity OffsetPipe is
         x_pos                       : out unsigned(10 downto 0);
         enabled                     : in std_logic;
         render                      : out std_logic;
-        part_to_render              : in std_logic
+        part_to_render              : in std_logic;
+        player_y_pos                : in unsigned(9 downto 0)
     );
 end entity OffsetPipe;
 
@@ -28,6 +29,9 @@ architecture behaviour of OffsetPipe is
     signal pipe_top_y_pos : unsigned(9 downto 0);
     signal pipe_bottom_y_pos : unsigned(9 downto 0);
     signal pipe_width : unsigned(9 downto 0) := to_unsigned(25,10);
+
+    signal player_latched_y_pos : unsigned(9 downto 0);
+    signal player_latched : std_logic := '0';
 begin
     -- render_out logic
     render_out <= '1' when (
@@ -49,7 +53,7 @@ begin
                 pipe_x_pos <= to_unsigned(640 + START_OFFSET, 11);
                 pipe_top_y_pos <= to_unsigned(height, 10) - to_unsigned(gap/2, 10);
                 pipe_bottom_y_pos <= to_unsigned(height, 10) + to_unsigned(gap/2, 10);
-
+                player_latched <= '0';  -- Reset player latched state on reset
             elsif enabled = '1' then
                 if pipe_x_pos <= to_unsigned(0, 11) then
                     end_reached <= '1';
@@ -59,9 +63,26 @@ begin
                     end_reached <= '0';
                     
                     -- The "Jump" logic: only apply while enabled and as it approaches
-                    if pipe_x_pos <= to_unsigned(50, 11) then
-                        pipe_top_y_pos <= pipe_top_y_pos - to_unsigned(40, 10);  -- Push up by 40 pixels
-                        pipe_bottom_y_pos <= pipe_bottom_y_pos - to_unsigned(40, 10);  -- Adjust bottom position accordingly
+                    if pipe_x_pos <= to_unsigned(100, 11) then
+                        if (player_latched = '0') then
+                            player_latched <= '1';
+                            player_latched_y_pos <= player_y_pos;
+                        end if;
+
+                        -- If top pipe move down.
+                        if (part_to_render = '1') then
+                            if (pipe_top_y_pos < player_latched_y_pos) then
+                                pipe_top_y_pos <= pipe_top_y_pos + to_unsigned(2, 10);  -- Move down by 2 pixels
+                                pipe_bottom_y_pos <= pipe_bottom_y_pos + to_unsigned(2, 10);  -- Adjust bottom position accordingly
+                            end if;
+                        
+                        -- If bottom pipe move up.
+                        elsif (part_to_render = '0') then
+                            if (pipe_top_y_pos > player_latched_y_pos) then
+                                pipe_top_y_pos <= pipe_top_y_pos - to_unsigned(2, 10);  -- Move up by 2 pixels
+                                pipe_bottom_y_pos <= pipe_bottom_y_pos - to_unsigned(2, 10);  -- Adjust bottom position accordingly
+                            end if;
+                        end if;
                     end if;
                 end if;
 

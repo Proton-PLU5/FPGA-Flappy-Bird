@@ -20,7 +20,8 @@ entity LevelTwo is
         pipe_2_x_pos : OUT unsigned(10 downto 0);
         powerup_enabled : OUT std_logic;
         powerup_red, powerup_green, powerup_blue : OUT std_logic_vector(3 downto 0);
-        pipe_1_render, pipe_2_render : OUT std_logic        
+        pipe_1_render, pipe_2_render : OUT std_logic;
+        player_y_pos : IN unsigned(9 downto 0)      
     );
 end entity LevelTwo;
 
@@ -40,7 +41,8 @@ architecture behavior of LevelTwo is
             x_pos                       : out unsigned(10 downto 0);
             enabled                     : in std_logic;
             render                      : out std_logic;
-            part_to_render              : in std_logic
+            part_to_render              : in std_logic;
+            player_y_pos                : in unsigned(9 downto 0);
         );
     end component OffsetPipe;
 
@@ -101,7 +103,7 @@ architecture behavior of LevelTwo is
 
 begin
     pipe_1_enabled_s <= level_two_enable and not paused;
-    pipe_2_enabled_s <= level_two_enable and not paused;
+    pipe_2_enabled_s <= level_two_enable and not paused and pipe_1_x_pos_s = to_unsigned(320, 11); -- Spawn pipe 2 when pipe 1 reaches mid-screen
 
     PIPE_COMPONENT : OffsetPipe
         generic map ( START_OFFSET => 0 )
@@ -121,7 +123,8 @@ begin
         enabled => pipe_1_enabled_s,
         x_pos => pipe_1_x_pos_s,
         render => pipe_1_render_s,
-        part_to_render => pipe_1_part_to_render
+        part_to_render => pipe_1_part_to_render,
+        player_y_pos => player_y_pos
     );
 
     PIPE2_COMPONENT : OffsetPipe
@@ -142,7 +145,8 @@ begin
         enabled => pipe_2_enabled_s,
         x_pos => pipe_2_x_pos_s,
         render => pipe_2_render_s,
-        part_to_render => pipe_2_part_to_render
+        part_to_render => pipe_2_part_to_render,
+        player_y_pos => player_y_pos
     );
 
     LFSR_COMPONENT : LFSR port map (

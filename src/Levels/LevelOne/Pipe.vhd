@@ -16,6 +16,8 @@ entity Pipe is
         end_reached                 : out std_logic;
         x_pos                       : out unsigned(10 downto 0);
         enabled                     : in std_logic;
+        follow_enable               : in std_logic;
+        follow_x_pos                : in unsigned(10 downto 0);
         render                      : out std_logic
     );
 end entity Pipe;
@@ -23,6 +25,7 @@ end entity Pipe;
 architecture behaviour of Pipe is
     signal render_out : std_logic;
     signal pipe_x_pos : unsigned(10 downto 0) := to_unsigned(640 + START_OFFSET, 11); -- Start off-screen right (staggerable)
+    signal pipe_x_pos_effective : unsigned(10 downto 0);
     signal pipe_top_y_pos : unsigned(9 downto 0);
     signal pipe_bottom_y_pos : unsigned(9 downto 0);
     signal pipe_width : unsigned(9 downto 0) := to_unsigned(25,10);
@@ -31,9 +34,12 @@ begin
     pipe_top_y_pos <= to_unsigned(height, 10) - to_unsigned(gap/2, 10);
     pipe_bottom_y_pos <= to_unsigned(height, 10) + to_unsigned(gap/2, 10);
 
+    pipe_x_pos_effective <= follow_x_pos + to_unsigned(START_OFFSET, 11) when follow_enable = '1'
+                            else pipe_x_pos;
+
     -- render_out logic
     render_out <= '1' when (
-        (pipe_x_pos <= unsigned(pixel_column) + pipe_width) and (unsigned(pixel_column) <= pipe_x_pos + pipe_width)
+        (pipe_x_pos_effective <= unsigned(pixel_column) + pipe_width) and (unsigned(pixel_column) <= pipe_x_pos_effective + pipe_width)
         and ( (unsigned(pixel_row) <= pipe_top_y_pos) or (unsigned(pixel_row) >= pipe_bottom_y_pos) )
     ) else '0';
 
@@ -42,16 +48,22 @@ begin
         if rising_edge(vert_sync) then
             -- handle reset unconditionally so it works even when menu/paused
             if reset = '1' then
-                pipe_x_pos <= to_unsigned(640 + START_OFFSET, 11); -- Reset to right edge
+                if follow_enable = '0' then
+                    pipe_x_pos <= to_unsigned(640 + START_OFFSET, 11); -- Reset to right edge
+                end if;
                 end_reached <= '0';
 
             elsif enabled = '1' then
-                -- normal running behaviour: move, pulse end_reached and respawn immediately
-                if pipe_x_pos <= to_unsigned(0, 11) then
-                    end_reached <= '1';
-                    pipe_x_pos <= to_unsigned(640 + START_OFFSET, 11); -- respawn immediately to avoid visible hang at edge
+                if follow_enable = '0' then
+                    -- normal running behaviour: move, pulse end_reached and respawn immediately
+                    if pipe_x_pos <= to_unsigned(0, 11) then
+                        end_reached <= '1';
+                        pipe_x_pos <= to_unsigned(640 + START_OFFSET, 11); -- respawn immediately to avoid visible hang at edge
+                    else
+                        pipe_x_pos <= pipe_x_pos - to_unsigned(2, 11);
+                        end_reached <= '0';
+                    end if;
                 else
-                    pipe_x_pos <= pipe_x_pos - to_unsigned(2, 11);
                     end_reached <= '0';
                 end if;
 
@@ -66,5 +78,5 @@ begin
     red <= (others => '0');
     green <= (others => '1');
     blue <= (others => '0');
-    x_pos <= pipe_x_pos;
+    x_pos <= pipe_x_pos_effective;
 end architecture behaviour;

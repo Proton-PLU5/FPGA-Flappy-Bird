@@ -36,6 +36,8 @@ architecture behavior of LevelOne is
             end_reached                 : out std_logic;
             x_pos                       : out unsigned(10 downto 0);
             enabled                     : in std_logic;
+            follow_enable               : in std_logic;
+            follow_x_pos                : in unsigned(10 downto 0);
             render                      : out std_logic
         );
     end component Pipe;
@@ -48,6 +50,8 @@ architecture behavior of LevelOne is
         random_out : OUT std_logic_vector(7 downto 0)
     );
     end component LFSR;
+
+    constant PIPE_GAP_X : integer := 320;
 
     -- Pipe 1 Values
     signal pipe_1_enabled_s : std_logic := '0';
@@ -95,12 +99,14 @@ begin
         reset => pipe_1_reset,
         end_reached => pipe_1_end_reached,
         enabled => pipe_1_enabled_s,
+        follow_enable => '0',
+        follow_x_pos => (others => '0'),
         x_pos => pipe_1_x_pos_s,
         render => pipe_1_render_s
     );
 
     PIPE2_COMPONENT : Pipe
-        generic map ( START_OFFSET => 200 )
+        generic map ( START_OFFSET => PIPE_GAP_X )
         port map (
         clk => clk25Mhz,
         vert_sync => vert_sync,
@@ -115,6 +121,8 @@ begin
         reset => pipe_2_reset,
         end_reached => pipe_2_end_reached,
         enabled => pipe_2_enabled_s,
+        follow_enable => '1',
+        follow_x_pos => pipe_1_x_pos_s,
         x_pos => pipe_2_x_pos_s,
         render => pipe_2_render_s
     );
@@ -140,9 +148,6 @@ begin
                 if pipe_1_end_reached = '1' then
                     pipe_1_height <= to_integer(unsigned(lfsr_out)) * 280 / 256 + 100;
                     pipe_1_reset <= '1';
-                end if;
-
-                if (pipe_2_end_reached = '1') then
                     pipe_2_height <= to_integer(unsigned(lfsr_out)) * 280 / 256 + 100;
                     pipe_2_reset <= '1';
                 end if;

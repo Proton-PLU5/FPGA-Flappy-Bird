@@ -101,14 +101,17 @@ architecture behavior of GameRenderer is
             level_three_enable : IN std_logic := '0';
             pixel_row, pixel_column	: IN std_logic_vector(9 DOWNTO 0);
             paused : IN std_logic;
-            skull_1_enabled : OUT std_logic;
+            skull_1_enabled, skull_2_enabled : OUT std_logic;
             skull_1_red, skull_1_green, skull_1_blue : OUT std_logic_vector(3 downto 0);
+            skull_2_red, skull_2_green, skull_2_blue : OUT std_logic_vector(3 downto 0);
             skull_1_x_pos : OUT unsigned(10 downto 0);
+            skull_2_x_pos : OUT unsigned(10 downto 0);
             powerup_render : OUT std_logic;
             powerup_red, powerup_green, powerup_blue : OUT std_logic_vector(3 downto 0);
             powerup_collect : IN std_logic;
             powerup_count : OUT integer;
-            skull_1_render : OUT std_logic  
+            skull_1_render : OUT std_logic;
+            skull_2_render : OUT std_logic
         );
     end component LevelThree;
 
@@ -323,13 +326,19 @@ begin
         skull_1_blue => level_three_1_blue,
         skull_1_enabled => level_three_1_enabled,
         skull_1_x_pos => level_three_1_x_pos,
+        skull_1_render => level_three_1_render,
+        skull_2_red => level_three_2_red,
+        skull_2_green => level_three_2_green,
+        skull_2_blue => level_three_2_blue,
+        skull_2_enabled => level_three_2_enabled,
+        skull_2_x_pos => level_three_2_x_pos,
+        skull_2_render => level_three_2_render,
         powerup_render => level_three_powerup_render,
         powerup_red => level_three_powerup_red,
  		powerup_green => level_three_powerup_green,
  		powerup_blue => level_three_powerup_blue,
         powerup_collect => powerup_collect_s,
         powerup_count => level_three_powerup_count,
-        skull_1_render => level_three_1_render,
         paused => paused
     );
 

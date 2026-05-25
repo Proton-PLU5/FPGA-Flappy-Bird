@@ -459,18 +459,23 @@ begin
                     level_four_enabled <= '1';
             end case;
 
-            -- Level Switching for testing purposes (KEY2)
-            if KEY(2) = '0' and last_key_2_state = '1' then
-                if level_state = 4 then
+            -- Manual level selection via switches
+            case (SW(9) & SW(8) & SW(7)) is
+                when "001" =>
                     level_state <= 1;
-                else
-                    level_state <= level_state + 1;
-                end if;
-                last_key_2_state <= '0';
-                manual_level_change := '1';
-            elsif KEY(2) = '1' and last_key_2_state = '0' then
-                last_key_2_state <= '1';
-            end if;
+                    manual_level_change := '1';
+                when "011" =>
+                    level_state <= 2;
+                    manual_level_change := '1';
+                when "101" =>
+                    level_state <= 3;
+                    manual_level_change := '1';
+                when "111" =>
+                    level_state <= 4;
+                    manual_level_change := '1';
+                when others =>
+                    manual_level_change := '0';
+            end case;
 
             -- Automated level progression based on score
             if manual_level_change = '0' then

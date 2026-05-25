@@ -101,8 +101,10 @@ architecture behavior of LevelTwo is
     --LSFR
     signal lfsr_out      : std_logic_vector(7 downto 0);
 
+    signal start_rendering_pipe_2 : std_logic := '0';
 begin
     pipe_1_enabled_s <= level_two_enable and not paused;
+    pipe_2_enabled_s <= level_two_enable and not paused and start_rendering_pipe_2;
 
     PIPE_COMPONENT : OffsetPipe
         generic map ( START_OFFSET => 0 )
@@ -171,57 +173,45 @@ begin
         level_two_enable => level_two_enable
     );
 
-    PIPE_HEIGHT_RANDOMISER : process (vert_sync)
+    CLOCK_PROCESS : process(clk25Mhz)
     begin
-        if rising_edge(vert_sync) then
-            if pipe_1_enabled_s = '1' then
+        if rising_edge(clk25Mhz) then
+            if (level_two_enable = '1') then
                 pipe_1_reset <= '0';
+                pipe_2_reset <= '0';
+
+                if (pipe_1_x_pos_s < to_unsigned(320, 11)) then
+                    start_rendering_pipe_2 <= '1';
+                end if;
+
                 if pipe_1_end_reached = '1' then
                     pipe_1_height <= to_integer(unsigned(lfsr_out)) * 280 / 256 + 100;
                     pipe_1_reset <= '1';
 
-                end if;
-            elsif (level_two_enable = '0') then
-                pipe_1_reset <= '1'; -- Reset the pipe when the level is not enabled
-            end if;
-        end if;
-    end process PIPE_HEIGHT_RANDOMISER;
-
-    PIPE_2_HEIGHT_RANDOMISER : process (vert_sync)
-    begin
-        if rising_edge(vert_sync) then
-				if (pipe_1_x_pos_s = to_unsigned(320, 11)) then
-					pipe_2_enabled_s <= level_two_enable and not paused; -- Spawn pipe 2 when pipe 1 reaches mid-screen
-				 else
-					pipe_2_enabled_s <= '0';
-				 end if;
-					 
-            if pipe_2_enabled_s = '1' then
-                pipe_2_reset <= '0';
-                if pipe_2_end_reached = '1' then
-                    pipe_2_waiting <= '1';
+                    if unsigned(lfsr_out) < 128 then
+                        pipe_1_part_to_render <= '0'; -- Render top part
+                    else
+                        pipe_1_part_to_render <= '1'; -- Render bottom part
+                    end if;
                 end if;
 
-                -- Spawn pipe_2 when pipe_1 reaches mid-screen (consistent 320px spacing = 1/2 screen width)
-                if (pipe_2_waiting = '1' and pipe_1_x_pos_s <= to_unsigned(320, 11)) then
+                if (pipe_2_end_reached = '1') then
                     pipe_2_height <= to_integer(unsigned(lfsr_out)) * 280 / 256 + 100;
                     pipe_2_reset <= '1';
-                    pipe_2_waiting <= '0';
 
-                    -- Radomly decide which part of the pipe to render
-                    -- 50/50 chance, so if LSFR output is less than 1/2 of its max value, render top part, otherwise render bottom part
                     if unsigned(lfsr_out) < 128 then
                         pipe_2_part_to_render <= '0'; -- Render top part
                     else
                         pipe_2_part_to_render <= '1'; -- Render bottom part
                     end if;
                 end if;
-            elsif (level_two_enable = '0') then
-                pipe_2_reset <= '1'; -- Reset the pipe when the level is not enabled
-                pipe_2_waiting <= '0';
+            else
+                pipe_1_reset <= '1'; -- Reset the pipe when the level is not enabled
+                pipe_2_reset <= '1';
+                start_rendering_pipe_2 <= '0';
             end if;
         end if;
-    end process PIPE_2_HEIGHT_RANDOMISER;
+    end process;
 
     pipe_1_enabled <= pipe_1_enabled_s;
     pipe_2_enabled <= pipe_2_enabled_s;

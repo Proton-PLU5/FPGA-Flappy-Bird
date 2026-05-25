@@ -470,7 +470,8 @@ begin
             end case;
 
             -- Manual level selection via switches
-				dip_switch := SW(9) & SW(8) & SW(7);
+			dip_switch := SW(9) & SW(8) & SW(7);
+            
             case (dip_switch) is
                 when "001" =>
                     level_state <= 1;

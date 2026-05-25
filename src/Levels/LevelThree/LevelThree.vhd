@@ -81,9 +81,10 @@ architecture behavior of LevelThree is
     signal skull_2_end_reached : std_logic;
     signal skull_2_x_pos_s : unsigned(10 downto 0);
     signal skull_2_y_pos_s : integer range 0 to 480;
-    signal skull_2_red_s, skull_1_green_s, skull_1_blue_s : std_logic_vector(3 downto 0);
+    signal skull_2_red_s, skull_2_green_s, skull_2_blue_s : std_logic_vector(3 downto 0);
     signal skull_2_reset : std_logic := '0';
     signal skull_2_height : integer range 0 to 480 := 240; -- Default height is 240
+    signal skull_2_waiting : std_logic := '0';
 
     signal powerup_render_s : std_logic := '0';
     signal powerup_red_s, powerup_green_s, powerup_blue_s : std_logic_vector(3 downto 0);
@@ -94,6 +95,7 @@ architecture behavior of LevelThree is
     signal lfsr_out : std_logic_vector(7 downto 0);
 begin
     skull_1_enabled_s <= level_three_enable and not paused;
+    skull_2_enabled_s <= level_three_enable and not paused;
 
     SKULL_1_COMPONENT : Skull port map (
         clk => clk25Mhz,
@@ -159,14 +161,12 @@ begin
         variable random_y : integer;
     begin
         if rising_edge(vert_sync) then
-            if level_three_enable = '0' or paused = '1' then
-                skull_2_enabled_s <= '0';
-            elsif skull_1_x_pos_s <= to_unsigned(640 / 3, skull_1_x_pos_s'length) then
-                skull_2_enabled_s <= '1';
+            if skull_1_x_pos_s <= to_unsigned(640 / 3, skull_1_x_pos_s'length) then
+                skull_2_waiting <= '1';
             end if;
 
             -- For duplicates, only enable once prev skull reaches 1/3 of screen x
-            if skull_2_enabled_s = '1' then
+            if skull_2_enabled_s = '1' and skull_2_waiting = '1' then
                 skull_2_reset <= '0';
                 if skull_2_end_reached = '1' then
                     skull_2_y_pos_s <= (to_integer(unsigned(lfsr_out)) * (480 - SKULL_1_HEIGHT)) / 255; -- Create new y pos spawn

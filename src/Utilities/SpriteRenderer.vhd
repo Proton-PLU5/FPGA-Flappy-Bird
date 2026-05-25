@@ -78,6 +78,12 @@ begin
                 when 5 =>
                     width := BLUE_BRICK_TILE_WIDTH;
                     height := BLUE_BRICK_TILE_HEIGHT;
+                when 6 =>
+                    width := LASER_BEAM_WARNING_WIDTH;
+                    height := LASER_BEAM_WARNING_HEIGHT;
+                when 7 =>
+                    width := LASER_BEAM_WIDTH;
+                    height := LASER_BEAM_HEIGHT;
                 when others =>
                     width := SKELETRON_HEAD_WIDTH;
                     height := SKELETRON_HEAD_HEIGHT;
@@ -119,6 +125,12 @@ begin
                     when 5 =>
                         palette_index := BLUE_BRICK_TILE_DATA(addr);
                         color := BLUE_BRICK_TILE_PALETTE(palette_index);
+                    when 6 =>
+                        palette_index := LASER_BEAM_WARNING_DATA(addr);
+                        color := LASER_BEAM_WARNING_PALETTE(palette_index);
+                    when 7 =>
+                        palette_index := LASER_BEAM_DATA(addr);
+                        color := LASER_BEAM_PALETTE(palette_index);
                     when others =>
                         palette_index := SKELETRON_HEAD_DATA(addr);
                         color := SKELETRON_HEAD_PALETTE(palette_index);

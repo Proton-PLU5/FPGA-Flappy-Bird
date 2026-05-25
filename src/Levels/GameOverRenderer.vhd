@@ -35,6 +35,7 @@ architecture Behavioral of GameOverRenderer is
     end component title_display;
 
     signal gameover_enable : std_logic := '0';
+    signal tooltip_enable : std_logic := '0';
     signal last_mouse_left : std_logic := '0';
 
     begin
@@ -47,6 +48,15 @@ architecture Behavioral of GameOverRenderer is
         text_row => 224,
         text_col_start => 176
     );
+
+    TOOL_TIP : title_display generic map (text_string => "CLICK TO RETURN", text_size => 15, SIZE => 2) port map (
+        clk => clk25Mhz,
+        pixel_row => pixel_row,
+        pixel_column => pixel_column,
+        pixel_on => tooltip_enable, 
+        text_row => 300,
+        text_col_start => 256
+    );
     
     process(clk25Mhz)
     begin
@@ -57,6 +67,10 @@ architecture Behavioral of GameOverRenderer is
                     red <= "1111";
                     green <= "0000";
                     blue <= "0000";
+                elsif tooltip_enable = '1' then
+                    red <= "1111";
+                    green <= "1111";
+                    blue <= "1111";
                 else
                     red <= "0000";
                     green <= "0000";

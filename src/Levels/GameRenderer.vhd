@@ -434,6 +434,7 @@ begin
 
     LEVEL_SELECT : process (clk25Mhz)
         variable manual_level_change : std_logic;
+		  variable dip_switch : std_logic_vector(2 downto 0);
     begin
         if rising_edge(clk25Mhz) then
             manual_level_change := '0';
@@ -469,7 +470,8 @@ begin
             end case;
 
             -- Manual level selection via switches
-            case (SW(9) & SW(8) & SW(7)) is
+				dip_switch := SW(9) & SW(8) & SW(7);
+            case (dip_switch) is
                 when "001" =>
                     level_state <= 1;
                     manual_level_change := '1';

@@ -25,7 +25,8 @@ architecture behavior of GameRenderer is
             KEY : IN std_logic_vector(3 DOWNTO 0);
             red, green, blue : OUT std_logic_vector(3 downto 0);
             enabled : IN std_logic;
-            render : OUT std_logic
+            render : OUT std_logic;
+            player_y_pos : OUT unsigned(9 downto 0)
         );
     end component Player;
 
@@ -81,7 +82,8 @@ architecture behavior of GameRenderer is
             pipe_2_x_pos : OUT unsigned(10 downto 0);
             powerup_enabled : OUT std_logic;
             powerup_red, powerup_green, powerup_blue : OUT std_logic_vector(3 downto 0);
-            pipe_1_render, pipe_2_render : OUT std_logic        
+            pipe_1_render, pipe_2_render : OUT std_logic;
+            player_y_pos : IN unsigned(9 downto 0)      
         );
     end component LevelTwo;
 
@@ -170,7 +172,8 @@ architecture behavior of GameRenderer is
     
     -- TEMPORARY: For score changing
     signal mouse_down : std_logic := '0';
-	 
+	
+    signal player_y_pos : unsigned(9 downto 0);
 	signal player_enabled : std_logic;
 
 begin
@@ -202,7 +205,8 @@ begin
         green => ball_green,
         blue => ball_blue,
         render => player_render,
-        enabled => player_enabled
+        enabled => player_enabled,
+        player_y_pos => player_y_pos
     );
 
     LEVEL_ONE_COMPONENT : LevelOne port map (
@@ -254,7 +258,8 @@ begin
 		powerup_blue => powerup_blue,
         pipe_1_render => level_two_1_render,
         pipe_2_render => level_two_2_render,
-        paused => paused
+        paused => paused,
+        player_y_pos => player_y_pos
     );
 
     -- Multiplexer

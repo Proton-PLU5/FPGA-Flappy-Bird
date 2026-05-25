@@ -166,7 +166,7 @@ begin
 
                 -- start button
                 if KEY(3) = '0' and last_key_3_state = '1' then
-                    if selected_option = 1 then
+                    if selected_option = 1 or selected_option = 0 then
                         proceed <= '1';
                     else
                         proceed <= '0';

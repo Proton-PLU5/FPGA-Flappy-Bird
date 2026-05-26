@@ -5,6 +5,9 @@ use IEEE.numeric_std.all;
 use work.sprite_data_pkg.all;
 
 entity SpriteRenderer is
+    generic (
+        SCALE_FACTOR : integer := 1
+    );
     port (
         clk : in std_logic;
         pixel_row    : in std_logic_vector(9 downto 0);
@@ -15,7 +18,7 @@ entity SpriteRenderer is
         red   : out std_logic_vector(3 downto 0);
         green : out std_logic_vector(3 downto 0);
         blue  : out std_logic_vector(3 downto 0);
-		transparent : out std_logic
+        transparent : out std_logic
     );
 end entity;
 
@@ -23,8 +26,6 @@ architecture behavior of SpriteRenderer is
 
     signal sprite_x : integer;
     signal sprite_y : integer;
-    signal sprite_width : integer;
-    signal sprite_height : integer;
 
 begin
     -- use integers since we have width and height as integers and its easier to do math by
@@ -45,6 +46,8 @@ begin
         variable color : std_logic_vector(11 downto 0);
         variable width : integer;
         variable height : integer;
+        variable scaled_width : integer;
+        variable scaled_height : integer;
     begin
 
         if rising_edge(clk) then
@@ -58,7 +61,7 @@ begin
             blue  <= "0000";
             transparent <= '1';
 
-            -- Get the sprite dimensions
+            -- Get the sprite dimensions (original unscaled size)
             case sprite_id is
                 when 0 =>
                     width := SKELETRON_HEAD_WIDTH;
@@ -95,20 +98,21 @@ begin
                     height := SKELETRON_HEAD_HEIGHT;
             end case;
 
-            -- Check if the current pixel is within the sprite's bounding box
-            -- very simple rectangle bb check.
+            -- Calculate scaled widths and heights
+            scaled_width := width * SCALE_FACTOR;
+            scaled_height := height * SCALE_FACTOR;
+
+            -- Check if the current pixel is within the scaled sprite's bounding box
             if screen_x >= sprite_x and
-               screen_x < sprite_x + width and
+               screen_x < sprite_x + scaled_width and
                screen_y >= sprite_y and
-               screen_y < sprite_y + height then
+               screen_y < sprite_y + scaled_height then
 
-                -- Calculate the local pixel coordinates within the sprite
-                local_x := screen_x - sprite_x;
-                local_y := screen_y - sprite_y;
+                -- Calculate the local pixel coordinates, scaling down to match the original array size
+                local_x := (screen_x - sprite_x) / SCALE_FACTOR;
+                local_y := (screen_y - sprite_y) / SCALE_FACTOR;
 
-                -- used to search thru the 1d array to find the pixel pallete data.
-                -- cuz the data is actually 1d array and not a 2d array.
-                -- so we do some math to emulate 2d indexing.
+                -- Calculate address using original unscaled width
                 addr := local_y * width + local_x;
 
                 -- Select the colors using the sprite we are rendering
@@ -149,7 +153,6 @@ begin
                 end case;
 
                 -- Check for transparency (palette index 0 is transparent)
-                -- we can use this to just turn off the pixel so its super simple.
                 if (palette_index /= 0) then
                     red   <= color(11 downto 8);
                     green <= color(7 downto 4);

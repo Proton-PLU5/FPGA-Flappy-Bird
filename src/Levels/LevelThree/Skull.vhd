@@ -65,11 +65,11 @@ begin
     diff_row <= unsigned(pixel_row) - to_unsigned(skull_y_pos, 10);
 
     scaled_pixel_column <= std_logic_vector(
-        unsigned(pixel_column) - ("0" & diff_col(10 downto 1))
+        (resize(unsigned(pixel_column), 11) - ("0" & diff_col(10 downto 1)))(9 downto 0)
     );
 
     scaled_pixel_row <= std_logic_vector(
-        unsigned(pixel_row) - ("0" & diff_row(9 downto 1))
+        unsigned(pixel_row) - diff_row(9 downto 1)
     );
 
     SPRITE_RENDERER : SpriteRenderer port map (

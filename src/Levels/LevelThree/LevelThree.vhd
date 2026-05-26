@@ -15,14 +15,15 @@ entity LevelThree is
         skull_1_enabled, skull_2_enabled : OUT std_logic;
         skull_1_red, skull_1_green, skull_1_blue : OUT std_logic_vector(3 downto 0);
         skull_2_red, skull_2_green, skull_2_blue : OUT std_logic_vector(3 downto 0);
-        skull_1_x_pos : OUT unsigned(10 downto 0);
-        skull_2_x_pos : OUT unsigned(10 downto 0);
+        skull_3_red, skull_3_green, skull_3_blue : OUT std_logic_vector(3 downto 0);
+        skull_1_x_pos, skull_2_x_pos, skull_3_x_pos : OUT unsigned(10 downto 0);
         powerup_render : OUT std_logic;
         powerup_red, powerup_green, powerup_blue : OUT std_logic_vector(3 downto 0);
         powerup_collect : IN std_logic;
         powerup_count : OUT integer;
         skull_1_render : OUT std_logic;
-        skull_2_render : OUT std_logic
+        skull_2_render : OUT std_logic;
+        skull_3_render : OUT std_logic
     );
 end entity LevelThree;
 
@@ -86,6 +87,16 @@ architecture behavior of LevelThree is
     signal skull_2_height : integer range 0 to 480 := 240; -- Default height is 240
     signal skull_2_waiting : std_logic := '0';
 
+    signal skull_3_render_s : std_logic := '0';
+    signal skull_3_enabled_s : std_logic := '0';
+    signal skull_3_end_reached : std_logic;
+    signal skull_3_x_pos_s : unsigned(10 downto 0);
+    signal skull_3_y_pos_s : integer range 0 to 480;
+    signal skull_3_red_s, skull_2_green_s, skull_2_blue_s : std_logic_vector(3 downto 0);
+    signal skull_3_reset : std_logic := '0';
+    signal skull_3_height : integer range 0 to 480 := 240; -- Default height is 240
+    signal skull_3_waiting : std_logic := '0';
+
     signal powerup_render_s : std_logic := '0';
     signal powerup_red_s, powerup_green_s, powerup_blue_s : std_logic_vector(3 downto 0);
     signal powerup_reset : std_logic := '0';
@@ -128,6 +139,22 @@ begin
         enabled => skull_2_enabled_s,
         render => skull_2_render_s
     );
+
+   SKULL_3_COMPONENT : Skull port map (
+       clk => clk35Mhz,
+       vert_sync => vert_sync,
+       pixel_row => pixel_row,
+       pixel_column => pixel_column,
+       red => skull_3_red_s,
+       green => skull_3_green_s,
+       blue => skull_3_blue_s,
+       spawn_y_pos => skull_3_y_pos_s,
+       reset => skull_3_reset,
+       end_reached => skull_3_end_reached,
+       x_pos => skull_3_x_pos_s,
+       enabled => skull_3_enabled_s,
+       render => skull_3_render_s
+   );
 
     POWERUP_COMPONENT : PowerUp port map (
         clk => clk25Mhz,
@@ -173,12 +200,11 @@ begin
         end if;
     end process SKULL_1_RANDOMISER;
 
-    -- Bugged, doesn't spawn in ever
     SKULL_2_RANDOMISER : process (vert_sync)
         variable random_y : integer;
     begin
         if rising_edge(vert_sync) then
-            if skull_1_x_pos_s <= to_unsigned(640 / 3, skull_1_x_pos_s'length) then
+            if skull_1_x_pos_s <= to_unsigned(640 / 5, skull_1_x_pos_s'length) then
                 skull_2_waiting <= '1';
             end if;
 
@@ -194,6 +220,26 @@ begin
             end if;
         end if;
     end process SKULL_2_RANDOMISER;
+
+    SKULL_3_RANDOMISER : process (vert_sync)
+        variable random_y : integer;
+    begin
+        if rising_edge(vert_sync) then
+            if skull_2_x_pos_s <= to_unsigned(640 / 5, skull_2_x_pos_s'length) then
+                skull_3_waiting <= '1';
+            end if;
+
+            if skull_3_enabled_s = '1' and skull_3_waiting = '1' then
+                skull_3_reset <= '0';
+                if skull_3_end_reached = '1' then
+                    skull_3_y_pos_s <= (to_integer(unsigned(lfsr_out)) * (480 - SKULL_1_HEIGHT)) / 255; -- Create new y pos spawn
+                    skull_3_reset <= '1';
+                end if;
+            elsif (level_three_enable = '0') then
+                skull_3_reset <= '1'; -- Reset the skull when the level is not enabled
+            end if;
+        end if;
+    end process SKULL_3_RANDOMISER;
 
     skull_1_enabled <= skull_1_enabled_s;
     skull_1_red <= skull_1_red_s;

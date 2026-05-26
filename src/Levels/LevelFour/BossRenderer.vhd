@@ -10,7 +10,9 @@ entity BossRenderer is
     pixel_row, pixel_column : IN std_logic_vector(9 downto 0);
     red, green, blue : OUT std_logic_vector(3 downto 0);
     vert_sync : IN std_logic;
-    enabled : OUT std_logic
+    enabled : OUT std_logic;
+    x_pos : OUT std_logic_vector(9 downto 0);
+    y_pos : OUT std_logic_vector(9 downto 0)
   );
 end BossRenderer;
 
@@ -34,7 +36,6 @@ architecture behavior of BossRenderer is
     signal red_lower_jaw, green_lower_jaw, blue_lower_jaw : std_logic_vector(3 downto 0) := (others => '1');
     signal transparent_upper_jaw, transparent_lower_jaw : std_logic := '0';
 
-    signal x_pos, y_pos : std_logic_vector(9 downto 0) := (others => '0');
     signal lower_jaw_x_offset : std_logic_vector(9 downto 0) := CONV_STD_LOGIC_VECTOR(13, 10); -- Adjust as needed for jaw positioning
     signal lower_jaw_y_offset : std_logic_vector(9 downto 0) := CONV_STD_LOGIC_VECTOR(57, 10); -- Adjust as needed for jaw positioning
 
@@ -65,9 +66,6 @@ begin
         blue => blue_lower_jaw,
         transparent => transparent_lower_jaw
     );
-
-    x_pos <= CONV_STD_LOGIC_VECTOR(200, 10); -- Starting X position of the boss
-    y_pos <= CONV_STD_LOGIC_VECTOR(50, 10); -- Starting Y position of the boss
 
     process (vert_sync)
         variable lower_jaw_anim_counter : integer range 0 to 24 := 0;

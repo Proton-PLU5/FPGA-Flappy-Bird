@@ -23,7 +23,9 @@ architecture behavior of LevelFour is
             pixel_row, pixel_column : IN std_logic_vector(9 downto 0);
             red, green, blue : OUT std_logic_vector(3 downto 0);
             vert_sync : IN std_logic;
-            enabled : OUT std_logic
+            enabled : OUT std_logic;
+            x_pos : OUT std_logic_vector(9 downto 0);
+            y_pos : OUT std_logic_vector(9 downto 0)
         );
     end component BossRenderer;
 
@@ -42,8 +44,11 @@ architecture behavior of LevelFour is
         );
     end component SpriteRenderer;
 
+    --------- BOSS SIGNALS ---------
     signal boss_red, boss_green, boss_blue : std_logic_vector(3 downto 0);
     signal boss_enabled : std_logic;
+    signal boss_x_pos : std_logic_vector(9 downto 0) := CONV_STD_LOGIC_VECTOR(200, 10); -- Starting X position of the boss
+    signal boss_y_pos : std_logic_vector(9 downto 0) := CONV_STD_LOGIC_VECTOR(50, 10); -- Starting Y position of the boss
 
     --------- LASER BEAM SIGNALS ---------
     -- LASER WARNING SIGNALS (shared)
@@ -81,7 +86,9 @@ begin
         green => boss_green,
         blue => boss_blue,
         vert_sync => vert_sync,
-        enabled => boss_enabled
+        enabled => boss_enabled,
+        x_pos => boss_x_pos,
+        y_pos => boss_y_pos
     );
 
     -- LASER WARNING 1 SPRITE

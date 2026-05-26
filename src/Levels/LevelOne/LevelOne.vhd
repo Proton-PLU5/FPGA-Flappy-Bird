@@ -121,8 +121,8 @@ begin
         reset => pipe_2_reset,
         end_reached => pipe_2_end_reached,
         enabled => pipe_2_enabled_s,
-        follow_enable => '1',
-        follow_x_pos => pipe_1_x_pos_s,
+        follow_enable => '0',
+        follow_x_pos => (others => '0'),
         x_pos => pipe_2_x_pos_s,
         render => pipe_2_render_s
     );
@@ -148,6 +148,9 @@ begin
                 if pipe_1_end_reached = '1' then
                     pipe_1_height <= to_integer(unsigned(lfsr_out)) * 280 / 256 + 100;
                     pipe_1_reset <= '1';
+                end if;
+
+                if pipe_2_end_reached = '1' then
                     pipe_2_height <= to_integer(unsigned(lfsr_out)) * 280 / 256 + 100;
                     pipe_2_reset <= '1';
                 end if;

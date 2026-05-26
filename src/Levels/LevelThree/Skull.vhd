@@ -78,7 +78,7 @@ begin
         pixel_column => scaled_pixel_column,
         start_x => std_logic_vector(skull_x_pos),
         start_y      => '0' & std_logic_vector(to_unsigned(skull_y_pos, 10)),
-        sprite_id => 6,
+        sprite_id => 8,
         red => red_s,
         blue => blue_s,
         green => green_s,

@@ -52,13 +52,27 @@ architecture behavior of LevelFour is
     signal boss_y_pos : std_logic_vector(9 downto 0) := std_logic_Vector(to_unsigned(50, 10)); 
 
     --------- LASER BEAM SIGNALS ---------
-    -- LASER WARNING SIGNALS (shared)
     signal laser_warning1_red, laser_warning1_green, laser_warning1_blue : std_logic_vector(3 downto 0);
     signal laser_warning1_transparent : std_logic;
     signal laser_warning2_red, laser_warning2_green, laser_warning2_blue : std_logic_vector(3 downto 0);
     signal laser_warning2_transparent : std_logic;
     signal laser_warning_enabled : std_logic;
-    signal laser_warning_counter : integer range 0 to 100 := 0;
+    
+    signal laser_warning_counter : integer range 0 to 60 := 0;
+
+    --------- CENTER GAP ---------
+    constant SPRITE_HEIGHT : integer := 120; 
+    
+    constant GAP_HALF : integer := 75;  -- Half of 150px
+    constant Y_CENTER : integer := 240; -- 480 / 2
+
+    -- Top laser bottom edge = 165 (start_y = 165 - height)
+    constant L1_TARGET_INT : integer := Y_CENTER - GAP_HALF - SPRITE_HEIGHT;
+    -- Bottom laser top edge = 315 (start_y = 315)
+    constant L2_TARGET_INT : integer := Y_CENTER + GAP_HALF;
+    -- Keep bottom laser fully on-screen at spawn
+    constant L2_START_INT  : integer := 480 - SPRITE_HEIGHT;
+    -------------------------------------------------------
 
     -- LASER 1 SIGNALS
     signal laser1_red, laser1_green, laser1_blue : std_logic_vector(3 downto 0);
@@ -70,14 +84,16 @@ architecture behavior of LevelFour is
     signal laser2_red, laser2_green, laser2_blue : std_logic_vector(3 downto 0);
     signal laser2_transparent : std_logic;
     signal laser2_enabled : std_logic;
-    signal laser2_y_pos : unsigned(9 downto 0) := to_unsigned(479, 10);
+    signal laser2_y_pos : unsigned(9 downto 0) := to_unsigned(L2_START_INT, 10);
 
-    constant laser1_target_y : unsigned(9 downto 0) := to_unsigned(140, 10);
-    constant laser2_target_y : unsigned(9 downto 0) := to_unsigned(340, 10);
+    -- TARGET CONSTANTS
+    constant laser1_target_y : unsigned(9 downto 0) := to_unsigned(L1_TARGET_INT, 10);
+    constant laser2_target_y : unsigned(9 downto 0) := to_unsigned(L2_TARGET_INT, 10);
 
     type boss_state is (IDLE, WARNING, MOVING, HOLD, VICTORY);
     signal current_state : boss_state := IDLE;
-    signal cycle_counter : integer range 0 to 500 := 0;
+    
+    signal cycle_counter : integer range 0 to 1000 := 0; 
 begin
     Boss: BossRenderer port map (
         clk25Mhz => clk25Mhz,
@@ -97,7 +113,7 @@ begin
         clk => clk25Mhz,
         pixel_row => pixel_row,
         pixel_column => pixel_column,
-        start_x => std_logic_vector(to_unsigned(0, 11)), -- FIXED: Start at edge
+        start_x => std_logic_vector(to_unsigned(0, 11)), 
         start_y => '0' & std_logic_vector(laser1_y_pos),
         sprite_id => 6, 
         red => laser_warning1_red,
@@ -111,7 +127,7 @@ begin
         clk => clk25Mhz,
         pixel_row => pixel_row,
         pixel_column => pixel_column,
-        start_x => std_logic_vector(to_unsigned(0, 11)), -- FIXED: Start at edge
+        start_x => std_logic_vector(to_unsigned(0, 11)), 
         start_y => '0' & std_logic_vector(laser2_y_pos),
         sprite_id => 6, 
         red => laser_warning2_red,
@@ -125,7 +141,7 @@ begin
         clk => clk25Mhz,
         pixel_row => pixel_row,
         pixel_column => pixel_column,
-        start_x => std_logic_vector(to_unsigned(0, 11)), -- FIXED: Start at edge
+        start_x => std_logic_vector(to_unsigned(0, 11)), 
         start_y => '0' & std_logic_vector(laser1_y_pos),
         sprite_id => 7, 
         red => laser1_red,
@@ -139,7 +155,7 @@ begin
         clk => clk25Mhz,
         pixel_row => pixel_row,
         pixel_column => pixel_column,
-        start_x => std_logic_vector(to_unsigned(0, 11)), -- FIXED: Start at edge
+        start_x => std_logic_vector(to_unsigned(0, 11)), 
         start_y => '0' & std_logic_vector(laser2_y_pos),
         sprite_id => 7, 
         red => laser2_red,
@@ -155,9 +171,10 @@ begin
             if level_four_enable = '0' then
                 current_state <= IDLE;
                 cycle_counter <= 0;
+                laser_warning_counter <= 0;
                 game_finished <= '0';
                 laser1_y_pos <= (others => '0');
-                laser2_y_pos <= to_unsigned(479, 10);
+                laser2_y_pos <= to_unsigned(L2_START_INT, 10);
                 
             elsif paused = '0' then
                 case current_state is
@@ -166,7 +183,7 @@ begin
                         laser_warning_enabled <= '0';
                         laser1_enabled <= '0';
                         laser2_enabled <= '0';
-                        -- Start attack after a short delay
+                        -- Start attack after a short delay (1 second)
                         if cycle_counter > 60 then 
                             current_state <= WARNING;
                             cycle_counter <= 0;
@@ -175,12 +192,27 @@ begin
                         end if;
 
                     when WARNING =>
-                        laser_warning_enabled <= '1';
-                        if cycle_counter > 120 then -- 2 second warning
+                        -- 5 second warning (300 frames at 60Hz)
+                        if cycle_counter >= 300 then 
                             current_state <= MOVING;
                             cycle_counter <= 0;
+                            laser_warning_counter <= 0; -- reset for next time
                         else
                             cycle_counter <= cycle_counter + 1;
+                            
+                            -- Slow Flash Logic (30 frames on, 30 frames off)
+                            if laser_warning_counter < 30 then
+                                laser_warning_enabled <= '1';
+                            else
+                                laser_warning_enabled <= '0';
+                            end if;
+                            
+                            -- Loop the flash counter
+                            if laser_warning_counter = 59 then
+                                laser_warning_counter <= 0;
+                            else
+                                laser_warning_counter <= laser_warning_counter + 1;
+                            end if;
                         end if;
 
                     when MOVING =>
@@ -188,12 +220,12 @@ begin
                         laser1_enabled <= '1';
                         laser2_enabled <= '1';
                         
-                        -- Move lasers toward targets
+                        -- Move lasers toward targets slowly (1 px per frame)
                         if laser1_y_pos < laser1_target_y then 
-                            laser1_y_pos <= laser1_y_pos + 2; 
+                            laser1_y_pos <= laser1_y_pos + 1; 
                         end if;
                         if laser2_y_pos > laser2_target_y then 
-                            laser2_y_pos <= laser2_y_pos - 2; 
+                            laser2_y_pos <= laser2_y_pos - 1; 
                         end if;
 
                         -- Transition when both reach center
@@ -204,7 +236,7 @@ begin
 
                     when HOLD =>
                         -- Keep them visible and stationary
-                        if cycle_counter > 180 then -- Stay for 3 seconds
+                        if cycle_counter >= 300 then -- Stay for 5 seconds (60Hz * 5)
                             current_state <= VICTORY;
                             cycle_counter <= 0;
                         else

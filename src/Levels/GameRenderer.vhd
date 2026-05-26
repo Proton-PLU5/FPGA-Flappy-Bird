@@ -560,10 +560,6 @@ begin
                     red <= obstacle_1_red;
 					green <= obstacle_1_green;
 					blue <= obstacle_1_blue;
-                elsif powerup_render = '1' then
-                    red <= powerup_red;
-					green <= powerup_green;
-					blue <= powerup_blue;
                 elsif obstacle_2_render = '1' then
                     red <= obstacle_2_red;
 					green <= obstacle_2_green;
@@ -580,6 +576,10 @@ begin
                     red <= obstacle_5_red;
 					green <= obstacle_5_green;
 					blue <= obstacle_5_blue;
+                elsif powerup_render = '1' then
+                    red <= powerup_red;
+					green <= powerup_green;
+					blue <= powerup_blue;
                 else
                     red <= background_red;
 					green <= background_green;

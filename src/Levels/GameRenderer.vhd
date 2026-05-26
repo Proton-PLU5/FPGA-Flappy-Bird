@@ -604,7 +604,7 @@ begin
                 end if;
 
                 if vert_sync = '1' and last_vert_sync = '0' then
-                    if collision_pending = '1' and invincibility = 0 then
+                    if obstacle_collision_pending = '1' and invincibility = 0 then
                         invincibility <= 200; -- gives 5 seconds of invincibility at 60fps
 								if no_lives_left = '0' then
 									collision_count <= collision_count + 1; -- add to counter of collisions
@@ -759,9 +759,9 @@ begin
                     case (score) is
                         when 0 to 10 =>
                             level_state <= 1; -- Level One
-                        when 11 to 30 =>
+                        when 11 to 160 =>
                             level_state <= 2; -- Level Two
-                        when 31 to 60 =>
+                        when 161 to 310 =>
                             level_state <= 3; -- Level Three
                         when others =>
                             level_state <= 4; -- Level Four

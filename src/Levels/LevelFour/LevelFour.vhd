@@ -1,6 +1,7 @@
 library IEEE;
 use IEEE.std_logic_1164.all;
 use IEEE.numeric_std.all;
+
 entity LevelFour is
     port (
         clk25Mhz : IN std_logic;
@@ -24,8 +25,8 @@ architecture behavior of LevelFour is
             red, green, blue : OUT std_logic_vector(3 downto 0);
             vert_sync : IN std_logic;
             enabled : OUT std_logic;
-            x_pos : OUT std_logic_vector(9 downto 0);
-            y_pos : OUT std_logic_vector(9 downto 0)
+            x_pos : IN std_logic_vector(9 downto 0);
+            y_pos : in std_logic_vector(9 downto 0)
         );
     end component BossRenderer;
 
@@ -34,9 +35,9 @@ architecture behavior of LevelFour is
             clk : in std_logic;
             pixel_row    : in std_logic_vector(9 downto 0);
             pixel_column : in std_logic_vector(9 downto 0);
-            start_x  : in std_logic_vector(9 downto 0);
-            start_y  : in std_logic_vector(9 downto 0);
-            sprite_id : in integer;
+            start_x  : in std_logic_vector(10 downto 0);
+            start_y  : in std_logic_vector(10 downto 0);
+            sprite_id : in integer range 0 to 64;
             red   : out std_logic_vector(3 downto 0);
             green : out std_logic_vector(3 downto 0);
             blue  : out std_logic_vector(3 downto 0);
@@ -47,8 +48,8 @@ architecture behavior of LevelFour is
     --------- BOSS SIGNALS ---------
     signal boss_red, boss_green, boss_blue : std_logic_vector(3 downto 0);
     signal boss_enabled : std_logic;
-    signal boss_x_pos : std_logic_vector(9 downto 0) := CONV_STD_LOGIC_VECTOR(200, 10); -- Starting X position of the boss
-    signal boss_y_pos : std_logic_vector(9 downto 0) := CONV_STD_LOGIC_VECTOR(50, 10); -- Starting Y position of the boss
+    signal boss_x_pos : std_logic_vector(9 downto 0) := std_logic_Vector(to_unsigned(200, 10)); 
+    signal boss_y_pos : std_logic_vector(9 downto 0) := std_logic_Vector(to_unsigned(50, 10)); 
 
     --------- LASER BEAM SIGNALS ---------
     -- LASER WARNING SIGNALS (shared)
@@ -96,9 +97,9 @@ begin
         clk => clk25Mhz,
         pixel_row => pixel_row,
         pixel_column => pixel_column,
-        start_x => CONV_STD_LOGIC_VECTOR(300, 10),
-        start_y => std_logic_vector(laser1_y_pos),
-        sprite_id => 6, -- LASER_BEAM_WARNING
+        start_x => std_logic_vector(to_unsigned(0, 11)), -- FIXED: Start at edge
+        start_y => '0' & std_logic_vector(laser1_y_pos),
+        sprite_id => 6, 
         red => laser_warning1_red,
         green => laser_warning1_green,
         blue => laser_warning1_blue,
@@ -110,9 +111,9 @@ begin
         clk => clk25Mhz,
         pixel_row => pixel_row,
         pixel_column => pixel_column,
-        start_x => CONV_STD_LOGIC_VECTOR(400, 10),
-        start_y => std_logic_vector(laser2_y_pos),
-        sprite_id => 6, -- LASER_BEAM_WARNING
+        start_x => std_logic_vector(to_unsigned(0, 11)), -- FIXED: Start at edge
+        start_y => '0' & std_logic_vector(laser2_y_pos),
+        sprite_id => 6, 
         red => laser_warning2_red,
         green => laser_warning2_green,
         blue => laser_warning2_blue,
@@ -124,9 +125,9 @@ begin
         clk => clk25Mhz,
         pixel_row => pixel_row,
         pixel_column => pixel_column,
-        start_x => CONV_STD_LOGIC_VECTOR(300, 10),
-        start_y => std_logic_vector(laser1_y_pos),
-        sprite_id => 7, -- LASER_BEAM
+        start_x => std_logic_vector(to_unsigned(0, 11)), -- FIXED: Start at edge
+        start_y => '0' & std_logic_vector(laser1_y_pos),
+        sprite_id => 7, 
         red => laser1_red,
         green => laser1_green,
         blue => laser1_blue,
@@ -138,9 +139,9 @@ begin
         clk => clk25Mhz,
         pixel_row => pixel_row,
         pixel_column => pixel_column,
-        start_x => CONV_STD_LOGIC_VECTOR(400, 10),
-        start_y => std_logic_vector(laser2_y_pos),
-        sprite_id => 7, -- LASER_BEAM
+        start_x => std_logic_vector(to_unsigned(0, 11)), -- FIXED: Start at edge
+        start_y => '0' & std_logic_vector(laser2_y_pos),
+        sprite_id => 7, 
         red => laser2_red,
         green => laser2_green,
         blue => laser2_blue,
@@ -158,7 +159,7 @@ begin
                 laser1_y_pos <= (others => '0');
                 laser2_y_pos <= to_unsigned(479, 10);
                 
-            elsif not paused then
+            elsif paused = '0' then
                 case current_state is
                     
                     when IDLE =>

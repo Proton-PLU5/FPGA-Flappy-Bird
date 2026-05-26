@@ -11,8 +11,8 @@ entity BossRenderer is
     red, green, blue : OUT std_logic_vector(3 downto 0);
     vert_sync : IN std_logic;
     enabled : OUT std_logic;
-    x_pos : OUT std_logic_vector(9 downto 0);
-    y_pos : OUT std_logic_vector(9 downto 0)
+    x_pos : IN std_logic_vector(9 downto 0);
+    y_pos : IN std_logic_vector(9 downto 0)
   );
 end BossRenderer;
 
@@ -24,7 +24,7 @@ architecture behavior of BossRenderer is
             pixel_column : in std_logic_vector(9 downto 0);
 			   start_x  : in std_logic_vector(10 downto 0);
 			   start_y  : in std_logic_vector(10 downto 0);
-			   sprite_id : in integer range 0 to 7;
+			   sprite_id : in integer range 0 to 64;
             red : out std_logic_vector(3 downto 0);
             green : out std_logic_vector(3 downto 0);
             blue : out std_logic_vector(3 downto 0);
@@ -58,8 +58,8 @@ begin
         clk => clk25Mhz,
         pixel_row => pixel_row,
         pixel_column => pixel_column,
-        start_x => x_pos + lower_jaw_x_offset, -- Adjust x position for lower jaw
-        start_y => y_pos + lower_jaw_y_offset, -- Adjust y position for lower jaw
+        start_x => '0' & x_pos + lower_jaw_x_offset, -- Adjust x position for lower jaw
+        start_y => '0' & y_pos + lower_jaw_y_offset, -- Adjust y position for lower jaw
         sprite_id => 1, -- Assuming 1 is the ID for the boss lower jaw sprite
         red => red_lower_jaw,
         green => green_lower_jaw,

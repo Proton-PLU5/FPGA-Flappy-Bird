@@ -92,7 +92,7 @@ architecture behavior of LevelThree is
     signal skull_3_end_reached : std_logic;
     signal skull_3_x_pos_s : unsigned(10 downto 0);
     signal skull_3_y_pos_s : integer range 0 to 480;
-    signal skull_3_red_s, skull_2_green_s, skull_2_blue_s : std_logic_vector(3 downto 0);
+    signal skull_3_red_s, skull_3_green_s, skull_3_blue_s : std_logic_vector(3 downto 0);
     signal skull_3_reset : std_logic := '0';
     signal skull_3_height : integer range 0 to 480 := 240; -- Default height is 240
     signal skull_3_waiting : std_logic := '0';

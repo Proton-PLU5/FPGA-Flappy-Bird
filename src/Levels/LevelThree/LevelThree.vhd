@@ -113,6 +113,22 @@ begin
         render => skull_1_render_s
     );
 
+    SKULL_2_COMPONENT : Skull port map (
+        clk => clk25Mhz,
+        vert_sync => vert_sync,
+        pixel_row => pixel_row,
+        pixel_column => pixel_column,
+        red => skull_2_red_s,
+        green => skull_2_green_s,
+        blue => skull_2_blue_s,
+        spawn_y_pos => skull_2_y_pos_s,
+        reset => skull_2_reset,
+        end_reached => skull_2_end_reached,
+        x_pos => skull_2_x_pos_s,
+        enabled => skull_2_enabled_s,
+        render => skull_2_render_s
+    );
+
     POWERUP_COMPONENT : PowerUp port map (
         clk => clk25Mhz,
         vert_sync => vert_sync,
@@ -157,6 +173,7 @@ begin
         end if;
     end process SKULL_1_RANDOMISER;
 
+    -- Bugged, doesn't spawn in ever
     SKULL_2_RANDOMISER : process (vert_sync)
         variable random_y : integer;
     begin

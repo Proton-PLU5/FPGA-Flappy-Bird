@@ -46,19 +46,20 @@ begin
     PIPE_CONTROLLER : process (vert_sync)
     begin
         if rising_edge(vert_sync) then
-            -- handle reset unconditionally so it works even when menu/paused
+            -- RESET
             if reset = '1' then
                 if follow_enable = '0' then
-                    pipe_x_pos <= to_unsigned(640 + START_OFFSET, 11); -- Reset to right edge
+                    pipe_x_pos <= to_unsigned(640 + START_OFFSET, 11); -- Jump to right edge
                 end if;
                 end_reached <= '0';
 
+            -- NORMAL MOVEMENT
             elsif enabled = '1' then
                 if follow_enable = '0' then
-                    -- normal running behaviour: move, pulse end_reached and respawn immediately
-                    if pipe_x_pos <= to_unsigned(0, 11) then
+                    
+                    -- FIX: Check against 2 instead
+                    if pipe_x_pos <= to_unsigned(2, 11) then
                         end_reached <= '1';
-                        pipe_x_pos <= to_unsigned(640 + START_OFFSET, 11); -- respawn immediately to avoid visible hang at edge
                     else
                         pipe_x_pos <= pipe_x_pos - to_unsigned(2, 11);
                         end_reached <= '0';
@@ -67,9 +68,9 @@ begin
                     end_reached <= '0';
                 end if;
 
+            -- PAUSED BEHAVIOUR
             else
-                -- paused/title: freeze position (no assignments)
-                null;
+                null; -- DO NOTHING
             end if;
         end if;
     end process PIPE_CONTROLLER;

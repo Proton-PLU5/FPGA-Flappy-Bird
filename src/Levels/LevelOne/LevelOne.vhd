@@ -106,7 +106,7 @@ begin
     );
 
     PIPE2_COMPONENT : Pipe
-        generic map ( START_OFFSET => PIPE_GAP_X )
+        generic map ( START_OFFSET => 0 ) -- FIX: Changed from PIPE_GAP_X to 0
         port map (
         clk => clk25Mhz,
         vert_sync => vert_sync,
@@ -126,7 +126,7 @@ begin
         x_pos => pipe_2_x_pos_s,
         render => pipe_2_render_s
     );
-
+    
     LFSR_COMPONENT : LFSR port map (
         clk        => clk25Mhz,
         reset      => '0',

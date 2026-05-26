@@ -86,14 +86,6 @@ begin
         end if;
     end process;
 
-    render_s <= '1' when (
-        active = '1' and
-        unsigned(pixel_column) >= powerup_x_pos and
-        unsigned(pixel_column) < powerup_x_pos + to_unsigned(POWERUP_WIDTH, 11) and
-        unsigned(pixel_row) >= powerup_y_pos and
-        unsigned(pixel_row) < powerup_y_pos + to_unsigned(POWERUP_WIDTH, 10)
-    ) else '0';
-
     process (vert_sync)
         variable spawn_y : integer;
     begin

@@ -56,10 +56,11 @@ architecture behaviour of PowerUp is
 	end component;
 begin
     render_s <= '1' when (
+        active = '1' and
         unsigned(pixel_column) >= powerup_x_pos and
         unsigned(pixel_column) < powerup_x_pos + to_unsigned(POWERUP_WIDTH, 11) and
-        unsigned(pixel_row) >= to_unsigned(powerup_y_pos, 10) and
-        unsigned(pixel_row) < to_unsigned(powerup_y_pos + POWERUP_HEIGHT, 10)
+        unsigned(pixel_row) >= powerup_y_pos and
+        unsigned(pixel_row) < powerup_y_pos + to_unsigned(POWERUP_HEIGHT, 10)
     ) else '0';
 
     SPRITE_RENDERER : SpriteRenderer port map (

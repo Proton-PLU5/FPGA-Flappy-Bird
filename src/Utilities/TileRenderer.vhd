@@ -20,9 +20,9 @@ architecture behaviour of TileRenderer is
             clk : in std_logic;
             pixel_row    : in std_logic_vector(9 downto 0);
             pixel_column : in std_logic_vector(9 downto 0);
-            start_x  : in std_logic_vector(9 downto 0);
-            start_y  : in std_logic_vector(9 downto 0);
-            sprite_id : in integer;
+			   start_x  : in std_logic_vector(10 downto 0);
+			   start_y  : in std_logic_vector(10 downto 0);
+			   sprite_id : in integer range 0 to 7;
             red   : out std_logic_vector(3 downto 0);
             green : out std_logic_vector(3 downto 0);
             blue  : out std_logic_vector(3 downto 0);
@@ -56,8 +56,8 @@ begin
         clk => clk,
         pixel_row => pixel_row,
         pixel_column => pixel_column,
-        start_x => tile_start_x,
-        start_y => tile_start_y,
+        start_x => '0' & tile_start_x,
+        start_y => '0' & tile_start_y,
         sprite_id => tile_id,  -- Use the provided tile_id
         red => sprite_red,
         green => sprite_green,

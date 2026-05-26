@@ -9,9 +9,9 @@ entity SpriteRenderer is
         clk : in std_logic;
         pixel_row    : in std_logic_vector(9 downto 0);
         pixel_column : in std_logic_vector(9 downto 0);
-        start_x  : in std_logic_vector(9 downto 0);
-        start_y  : in std_logic_vector(9 downto 0);
-        sprite_id : in integer;
+        start_x  : in std_logic_vector(10 downto 0);
+        start_y  : in std_logic_vector(10 downto 0);
+        sprite_id : in integer range 0 to 8;
         red   : out std_logic_vector(3 downto 0);
         green : out std_logic_vector(3 downto 0);
         blue  : out std_logic_vector(3 downto 0);
@@ -84,6 +84,9 @@ begin
                 when 7 =>
                     width := LASER_BEAM_WIDTH;
                     height := LASER_BEAM_HEIGHT;
+                when 8 =>
+                    width := L3SKULL_WIDTH;
+                    height := L3SKULL_HEIGHT;
                 when others =>
                     width := SKELETRON_HEAD_WIDTH;
                     height := SKELETRON_HEAD_HEIGHT;
@@ -131,6 +134,9 @@ begin
                     when 7 =>
                         palette_index := LASER_BEAM_DATA(addr);
                         color := LASER_BEAM_PALETTE(palette_index);
+                    when 8 =>
+                        palette_index := L3SKULL_DATA(addr);
+                        color := L3SKULL_PALETTE(palette_index);
                     when others =>
                         palette_index := SKELETRON_HEAD_DATA(addr);
                         color := SKELETRON_HEAD_PALETTE(palette_index);

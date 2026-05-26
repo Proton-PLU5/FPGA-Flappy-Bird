@@ -16,6 +16,8 @@ entity Pipe is
         end_reached                 : out std_logic;
         x_pos                       : out unsigned(10 downto 0);
         enabled                     : in std_logic;
+        follow_enable               : in std_logic;
+        follow_x_pos                : in unsigned(10 downto 0);
         render                      : out std_logic
     );
 end entity Pipe;
@@ -23,41 +25,54 @@ end entity Pipe;
 architecture behaviour of Pipe is
     signal render_out : std_logic;
     signal pipe_x_pos : unsigned(10 downto 0) := to_unsigned(640 + START_OFFSET, 11); -- Start off-screen right (staggerable)
+    signal pipe_x_pos_effective : unsigned(10 downto 0);
     signal pipe_top_y_pos : unsigned(9 downto 0);
     signal pipe_bottom_y_pos : unsigned(9 downto 0);
     signal pipe_width : unsigned(9 downto 0) := to_unsigned(25,10);
+    signal is_visible : std_logic := '1';
 begin
     -- Calculate top and bottom y positions based on height and gap
     pipe_top_y_pos <= to_unsigned(height, 10) - to_unsigned(gap/2, 10);
     pipe_bottom_y_pos <= to_unsigned(height, 10) + to_unsigned(gap/2, 10);
 
+    pipe_x_pos_effective <= follow_x_pos + to_unsigned(START_OFFSET, 11) when follow_enable = '1'
+                            else pipe_x_pos;
+
     -- render_out logic
     render_out <= '1' when (
-        (pipe_x_pos <= unsigned(pixel_column) + pipe_width) and (unsigned(pixel_column) <= pipe_x_pos + pipe_width)
+        (is_visible = '1') and (enabled = '1') 
+        and (pipe_x_pos_effective <= unsigned(pixel_column) + pipe_width) 
+        and (unsigned(pixel_column) <= pipe_x_pos_effective + pipe_width)
         and ( (unsigned(pixel_row) <= pipe_top_y_pos) or (unsigned(pixel_row) >= pipe_bottom_y_pos) )
     ) else '0';
 
     PIPE_CONTROLLER : process (vert_sync)
     begin
         if rising_edge(vert_sync) then
-            -- handle reset unconditionally so it works even when menu/paused
-            if reset = '1' then
-                pipe_x_pos <= to_unsigned(640 + START_OFFSET, 11); -- Reset to right edge
+            
+            -- UPDATED: Snap to the end of the screen if explicitly reset OR if the level is disabled
+            if reset = '1' or enabled = '0' then
+                if follow_enable = '0' then
+                    pipe_x_pos <= to_unsigned(640 + START_OFFSET, 11);
+                end if;
                 end_reached <= '0';
+                is_visible <= '1'; -- Unhide the pipe for its next run (it is off-screen anyway)
 
+            -- Normal Movement
             elsif enabled = '1' then
-                -- normal running behaviour: move, pulse end_reached and respawn immediately
-                if pipe_x_pos <= to_unsigned(0, 11) then
-                    end_reached <= '1';
-                    pipe_x_pos <= to_unsigned(640 + START_OFFSET, 11); -- respawn immediately to avoid visible hang at edge
+                if follow_enable = '0' then
+                    
+                    -- Check if it reached the end
+                    if pipe_x_pos <= to_unsigned(2, 11) then
+                        end_reached <= '1';
+                        is_visible <= '0'; -- Hide the pipe while it waits for the parent reset
+                    else
+                        pipe_x_pos <= pipe_x_pos - to_unsigned(2, 11);
+                        end_reached <= '0';
+                    end if;
                 else
-                    pipe_x_pos <= pipe_x_pos - to_unsigned(2, 11);
                     end_reached <= '0';
                 end if;
-
-            else
-                -- paused/title: freeze position (no assignments)
-                null;
             end if;
         end if;
     end process PIPE_CONTROLLER;
@@ -66,5 +81,5 @@ begin
     red <= (others => '0');
     green <= (others => '1');
     blue <= (others => '0');
-    x_pos <= pipe_x_pos;
+    x_pos <= pipe_x_pos_effective;
 end architecture behaviour;

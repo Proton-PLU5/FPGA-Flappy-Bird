@@ -32,10 +32,14 @@ architecture behaviour of OffsetPipe is
 
     signal player_latched_y_pos : unsigned(9 downto 0);
     signal player_latched : std_logic := '0';
+    
+    -- NEW: Visibility toggle to hide the pipe when it reaches the end
+    signal is_visible : std_logic := '1';
 begin
     -- render_out logic
     render_out <= '1' when (
-        (pipe_x_pos <= unsigned(pixel_column) + pipe_width) and (unsigned(pixel_column) <= pipe_x_pos + pipe_width)
+        (is_visible = '1') -- Added visibility check
+        and (pipe_x_pos <= unsigned(pixel_column) + pipe_width) and (unsigned(pixel_column) <= pipe_x_pos + pipe_width)
         and (
             ((unsigned(pixel_row) <= pipe_top_y_pos) and (part_to_render = '1')) or
             ((unsigned(pixel_row) >= pipe_bottom_y_pos) and (part_to_render = '0'))
@@ -48,16 +52,21 @@ begin
             -- handle reset unconditionally so it works even when menu/paused
             if reset = '1' then
                 end_reached <= '0';
+                is_visible <= '1'; -- Unhide on reset
 
                 -- Reset pipe positions
                 pipe_x_pos <= to_unsigned(640 + START_OFFSET, 11);
                 pipe_top_y_pos <= to_unsigned(height, 10) - to_unsigned(gap/2, 10);
                 pipe_bottom_y_pos <= to_unsigned(height, 10) + to_unsigned(gap/2, 10);
                 player_latched <= '0';  -- Reset player latched state on reset
+                
             elsif enabled = '1' then
-                if pipe_x_pos <= to_unsigned(0, 11) then
+                
+                -- FIX: Check against 2 instead of 0 to prevent unsigned underflow wrapping
+                if pipe_x_pos <= to_unsigned(2, 11) then
                     end_reached <= '1';
-                    pipe_x_pos <= to_unsigned(640 + START_OFFSET, 11); -- respawn immediately
+                    is_visible <= '0'; -- Hide the pipe while it waits for the parent reset
+                    -- REMOVED immediate self-reset: Let LevelTwo's reset handle the respawn
                 else
                     pipe_x_pos <= pipe_x_pos - to_unsigned(2, 11);
                     end_reached <= '0';

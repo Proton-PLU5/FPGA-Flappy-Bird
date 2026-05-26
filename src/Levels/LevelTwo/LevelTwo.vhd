@@ -176,37 +176,45 @@ begin
     CLOCK_PROCESS : process(clk25Mhz)
     begin
         if rising_edge(clk25Mhz) then
+            -- 1. LEVEL IS ENABLED
             if (level_two_enable = '1') then
-                pipe_1_reset <= '0';
-                pipe_2_reset <= '0';
+                
+                -- PIPE 1 HANDSHAKE
+                if pipe_1_end_reached = '1' then
+                    pipe_1_reset <= '1';
+                    -- Latch new random values only once per respawn
+                    -- (They only change when reset is high)
+                    pipe_1_height <= to_integer(unsigned(lfsr_out)) * 280 / 256 + 100;
+                    if unsigned(lfsr_out) < 128 then
+                        pipe_1_part_to_render <= '0'; 
+                    else
+                        pipe_1_part_to_render <= '1';
+                    end if;
+                else
+                    pipe_1_reset <= '0'; -- Release reset once pipe has moved
+                end if;
 
+                -- PIPE 2 STAGGERED START & HANDSHAKE
+                -- Only start moving Pipe 2 once Pipe 1 has crossed the middle
                 if (pipe_1_x_pos_s < to_unsigned(320, 11)) then
                     start_rendering_pipe_2 <= '1';
                 end if;
 
-                if pipe_1_end_reached = '1' then
-                    pipe_1_height <= to_integer(unsigned(lfsr_out)) * 280 / 256 + 100;
-                    pipe_1_reset <= '1';
-
-                    if unsigned(lfsr_out) < 128 then
-                        pipe_1_part_to_render <= '0'; -- Render top part
-                    else
-                        pipe_1_part_to_render <= '1'; -- Render bottom part
-                    end if;
-                end if;
-
-                if (pipe_2_end_reached = '1') then
-                    pipe_2_height <= to_integer(unsigned(lfsr_out)) * 280 / 256 + 100;
+                if pipe_2_end_reached = '1' then
                     pipe_2_reset <= '1';
-
+                    pipe_2_height <= to_integer(unsigned(lfsr_out)) * 280 / 256 + 100;
                     if unsigned(lfsr_out) < 128 then
-                        pipe_2_part_to_render <= '0'; -- Render top part
+                        pipe_2_part_to_render <= '0';
                     else
-                        pipe_2_part_to_render <= '1'; -- Render bottom part
+                        pipe_2_part_to_render <= '1';
                     end if;
+                else
+                    pipe_2_reset <= '0';
                 end if;
+
+            -- RESET LOGIC
             else
-                pipe_1_reset <= '1'; -- Reset the pipe when the level is not enabled
+                pipe_1_reset <= '1'; 
                 pipe_2_reset <= '1';
                 start_rendering_pipe_2 <= '0';
             end if;

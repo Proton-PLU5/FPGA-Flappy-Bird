@@ -81,15 +81,15 @@ begin
                         -- If top pipe move down.
                         if (part_to_render = '1') then
                             if (pipe_top_y_pos < player_latched_y_pos) then
-                                pipe_top_y_pos <= pipe_top_y_pos + to_unsigned(2, 10);  -- Move down by 2 pixels
-                                pipe_bottom_y_pos <= pipe_bottom_y_pos + to_unsigned(2, 10);  -- Adjust bottom position accordingly
+                                pipe_top_y_pos <= pipe_top_y_pos + to_unsigned(8, 10);  -- Move down by 8 pixels
+                                pipe_bottom_y_pos <= pipe_bottom_y_pos + to_unsigned(8, 10);  -- Adjust bottom position accordingly
                             end if;
                         
                         -- If bottom pipe move up.
                         elsif (part_to_render = '0') then
                             if (pipe_top_y_pos > player_latched_y_pos) then
-                                pipe_top_y_pos <= pipe_top_y_pos - to_unsigned(2, 10);  -- Move up by 2 pixels
-                                pipe_bottom_y_pos <= pipe_bottom_y_pos - to_unsigned(2, 10);  -- Adjust bottom position accordingly
+                                pipe_top_y_pos <= pipe_top_y_pos - to_unsigned(8, 10);  -- Move up by 8 pixels
+                                pipe_bottom_y_pos <= pipe_bottom_y_pos - to_unsigned(8, 10);  -- Adjust bottom position accordingly
                             end if;
                         end if;
                     end if;

@@ -639,7 +639,7 @@ begin
                     powerup_collision_pending <= '0';
                 end if;
 					 
-				else
+            else
                 --While the game is disabled (on Title Screen), constantly hold the score at 0.
                 score <= 0;
                 mouse_down <= '0';
@@ -667,65 +667,71 @@ begin
                 prev_paused <= '0';
             end if;
 
-            case (level_state) is
-                when 1 =>
-                    level_one_enabled <= '1';
-                    level_two_enabled <= '0';
-                    level_three_enabled <= '0';
-                    level_four_enabled <= '0';
-                when 2 =>
-                    level_one_enabled <= '0';
-                    level_two_enabled <= '1';
-                    level_three_enabled <= '0';
-                    level_four_enabled <= '0';
-                when 3 =>
-                    level_one_enabled <= '0';
-                    level_two_enabled <= '0';
-                    level_three_enabled <= '1';
-                    level_four_enabled <= '0';
-                when others =>
-                    level_one_enabled <= '0';
-                    level_two_enabled <= '0';
-                    level_three_enabled <= '0';
-                    level_four_enabled <= '1';
-            end case;
-
-            -- Manual level selection via switches
-				dip_switch := SW(9) & SW(8) & SW(7);
-            case (dip_switch) is
-                when "001" =>
-                    level_state <= 1;
-                    manual_level_change := '1';
-                when "011" =>
-                    level_state <= 2;
-                    manual_level_change := '1';
-                when "101" =>
-                    level_state <= 3;
-                    manual_level_change := '1';
-                when "111" =>
-                    level_state <= 4;
-                    manual_level_change := '1';
-                when others =>
-                    manual_level_change := '0';
-            end case;
-
-            -- Automated level progression based on score
-            if manual_level_change = '0' then
-                case (score) is
-                    when 0 to 10 =>
-                        level_state <= 1; -- Level One
-                    when 11 to 160 =>
-                        level_state <= 2; -- Level Two
-                    when 161 to 310 =>
-                        level_state <= 3; -- Level Three
+            if (enabled = '0') then
+                level_one_enabled <= '0';
+                level_two_enabled <= '0';
+                level_three_enabled <= '0';
+                level_four_enabled <= '0';
+            else
+                case (level_state) is
+                    when 1 =>
+                        level_one_enabled <= '1';
+                        level_two_enabled <= '0';
+                        level_three_enabled <= '0';
+                        level_four_enabled <= '0';
+                    when 2 =>
+                        level_one_enabled <= '0';
+                        level_two_enabled <= '1';
+                        level_three_enabled <= '0';
+                        level_four_enabled <= '0';
+                    when 3 =>
+                        level_one_enabled <= '0';
+                        level_two_enabled <= '0';
+                        level_three_enabled <= '1';
+                        level_four_enabled <= '0';
                     when others =>
-                        level_state <= 4; -- Level Four
+                        level_one_enabled <= '0';
+                        level_two_enabled <= '0';
+                        level_three_enabled <= '0';
+                        level_four_enabled <= '1';
                 end case;
-            elsif training_mode = '1' then
-                -- In training mode, override to only level one for consistent testing conditions
-                level_state <= 1;
-            end if;
 
+                -- Manual level selection via switches
+                dip_switch := SW(9) & SW(8) & SW(7);
+                case (dip_switch) is
+                    when "001" =>
+                        level_state <= 1;
+                        manual_level_change := '1';
+                    when "011" =>
+                        level_state <= 2;
+                        manual_level_change := '1';
+                    when "101" =>
+                        level_state <= 3;
+                        manual_level_change := '1';
+                    when "111" =>
+                        level_state <= 4;
+                        manual_level_change := '1';
+                    when others =>
+                        manual_level_change := '0';
+                end case; 
+
+                -- Automated level progression based on score
+                if manual_level_change = '0' then
+                    case (score) is
+                        when 0 to 10 =>
+                            level_state <= 1; -- Level One
+                        when 11 to 30 =>
+                            level_state <= 2; -- Level Two
+                        when 31 to 60 =>
+                            level_state <= 3; -- Level Three
+                        when others =>
+                            level_state <= 4; -- Level Four
+                    end case;
+                elsif training_mode = '1' then
+                  -- In training mode, override to only level one for consistent testing conditions
+                  level_state <= 1;
+                end if;
+            end if;
         end if;
     end process LEVEL_SELECT;
     

@@ -426,19 +426,19 @@ begin
     obstacle_3_x_pos    <= level_three_3_x_pos when level_state = 3 else (others => '0');
     obstacle_3_render   <= level_three_3_render when level_state = 3 else '0';
 
-    obstacle_4_enabled  <= level_three_4_enabled when level_state = 4 else '0';
-    obstacle_4_red      <= level_three_4_red when level_state = 4 else "0000";
-    obstacle_4_green    <= level_three_4_green when level_state = 4 else "0000";
-    obstacle_4_blue     <= level_three_4_blue when level_state = 4 else "0000";
-    obstacle_4_x_pos    <= level_three_4_x_pos when level_state = 4 else (others => '0');
-    obstacle_4_render   <= level_three_4_render when level_state = 4 else '0';
+    obstacle_4_enabled  <= level_three_4_enabled when level_state = 3 else '0';
+    obstacle_4_red      <= level_three_4_red when level_state = 3 else "0000";
+    obstacle_4_green    <= level_three_4_green when level_state = 3 else "0000";
+    obstacle_4_blue     <= level_three_4_blue when level_state = 3 else "0000";
+    obstacle_4_x_pos    <= level_three_4_x_pos when level_state = 3 else (others => '0');
+    obstacle_4_render   <= level_three_4_render when level_state = 3 else '0';
 
-    obstacle_5_enabled  <= level_three_5_enabled when level_state = 5 else '0';
-    obstacle_5_red      <= level_three_5_red when level_state = 5 else "0000";
-    obstacle_5_green    <= level_three_5_green when level_state = 5 else "0000";
-    obstacle_5_blue     <= level_three_5_blue when level_state = 5 else "0000";
-    obstacle_5_x_pos    <= level_three_5_x_pos when level_state = 5 else (others => '0');
-    obstacle_5_render   <= level_three_5_render when level_state = 5 else '0';
+    obstacle_5_enabled  <= level_three_5_enabled when level_state = 3 else '0';
+    obstacle_5_red      <= level_three_5_red when level_state = 3 else "0000";
+    obstacle_5_green    <= level_three_5_green when level_state = 3 else "0000";
+    obstacle_5_blue     <= level_three_5_blue when level_state = 3 else "0000";
+    obstacle_5_x_pos    <= level_three_5_x_pos when level_state = 3 else (others => '0');
+    obstacle_5_render   <= level_three_5_render when level_state = 3 else '0';
 
     -- Route active level's power-up outputs to renderer
     powerup_render      <= level_two_powerup_render when level_state = 2 else

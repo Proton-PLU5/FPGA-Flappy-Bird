@@ -267,7 +267,7 @@ begin
             if skull_2_enabled_s = '1' and skull_2_waiting = '1' then
                 skull_2_reset <= '0';
                 if skull_2_end_reached = '1' then
-                    skull_2_y_pos_s <= (to_integer(unsigned(lfsr_out)) * (480 - SKULL_1_HEIGHT)) / 255; -- Create new y pos spawn
+                    skull_2_y_pos_s <= (to_integer(unsigned(lfsr_out)) * (480 - SKULL_2_HEIGHT)) / 255; -- Create new y pos spawn
                     skull_2_reset <= '1';
                 end if;
             elsif (level_three_enable = '0') then
@@ -287,7 +287,7 @@ begin
             if skull_3_enabled_s = '1' and skull_3_waiting = '1' then
                 skull_3_reset <= '0';
                 if skull_3_end_reached = '1' then
-                    skull_3_y_pos_s <= (to_integer(unsigned(lfsr_out)) * (480 - SKULL_1_HEIGHT)) / 255; -- Create new y pos spawn
+                    skull_3_y_pos_s <= (to_integer(unsigned(lfsr_out)) * (480 - SKULL_3_HEIGHT)) / 255; -- Create new y pos spawn
                     skull_3_reset <= '1';
                 end if;
             elsif (level_three_enable = '0') then
@@ -307,7 +307,7 @@ begin
             if skull_4_enabled_s = '1' and skull_4_waiting = '1' then
                 skull_4_reset <= '0';
                 if skull_4_end_reached = '1' then
-                    skull_4_y_pos_s <= (to_integer(unsigned(lfsr_out)) * (480 - SKULL_1_HEIGHT)) / 255; -- Create new y pos spawn
+                    skull_4_y_pos_s <= (to_integer(unsigned(lfsr_out)) * (480 - SKULL_4_HEIGHT)) / 255; -- Create new y pos spawn
                     skull_4_reset <= '1';
                 end if;
             elsif (level_three_enable = '0') then
@@ -327,7 +327,7 @@ begin
             if skull_5_enabled_s = '1' and skull_5_waiting = '1' then
                 skull_5_reset <= '0';
                 if skull_5_end_reached = '1' then
-                    skull_5_y_pos_s <= (to_integer(unsigned(lfsr_out)) * (480 - SKULL_1_HEIGHT)) / 255; -- Create new y pos spawn
+                    skull_5_y_pos_s <= (to_integer(unsigned(lfsr_out)) * (480 - SKULL_5_HEIGHT)) / 255; -- Create new y pos spawn
                     skull_5_reset <= '1';
                 end if;
             elsif (level_three_enable = '0') then

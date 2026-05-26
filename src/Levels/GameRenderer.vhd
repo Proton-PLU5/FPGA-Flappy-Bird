@@ -200,7 +200,7 @@ architecture behavior of GameRenderer is
 
     -- Level Three outputs
     signal level_three_1_enabled, level_three_2_enabled, level_three_3_enabled, level_three_4_enabled, level_three_5_enabled : std_logic;
-    signal level_three_1_red, level_three_1_green, level_three_1_blue,  : std_logic_vector(3 downto 0);
+    signal level_three_1_red, level_three_1_green, level_three_1_blue  : std_logic_vector(3 downto 0);
     signal level_three_2_red, level_three_2_green, level_three_2_blue : std_logic_vector(3 downto 0);
     signal level_three_3_red, level_three_3_green, level_three_3_blue : std_logic_vector(3 downto 0);
     signal level_three_4_red, level_three_4_green, level_three_4_blue : std_logic_vector(3 downto 0);

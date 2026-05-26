@@ -12,7 +12,7 @@ entity LevelThree is
         level_three_enable : IN std_logic := '0';
         pixel_row, pixel_column	: IN std_logic_vector(9 DOWNTO 0);
         paused : IN std_logic;
-        skull_1_enabled, skull_2_enabled : OUT std_logic;
+        skull_1_enabled, skull_2_enabled, skull_3_enabled : OUT std_logic;
         skull_1_red, skull_1_green, skull_1_blue : OUT std_logic_vector(3 downto 0);
         skull_2_red, skull_2_green, skull_2_blue : OUT std_logic_vector(3 downto 0);
         skull_3_red, skull_3_green, skull_3_blue : OUT std_logic_vector(3 downto 0);
@@ -141,7 +141,7 @@ begin
     );
 
    SKULL_3_COMPONENT : Skull port map (
-       clk => clk35Mhz,
+       clk => clk25Mhz,
        vert_sync => vert_sync,
        pixel_row => pixel_row,
        pixel_column => pixel_column,

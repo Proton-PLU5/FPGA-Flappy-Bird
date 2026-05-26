@@ -324,7 +324,7 @@ begin
                         when others => skull_3_y_pos_s <= LANE_4;
                     end case;
 
-                    skull_2_reset <= '1';
+                    skull_3_reset <= '1';
                 end if;
             elsif (level_three_enable = '0') then
                 skull_3_reset <= '1'; -- Reset the skull when the level is not enabled
@@ -354,7 +354,7 @@ begin
                         when others => skull_4_y_pos_s <= LANE_4;
                     end case;
 
-                    skull_2_reset <= '1';
+                    skull_4_reset <= '1';
                 end if;
             elsif (level_three_enable = '0') then
                 skull_4_reset <= '1'; -- Reset the skull when the level is not enabled
@@ -384,7 +384,7 @@ begin
                         when others => skull_5_y_pos_s <= LANE_4;
                     end case;
 
-                    skull_2_reset <= '1';
+                    skull_5_reset <= '1';
                 end if;
             elsif (level_three_enable = '0') then
                 skull_5_reset <= '1'; -- Reset the skull when the level is not enabled

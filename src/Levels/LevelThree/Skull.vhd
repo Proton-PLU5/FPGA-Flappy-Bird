@@ -19,12 +19,14 @@ end entity Skull;
 architecture behaviour of Skull is
     constant SCREEN_WIDTH  : integer := 640;
     constant SCREEN_HEIGHT : integer := 480;
-    constant SKULL_WIDTH   : integer := 26;
-    constant SKULL_HEIGHT  : integer := 28;
+    constant SKULL_WIDTH   : integer := 52;
+    constant SKULL_HEIGHT  : integer := 56;
     constant SPEED         : integer := 2;
 
     signal skull_x_pos : unsigned(10 downto 0) := to_unsigned(SCREEN_WIDTH, 11); -- Start offscreen right
     signal skull_y_pos : integer range 0 to 480 := 0;
+
+    signal scaled_pixel_row, scaled_pixel_column : std_logic_vector(9 downto 0);
 
     signal render_s : std_logic;
     signal red_s, green_s, blue_s : std_logic_vector(3 downto 0);
@@ -57,10 +59,18 @@ begin
         unsigned(pixel_row) < to_unsigned(skull_y_pos + SKULL_HEIGHT, 10)
     ) else '0';
 
+    scaled_pixel_column <= std_logic_vector(
+        unsigned(pixel_column) - ("0" & (unsigned(pixel_column) - skull_x_pos)(10 downto 1))
+    );
+
+    scaled_pixel_row <= std_logic_vector(
+        unsigned(pixel_row) - ("0" & (unsigned(pixel_row) - to_unsigned(skull_y_pos, 10))(9 downto 1))
+    );
+
     SPRITE_RENDERER : SpriteRenderer port map (
         clk => clk,
-        pixel_row => pixel_row,
-        pixel_column => pixel_column,
+        pixel_row => scaled_pixel_row,
+        pixel_column => scaled_pixel_column,
         start_x => std_logic_vector(skull_x_pos),
         start_y      => '0' & std_logic_vector(to_unsigned(skull_y_pos, 10)),
         sprite_id => 6,

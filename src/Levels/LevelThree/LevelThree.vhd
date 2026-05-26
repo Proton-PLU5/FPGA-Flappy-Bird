@@ -66,7 +66,7 @@ architecture behavior of LevelThree is
         );
     end component LFSR;
 
-    constant SKULL_HEIGHT  : integer := 28;
+    constant SKULL_HEIGHT  : integer := 56;
 
     signal skull_1_render_s : std_logic := '0';
     signal skull_1_enabled_s : std_logic := '0';

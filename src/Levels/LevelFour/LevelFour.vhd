@@ -1,18 +1,18 @@
 library IEEE;
 use IEEE.std_logic_1164.all;
 use IEEE.numeric_std.all;
-
 entity LevelFour is
     port (
         clk25Mhz : IN std_logic;
         mouse_left : IN std_logic;
         vert_sync : IN std_logic;
-		SW : IN std_logic_vector(9 downto 0);
-		KEY : IN std_logic_vector(3 DOWNTO 0);
+        SW : IN std_logic_vector(9 downto 0);
+        KEY : IN std_logic_vector(3 DOWNTO 0);
         level_four_enable : IN std_logic;
-        pixel_row, pixel_column	: IN std_logic_vector(9 DOWNTO 0);
+        pixel_row, pixel_column : IN std_logic_vector(9 downto 0);
         red, green, blue : OUT std_logic_vector(3 downto 0);
         paused : IN std_logic;
+        game_finished : OUT std_logic
     );
 end entity LevelFour;
 
@@ -68,6 +68,10 @@ architecture behavior of LevelFour is
 
     constant laser1_target_y : unsigned(9 downto 0) := to_unsigned(140, 10);
     constant laser2_target_y : unsigned(9 downto 0) := to_unsigned(340, 10);
+
+    type boss_state is (IDLE, WARNING, MOVING, HOLD, VICTORY);
+    signal current_state : boss_state := IDLE;
+    signal cycle_counter : integer range 0 to 500 := 0;
 begin
     Boss: BossRenderer port map (
         clk25Mhz => clk25Mhz,
@@ -137,46 +141,100 @@ begin
     );
     
 
-    CLOCK_PROCESS : process(clk25Mhz)
-    begin
-        if rising_edge(clk25Mhz) then
-        end if;
-    end process;
-
-    process (vert_sync)
+    PROCESS (vert_sync)
     begin
         if rising_edge(vert_sync) then
-            if (level_four_enable = '1') then
-                if (laser_warning_counter < 100) then
-                    laser_warning_enabled <= '1';
-                    laser_warning_counter <= laser_warning_counter + 1;
-                    laser1_enabled <= '0';
-                    laser2_enabled <= '0';
-                    laser1_y_pos <= (others => '0');
-                    laser2_y_pos <= to_unsigned(479, 10);
-                else
-                    laser1_enabled <= '1';
-                    laser2_enabled <= '1';
-                    laser_warning_enabled <= '0';
-
-                    if laser1_y_pos < laser1_target_y then
-                        laser1_y_pos <= laser1_y_pos + 1;
-                    end if;
-
-                    if laser2_y_pos > laser2_target_y then
-                        laser2_y_pos <= laser2_y_pos - 1;
-                    end if;
-                end if;
-            else
-                laser_warning_enabled <= '0';
-                laser1_enabled <= '0';
-                laser2_enabled <= '0';
-                laser_warning_counter <= 0;
+            if level_four_enable = '0' then
+                current_state <= IDLE;
+                cycle_counter <= 0;
+                game_finished <= '0';
                 laser1_y_pos <= (others => '0');
                 laser2_y_pos <= to_unsigned(479, 10);
+                
+            elsif not paused then
+                case current_state is
+                    
+                    when IDLE =>
+                        laser_warning_enabled <= '0';
+                        laser1_enabled <= '0';
+                        laser2_enabled <= '0';
+                        -- Start attack after a short delay
+                        if cycle_counter > 60 then 
+                            current_state <= WARNING;
+                            cycle_counter <= 0;
+                        else
+                            cycle_counter <= cycle_counter + 1;
+                        end if;
+
+                    when WARNING =>
+                        laser_warning_enabled <= '1';
+                        if cycle_counter > 120 then -- 2 second warning
+                            current_state <= MOVING;
+                            cycle_counter <= 0;
+                        else
+                            cycle_counter <= cycle_counter + 1;
+                        end if;
+
+                    when MOVING =>
+                        laser_warning_enabled <= '0';
+                        laser1_enabled <= '1';
+                        laser2_enabled <= '1';
+                        
+                        -- Move lasers toward targets
+                        if laser1_y_pos < laser1_target_y then 
+                            laser1_y_pos <= laser1_y_pos + 2; 
+                        end if;
+                        if laser2_y_pos > laser2_target_y then 
+                            laser2_y_pos <= laser2_y_pos - 2; 
+                        end if;
+
+                        -- Transition when both reach center
+                        if laser1_y_pos >= laser1_target_y and laser2_y_pos <= laser2_target_y then
+                            current_state <= HOLD;
+                            cycle_counter <= 0;
+                        end if;
+
+                    when HOLD =>
+                        -- Keep them visible and stationary
+                        if cycle_counter > 180 then -- Stay for 3 seconds
+                            current_state <= VICTORY;
+                            cycle_counter <= 0;
+                        else
+                            cycle_counter <= cycle_counter + 1;
+                        end if;
+
+                    when VICTORY =>
+                        -- HIDE EVERYTHING
+                        laser1_enabled <= '0';
+                        laser2_enabled <= '0';
+                        laser_warning_enabled <= '0';
+                        game_finished <= '1'; -- Trigger the win state
+                        
+                end case;
             end if;
         end if;
     end process;
-    
+
+    -- RENDER COMBINER
+    RENDER_LOGIC : process(clk25Mhz)
+    begin
+        if rising_edge(clk25Mhz) then
+            if level_four_enable = '1' then
+                if laser_warning_enabled = '1' and laser_warning1_transparent = '0' then
+                    red <= laser_warning1_red; green <= laser_warning1_green; blue <= laser_warning1_blue;
+                elsif laser_warning_enabled = '1' and laser_warning2_transparent = '0' then
+                    red <= laser_warning2_red; green <= laser_warning2_green; blue <= laser_warning2_blue;
+                elsif laser1_enabled = '1' and laser1_transparent = '0' then
+                    red <= laser1_red; green <= laser1_green; blue <= laser1_blue;
+                elsif laser2_enabled = '1' and laser2_transparent = '0' then
+                    red <= laser2_red; green <= laser2_green; blue <= laser2_blue;
+                elsif boss_enabled = '1' then
+                    red <= boss_red; green <= boss_green; blue <= boss_blue;
+                else
+                    red <= (others => '0'); green <= (others => '0'); blue <= (others => '0');
+                end if;
+            end if;
+        end if;
+    end process;
 
 end architecture behavior;

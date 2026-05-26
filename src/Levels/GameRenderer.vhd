@@ -87,6 +87,21 @@ architecture behavior of GameRenderer is
         );
     end component LevelTwo;
 
+    component LevelFour is
+        port (
+            clk25Mhz : IN std_logic;
+            mouse_left : IN std_logic;
+            vert_sync : IN std_logic;
+            SW : IN std_logic_vector(9 downto 0);
+            KEY : IN std_logic_vector(3 DOWNTO 0);
+            level_four_enable : IN std_logic;
+            pixel_row, pixel_column : IN std_logic_vector(9 downto 0);
+            red, green, blue : OUT std_logic_vector(3 downto 0);
+            paused : IN std_logic;
+            game_finished : OUT std_logic
+        );
+    end component LevelFour;
+
     component LivesRenderer is
         port (
             clk, reset: in std_logic;
@@ -145,6 +160,9 @@ architecture behavior of GameRenderer is
     signal level_two_1_x_pos, level_two_2_x_pos : unsigned(10 downto 0);
 	signal level_two_1_render, level_two_2_render : std_logic;
 
+    -- Level Four outputs
+    signal level_four_red, level_four_green, level_four_blue : std_logic_vector(3 downto 0);
+    signal level_four_game_finished : std_logic;
     -- Power Up outputs
     signal powerup_enabled : std_logic;
     signal powerup_red, powerup_green, powerup_blue : std_logic_vector(3 downto 0);
@@ -262,6 +280,22 @@ begin
         player_y_pos => player_y_pos
     );
 
+    LEVEL_FOUR_COMPONENT : LevelFour port map (
+        clk25Mhz => clk25Mhz,
+        mouse_left => mouse_left,
+        vert_sync => vert_sync,
+        SW => SW,
+        KEY => KEY,
+        level_four_enable => level_four_enabled,
+        pixel_row => pixel_row,
+        pixel_column => pixel_column,
+        red => level_four_red,
+        green => level_four_green,
+        blue => level_four_blue,
+        paused => paused,
+        game_finished => level_four_game_finished
+    );
+
     -- Multiplexer
     obstacle_1_enabled  <= level_one_1_enabled when level_state = 1 else
                           level_two_1_enabled when level_state = 2 else '0';
@@ -354,6 +388,10 @@ begin
                     red <= lives_red;
                     green <= lives_green;
                     blue <= lives_blue;
+                elsif level_four_enabled = '1' then
+                    red <= level_four_red;
+                    green <= level_four_green;
+                    blue <= level_four_blue;
                 elsif obstacle_1_render = '1' then
                     red <= obstacle_1_red;
 					green <= obstacle_1_green;

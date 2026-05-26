@@ -11,8 +11,10 @@ entity GameRenderer is
         KEY : IN std_logic_vector(3 DOWNTO 0);
         pixel_row, pixel_column : IN std_logic_vector(9 DOWNTO 0);
         red, green, blue : OUT std_logic_vector(3 downto 0);
+        training_mode : IN std_logic; 
         request_back : OUT std_logic;
         enabled : IN std_logic;
+        training_mode_selected : IN std_logic;
         game_over : OUT std_logic;
         score_out   : OUT integer range 0 to 999;
         powerup_out : OUT integer
@@ -563,8 +565,8 @@ begin
                 end if;
 
                 if vert_sync = '1' and last_vert_sync = '0' then
-                    if obstacle_collision_pending = '1' and invincibility = 0 then
-                        invincibility <= 300; -- gives 5 seconds of invincibility at 60fps
+                    if collision_pending = '1' and invincibility = 0 then
+                        invincibility <= 200; -- gives 5 seconds of invincibility at 60fps
 								if no_lives_left = '0' then
 									collision_count <= collision_count + 1; -- add to counter of collisions
                                 else
@@ -578,6 +580,8 @@ begin
                         if invincibility mod 5 = 0 then
                             invincibility_flash <= not invincibility_flash;
                         end if;
+                    elsif (SW(6) = '0') then
+                        invincibility <= 200;
                     else
                         -- reset flash when invincibility runs out
                         invincibility_flash <= '0';
@@ -717,7 +721,11 @@ begin
                     when others =>
                         level_state <= 4; -- Level Four
                 end case;
+            elsif training_mode = '1' then
+                -- In training mode, override to only level one for consistent testing conditions
+                level_state <= 1;
             end if;
+
         end if;
     end process LEVEL_SELECT;
     

@@ -26,6 +26,8 @@ architecture behaviour of Skull is
     signal skull_x_pos : unsigned(10 downto 0) := to_unsigned(SCREEN_WIDTH, 11); -- Start offscreen right
     signal skull_y_pos : integer range 0 to 480 := 0;
 
+    signal diff_col : unsigned(10 downto 0);
+    signal diff_row : unsigned(9 downto 0);
     signal scaled_pixel_row, scaled_pixel_column : std_logic_vector(9 downto 0);
 
     signal render_s : std_logic;
@@ -59,12 +61,15 @@ begin
         unsigned(pixel_row) < to_unsigned(skull_y_pos + SKULL_HEIGHT, 10)
     ) else '0';
 
+    diff_col <= unsigned(pixel_column) - skull_x_pos;
+    diff_row <= unsigned(pixel_row) - to_unsigned(skull_y_pos, 10);
+
     scaled_pixel_column <= std_logic_vector(
-        unsigned(pixel_column) - ("0" & (unsigned(pixel_column) - skull_x_pos)(10 downto 1))
+        unsigned(pixel_column) - ("0" & diff_col(10 downto 1))
     );
 
     scaled_pixel_row <= std_logic_vector(
-        unsigned(pixel_row) - ("0" & (unsigned(pixel_row) - to_unsigned(skull_y_pos, 10))(9 downto 1))
+        unsigned(pixel_row) - ("0" & diff_row(9 downto 1))
     );
 
     SPRITE_RENDERER : SpriteRenderer port map (

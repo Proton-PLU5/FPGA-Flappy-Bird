@@ -68,6 +68,12 @@ architecture behavior of LevelThree is
 
     constant SKULL_HEIGHT  : integer := 56;
 
+    constant LANE_0 : integer := 40;
+    constant LANE_1 : integer := 120;
+    constant LANE_2 : integer := 200;
+    constant LANE_3 : integer := 280;
+    constant LANE_4 : integer := 360;
+
     signal skull_1_render_s : std_logic := '0';
     signal skull_1_enabled_s : std_logic := '0';
     signal skull_1_end_reached : std_logic;
@@ -241,12 +247,22 @@ begin
 
     SKULL_1_RANDOMISER : process (vert_sync)
         variable random_y : integer;
+        variable lane_sel : std_logic_vector(2 downto 0);
     begin
         if rising_edge(vert_sync) then
             if skull_1_enabled_s = '1' then
                 skull_1_reset <= '0';
                 if skull_1_end_reached = '1' then
-                    skull_1_y_pos_s <= (to_integer(unsigned(lfsr_out)) * (480 - SKULL_1_HEIGHT)) / 255; -- Create new y pos spawn
+                    lane_sel := lfsr_out(2 downto 0) xor std_logic_vector(to_unsigned(1, 3));
+
+                    case lane_sel is
+                        when "000" => skull_1_y_pos_s <= LANE_0;
+                        when "001" => skull_1_y_pos_s <= LANE_1;
+                        when "010" => skull_1_y_pos_s <= LANE_2;
+                        when "011" => skull_1_y_pos_s <= LANE_3;
+                        when others => skull_1_y_pos_s <= LANE_4;
+                    end case;
+
                     skull_1_reset <= '1';
                 end if;
             elsif (level_three_enable = '0') then
@@ -257,6 +273,7 @@ begin
 
     SKULL_2_RANDOMISER : process (vert_sync)
         variable random_y : integer;
+        variable lane_sel : std_logic_vector(2 downto 0);
     begin
         if rising_edge(vert_sync) then
             if skull_1_x_pos_s <= to_unsigned(640 / 5, skull_1_x_pos_s'length) then
@@ -267,7 +284,16 @@ begin
             if skull_2_enabled_s = '1' and skull_2_waiting = '1' then
                 skull_2_reset <= '0';
                 if skull_2_end_reached = '1' then
-                    skull_2_y_pos_s <= (to_integer(unsigned(lfsr_out)) * (480 - SKULL_2_HEIGHT)) / 255; -- Create new y pos spawn
+                    lane_sel := lfsr_out(2 downto 0) xor std_logic_vector(to_unsigned(2, 3));
+
+                    case lane_sel is
+                        when "000" => skull_2_y_pos_s <= LANE_0;
+                        when "001" => skull_2_y_pos_s <= LANE_1;
+                        when "010" => skull_2_y_pos_s <= LANE_2;
+                        when "011" => skull_2_y_pos_s <= LANE_3;
+                        when others => skull_2_y_pos_s <= LANE_4;
+                    end case;
+
                     skull_2_reset <= '1';
                 end if;
             elsif (level_three_enable = '0') then
@@ -278,6 +304,7 @@ begin
 
     SKULL_3_RANDOMISER : process (vert_sync)
         variable random_y : integer;
+        variable lane_sel : std_logic_vector(2 downto 0);
     begin
         if rising_edge(vert_sync) then
             if skull_2_x_pos_s <= to_unsigned(640 / 5, skull_2_x_pos_s'length) then
@@ -287,8 +314,17 @@ begin
             if skull_3_enabled_s = '1' and skull_3_waiting = '1' then
                 skull_3_reset <= '0';
                 if skull_3_end_reached = '1' then
-                    skull_3_y_pos_s <= (to_integer(unsigned(lfsr_out)) * (480 - SKULL_3_HEIGHT)) / 255; -- Create new y pos spawn
-                    skull_3_reset <= '1';
+                    lane_sel := lfsr_out(2 downto 0) xor std_logic_vector(to_unsigned(3, 3));
+
+                    case lane_sel is
+                        when "000" => skull_3_y_pos_s <= LANE_0;
+                        when "001" => skull_3_y_pos_s <= LANE_1;
+                        when "010" => skull_3_y_pos_s <= LANE_2;
+                        when "011" => skull_3_y_pos_s <= LANE_3;
+                        when others => skull_3_y_pos_s <= LANE_4;
+                    end case;
+
+                    skull_2_reset <= '1';
                 end if;
             elsif (level_three_enable = '0') then
                 skull_3_reset <= '1'; -- Reset the skull when the level is not enabled
@@ -298,6 +334,7 @@ begin
 
     SKULL_4_RANDOMISER : process (vert_sync)
         variable random_y : integer;
+        variable lane_sel : std_logic_vector(2 downto 0);
     begin
         if rising_edge(vert_sync) then
             if skull_3_x_pos_s <= to_unsigned(640 / 5, skull_3_x_pos_s'length) then
@@ -307,8 +344,17 @@ begin
             if skull_4_enabled_s = '1' and skull_4_waiting = '1' then
                 skull_4_reset <= '0';
                 if skull_4_end_reached = '1' then
-                    skull_4_y_pos_s <= (to_integer(unsigned(lfsr_out)) * (480 - SKULL_4_HEIGHT)) / 255; -- Create new y pos spawn
-                    skull_4_reset <= '1';
+                    lane_sel := lfsr_out(2 downto 0) xor std_logic_vector(to_unsigned(4, 3));
+
+                    case lane_sel is
+                        when "000" => skull_4_y_pos_s <= LANE_0;
+                        when "001" => skull_4_y_pos_s <= LANE_1;
+                        when "010" => skull_4_y_pos_s <= LANE_2;
+                        when "011" => skull_4_y_pos_s <= LANE_3;
+                        when others => skull_4_y_pos_s <= LANE_4;
+                    end case;
+
+                    skull_2_reset <= '1';
                 end if;
             elsif (level_three_enable = '0') then
                 skull_4_reset <= '1'; -- Reset the skull when the level is not enabled
@@ -318,6 +364,7 @@ begin
 
     SKULL_5_RANDOMISER : process (vert_sync)
         variable random_y : integer;
+        variable lane_sel : std_logic_vector(2 downto 0);
     begin
         if rising_edge(vert_sync) then
             if skull_4_x_pos_s <= to_unsigned(640 / 5, skull_4_x_pos_s'length) then
@@ -327,8 +374,17 @@ begin
             if skull_5_enabled_s = '1' and skull_5_waiting = '1' then
                 skull_5_reset <= '0';
                 if skull_5_end_reached = '1' then
-                    skull_5_y_pos_s <= (to_integer(unsigned(lfsr_out)) * (480 - SKULL_5_HEIGHT)) / 255; -- Create new y pos spawn
-                    skull_5_reset <= '1';
+                    lane_sel := lfsr_out(2 downto 0) xor std_logic_vector(to_unsigned(5, 3));
+
+                    case lane_sel is
+                        when "000" => skull_5_y_pos_s <= LANE_0;
+                        when "001" => skull_5_y_pos_s <= LANE_1;
+                        when "010" => skull_5_y_pos_s <= LANE_2;
+                        when "011" => skull_5_y_pos_s <= LANE_3;
+                        when others => skull_5_y_pos_s <= LANE_4;
+                    end case;
+
+                    skull_2_reset <= '1';
                 end if;
             elsif (level_three_enable = '0') then
                 skull_5_reset <= '1'; -- Reset the skull when the level is not enabled

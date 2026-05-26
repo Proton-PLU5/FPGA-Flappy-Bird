@@ -48,8 +48,11 @@ architecture behavior of LevelFour is
     --------- BOSS SIGNALS ---------
     signal boss_red, boss_green, boss_blue : std_logic_vector(3 downto 0);
     signal boss_enabled : std_logic;
-    signal boss_x_pos : std_logic_vector(9 downto 0) := std_logic_Vector(to_unsigned(200, 10)); 
-    signal boss_y_pos : std_logic_vector(9 downto 0) := std_logic_Vector(to_unsigned(50, 10)); 
+    
+    -- X = 320 (Screen Center) - 40 (Half Boss Width) = 280
+    -- Y = 240 (Screen Center) - 38 (Half Boss Height) = 202
+    signal boss_x_pos : std_logic_vector(9 downto 0) := std_logic_vector(to_unsigned(280, 10)); 
+    signal boss_y_pos : std_logic_vector(9 downto 0) := std_logic_vector(to_unsigned(202, 10)); 
 
     --------- LASER BEAM SIGNALS ---------
     signal laser_warning1_red, laser_warning1_green, laser_warning1_blue : std_logic_vector(3 downto 0);
@@ -63,17 +66,19 @@ architecture behavior of LevelFour is
     --------- CENTER GAP ---------
     constant SPRITE_HEIGHT : integer := 120; 
     
-    constant GAP_HALF : integer := 75;  -- Half of 150px
+    constant GAP_HALF : integer := 40;  -- Half of 150px
     constant Y_CENTER : integer := 240; -- 480 / 2
 
     -- Top laser bottom edge = 165 (start_y = 165 - height)
     constant L1_TARGET_INT : integer := Y_CENTER - GAP_HALF - SPRITE_HEIGHT;
-    -- Bottom laser top edge = 315 (start_y = 315)
+    
+	 -- Bottom laser top edge = 315 (start_y = 315)
     constant L2_TARGET_INT : integer := Y_CENTER + GAP_HALF;
+	 
+	 
     -- Keep bottom laser fully on-screen at spawn
     constant L2_START_INT  : integer := 480 - SPRITE_HEIGHT;
-    -------------------------------------------------------
-
+	 
     -- LASER 1 SIGNALS
     signal laser1_red, laser1_green, laser1_blue : std_logic_vector(3 downto 0);
     signal laser1_transparent : std_logic;
@@ -244,7 +249,6 @@ begin
                         end if;
 
                     when VICTORY =>
-                        -- HIDE EVERYTHING
                         laser1_enabled <= '0';
                         laser2_enabled <= '0';
                         laser_warning_enabled <= '0';

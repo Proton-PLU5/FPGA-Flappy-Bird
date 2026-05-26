@@ -79,13 +79,13 @@ begin
                         -- Calculate current gap center to decide movement
                         gap_center := pipe_top_y_pos + to_unsigned(gap/2, 10);
 
-                        -- If gap is above player, move whole pipe system DOWN
-                        if (gap_center < player_latched_y_pos - 4) then
+                        -- If gap is above player, AND we're rendering the top part, move whole pipe system DOWN (descending)
+                        if (gap_center < player_latched_y_pos - 4 and part_to_render = '1') then
                             pipe_top_y_pos <= pipe_top_y_pos + 4;
                             pipe_bottom_y_pos <= pipe_bottom_y_pos + 4;
                         
-                        -- If gap is below player, move whole pipe system UP (climbing)
-                        elsif (gap_center > player_latched_y_pos + 4) then
+                        -- If gap is below player, AND we're rendering the bottom part, move whole pipe system UP (ascending)
+                        elsif (gap_center > player_latched_y_pos + 4 and part_to_render = '0') then
                             pipe_top_y_pos <= pipe_top_y_pos - 4;
                             pipe_bottom_y_pos <= pipe_bottom_y_pos - 4;
                         end if;

@@ -101,18 +101,18 @@ architecture behavior of GameRenderer is
             level_three_enable : IN std_logic := '0';
             pixel_row, pixel_column	: IN std_logic_vector(9 DOWNTO 0);
             paused : IN std_logic;
-            skull_1_enabled, skull_2_enabled, skull_3_enabled : OUT std_logic;
+            skull_1_enabled, skull_2_enabled, skull_3_enabled, skull_4_enabled, skull_5_enabled : OUT std_logic;
             skull_1_red, skull_1_green, skull_1_blue : OUT std_logic_vector(3 downto 0);
             skull_2_red, skull_2_green, skull_2_blue : OUT std_logic_vector(3 downto 0);
             skull_3_red, skull_3_green, skull_3_blue : OUT std_logic_vector(3 downto 0);
-            skull_1_x_pos, skull_2_x_pos, skull_3_x_pos : OUT unsigned(10 downto 0);
+            skull_4_red, skull_4_green, skull_4_blue : OUT std_logic_vector(3 downto 0);
+            skull_5_red, skull_5_green, skull_5_blue : OUT std_logic_vector(3 downto 0);
+            skull_1_x_pos, skull_2_x_pos, skull_3_x_pos, skull_4_x_pos, skull_5_x_pos : OUT unsigned(10 downto 0);
             powerup_render : OUT std_logic;
             powerup_red, powerup_green, powerup_blue : OUT std_logic_vector(3 downto 0);
             powerup_collect : IN std_logic;
             powerup_count : OUT integer;
-            skull_1_render : OUT std_logic;
-            skull_2_render : OUT std_logic;
-            skull_3_render : OUT std_logic
+            skull_1_render, skull_2_render, skull_3_render, skull_4_render, skull_5_render : OUT std_logic
         );
     end component LevelThree;
 
@@ -167,6 +167,18 @@ architecture behavior of GameRenderer is
     signal obstacle_3_x_pos : unsigned(10 downto 0);
 	signal obstacle_3_score_incremented : std_logic := '0';
 
+    signal obstacle_4_enabled : std_logic := '0';
+    signal obstacle_4_red, obstacle_4_green, obstacle_4_blue : std_logic_vector(3 downto 0);
+    signal obstacle_4_render : std_logic := '0';
+    signal obstacle_4_x_pos : unsigned(10 downto 0);
+    signal obstacle_4_score_incremented : std_logic := '0';
+
+    signal obstacle_5_enabled : std_logic := '0';
+    signal obstacle_5_red, obstacle_5_green, obstacle_5_blue : std_logic_vector(3 downto 0);
+    signal obstacle_5_render : std_logic := '0';
+    signal obstacle_5_x_pos : unsigned(10 downto 0);
+    signal obstacle_5_score_incremented : std_logic := '0';
+
 	 --Powerup signals
 	 signal powerup_render : std_logic;
 	 signal powerup_red, powerup_green, powerup_blue : std_logic_vector(3 downto 0);
@@ -187,12 +199,14 @@ architecture behavior of GameRenderer is
 	signal level_two_1_render, level_two_2_render : std_logic;
 
     -- Level Three outputs
-    signal level_three_1_enabled, level_three_2_enabled, level_three_3_enabled : std_logic;
-    signal level_three_1_red, level_three_1_green, level_three_1_blue : std_logic_vector(3 downto 0);
+    signal level_three_1_enabled, level_three_2_enabled, level_three_3_enabled, level_three_4_enabled, level_three_5_enabled : std_logic;
+    signal level_three_1_red, level_three_1_green, level_three_1_blue,  : std_logic_vector(3 downto 0);
     signal level_three_2_red, level_three_2_green, level_three_2_blue : std_logic_vector(3 downto 0);
     signal level_three_3_red, level_three_3_green, level_three_3_blue : std_logic_vector(3 downto 0);
-    signal level_three_1_x_pos, level_three_2_x_pos, level_three_3_x_pos : unsigned(10 downto 0);
-    signal level_three_1_render, level_three_2_render, level_three_3_render : std_logic;
+    signal level_three_4_red, level_three_4_green, level_three_4_blue : std_logic_vector(3 downto 0);
+    signal level_three_5_red, level_three_5_green, level_three_5_blue : std_logic_vector(3 downto 0);
+    signal level_three_1_x_pos, level_three_2_x_pos, level_three_3_x_pos, level_three_4_x_pos, level_three_5_x_pos : unsigned(10 downto 0);
+    signal level_three_1_render, level_three_2_render, level_three_3_render, level_three_4_render, level_three_5_render : std_logic;
 
     -- Power Up outputs
     signal level_two_powerup_render : std_logic := '0';
@@ -345,6 +359,18 @@ begin
         skull_3_enabled => level_three_3_enabled,
         skull_3_x_pos => level_three_3_x_pos,
         skull_3_render => level_three_3_render,
+        skull_4_red => level_three_4_red,
+        skull_4_green => level_three_4_green,
+        skull_4_blue => level_three_4_blue,
+        skull_4_enabled => level_three_4_enabled,
+        skull_4_x_pos => level_three_4_x_pos,
+        skull_4_render => level_three_4_render,
+        skull_5_red => level_three_5_red,
+        skull_5_green => level_three_5_green,
+        skull_5_blue => level_three_5_blue,
+        skull_5_enabled => level_three_5_enabled,
+        skull_5_x_pos => level_three_5_x_pos,
+        skull_5_render => level_three_5_render,
         powerup_render => level_three_powerup_render,
         powerup_red => level_three_powerup_red,
  		powerup_green => level_three_powerup_green,
@@ -399,6 +425,20 @@ begin
     obstacle_3_blue     <= level_three_3_blue when level_state = 3 else "0000";
     obstacle_3_x_pos    <= level_three_3_x_pos when level_state = 3 else (others => '0');
     obstacle_3_render   <= level_three_3_render when level_state = 3 else '0';
+
+    obstacle_4_enabled  <= level_three_4_enabled when level_state = 4 else '0';
+    obstacle_4_red      <= level_three_4_red when level_state = 4 else "0000";
+    obstacle_4_green    <= level_three_4_green when level_state = 4 else "0000";
+    obstacle_4_blue     <= level_three_4_blue when level_state = 4 else "0000";
+    obstacle_4_x_pos    <= level_three_4_x_pos when level_state = 4 else (others => '0');
+    obstacle_4_render   <= level_three_4_render when level_state = 4 else '0';
+
+    obstacle_5_enabled  <= level_three_5_enabled when level_state = 5 else '0';
+    obstacle_5_red      <= level_three_5_red when level_state = 5 else "0000";
+    obstacle_5_green    <= level_three_5_green when level_state = 5 else "0000";
+    obstacle_5_blue     <= level_three_5_blue when level_state = 5 else "0000";
+    obstacle_5_x_pos    <= level_three_5_x_pos when level_state = 5 else (others => '0');
+    obstacle_5_render   <= level_three_5_render when level_state = 5 else '0';
 
     -- Route active level's power-up outputs to renderer
     powerup_render      <= level_two_powerup_render when level_state = 2 else
@@ -491,6 +531,14 @@ begin
                     red <= obstacle_3_red;
 					green <= obstacle_3_green;
 					blue <= obstacle_3_blue;
+                elsif obstacle_4_render = '1' then
+                    red <= obstacle_4_red;
+					green <= obstacle_4_green;
+					blue <= obstacle_4_blue;
+                elsif obstacle_5_render = '1' then
+                    red <= obstacle_5_red;
+					green <= obstacle_5_green;
+					blue <= obstacle_5_blue;
                 else
                     red <= background_red;
 					green <= background_green;
@@ -503,7 +551,9 @@ begin
                 --Obstacles
                 if (player_render = '1' and (obstacle_1_render = '1' or
                                             obstacle_2_render = '1' or
-                                            obstacle_3_render = '1')) then
+                                            obstacle_3_render = '1' or
+                                            obstacle_4_render = '1' or
+                                            obstacle_5_render = '1')) then
                     obstacle_collision_pending <= '1';
                 end if;
 
@@ -565,6 +615,20 @@ begin
                         obstacle_3_score_incremented <= '1';
                     elsif (obstacle_3_x_pos >= to_unsigned(50, 11)) then
                         obstacle_3_score_incremented <= '0';
+                    end if;
+
+                    if (obstacle_4_x_pos < to_unsigned(50, 11) and obstacle_4_score_incremented = '0') then
+                        score <= score + 2;
+                        obstacle_4_score_incremented <= '1';
+                    elsif (obstacle_4_x_pos >= to_unsigned(50, 11)) then
+                        obstacle_4_score_incremented <= '0';
+                    end if;
+
+                    if (obstacle_5_x_pos < to_unsigned(50, 11) and obstacle_5_score_incremented = '0') then
+                        score <= score + 2;
+                        obstacle_5_score_incremented <= '1';
+                    elsif (obstacle_5_x_pos >= to_unsigned(50, 11)) then
+                        obstacle_5_score_incremented <= '0';
                     end if;
 
                     obstacle_collision_pending <= '0';

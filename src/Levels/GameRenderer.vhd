@@ -118,6 +118,21 @@ architecture behavior of GameRenderer is
         );
     end component LevelThree;
 
+    component LevelFour is
+        port (
+            clk25Mhz : IN std_logic;
+            mouse_left : IN std_logic;
+            vert_sync : IN std_logic;
+            SW : IN std_logic_vector(9 downto 0);
+            KEY : IN std_logic_vector(3 DOWNTO 0);
+            level_four_enable : IN std_logic;
+            pixel_row, pixel_column : IN std_logic_vector(9 downto 0);
+            red, green, blue : OUT std_logic_vector(3 downto 0);
+            paused : IN std_logic;
+            game_finished : OUT std_logic
+        );
+    end component LevelFour;
+
     component LivesRenderer is
         port (
             clk, reset: in std_logic;
@@ -199,6 +214,10 @@ architecture behavior of GameRenderer is
     signal level_two_2_red, level_two_2_green, level_two_2_blue : std_logic_vector(3 downto 0);
     signal level_two_1_x_pos, level_two_2_x_pos : unsigned(10 downto 0);
 	signal level_two_1_render, level_two_2_render : std_logic;
+
+    -- Level Four outputs
+    signal level_four_red, level_four_green, level_four_blue : std_logic_vector(3 downto 0);
+    signal level_four_game_finished : std_logic;
 
     -- Level Three outputs
     signal level_three_1_enabled, level_three_2_enabled, level_three_3_enabled, level_three_4_enabled, level_three_5_enabled : std_logic;
@@ -334,7 +353,23 @@ begin
         player_y_pos => player_y_pos
     );
 
-     LEVEL_THREE_COMPONENT : LevelThree port map (
+    LEVEL_FOUR_COMPONENT : LevelFour port map (
+        clk25Mhz => clk25Mhz,
+        mouse_left => mouse_left,
+        vert_sync => vert_sync,
+        SW => SW,
+        KEY => KEY,
+        level_four_enable => level_four_enabled,
+        pixel_row => pixel_row,
+        pixel_column => pixel_column,
+        red => level_four_red,
+        green => level_four_green,
+        blue => level_four_blue,
+        paused => paused,
+        game_finished => level_four_game_finished
+    );
+
+    LEVEL_THREE_COMPONENT : LevelThree port map (
         clk25Mhz => clk25Mhz,
         mouse_left => mouse_left,
         vert_sync => vert_sync,
@@ -517,6 +552,10 @@ begin
                     red <= lives_red;
                     green <= lives_green;
                     blue <= lives_blue;
+                elsif level_four_enabled = '1' then
+                    red <= level_four_red;
+                    green <= level_four_green;
+                    blue <= level_four_blue;
                 elsif obstacle_1_render = '1' then
                     red <= obstacle_1_red;
 					green <= obstacle_1_green;
@@ -639,7 +678,7 @@ begin
                     powerup_collision_pending <= '0';
                 end if;
 					 
-				else
+            else
                 --While the game is disabled (on Title Screen), constantly hold the score at 0.
                 score <= 0;
                 mouse_down <= '0';
@@ -667,65 +706,71 @@ begin
                 prev_paused <= '0';
             end if;
 
-            case (level_state) is
-                when 1 =>
-                    level_one_enabled <= '1';
-                    level_two_enabled <= '0';
-                    level_three_enabled <= '0';
-                    level_four_enabled <= '0';
-                when 2 =>
-                    level_one_enabled <= '0';
-                    level_two_enabled <= '1';
-                    level_three_enabled <= '0';
-                    level_four_enabled <= '0';
-                when 3 =>
-                    level_one_enabled <= '0';
-                    level_two_enabled <= '0';
-                    level_three_enabled <= '1';
-                    level_four_enabled <= '0';
-                when others =>
-                    level_one_enabled <= '0';
-                    level_two_enabled <= '0';
-                    level_three_enabled <= '0';
-                    level_four_enabled <= '1';
-            end case;
-
-            -- Manual level selection via switches
-				dip_switch := SW(9) & SW(8) & SW(7);
-            case (dip_switch) is
-                when "001" =>
-                    level_state <= 1;
-                    manual_level_change := '1';
-                when "011" =>
-                    level_state <= 2;
-                    manual_level_change := '1';
-                when "101" =>
-                    level_state <= 3;
-                    manual_level_change := '1';
-                when "111" =>
-                    level_state <= 4;
-                    manual_level_change := '1';
-                when others =>
-                    manual_level_change := '0';
-            end case;
-
-            -- Automated level progression based on score
-            if manual_level_change = '0' then
-                case (score) is
-                    when 0 to 10 =>
-                        level_state <= 1; -- Level One
-                    when 11 to 160 =>
-                        level_state <= 2; -- Level Two
-                    when 161 to 310 =>
-                        level_state <= 3; -- Level Three
+            if (enabled = '0') then
+                level_one_enabled <= '0';
+                level_two_enabled <= '0';
+                level_three_enabled <= '0';
+                level_four_enabled <= '0';
+            else
+                case (level_state) is
+                    when 1 =>
+                        level_one_enabled <= '1';
+                        level_two_enabled <= '0';
+                        level_three_enabled <= '0';
+                        level_four_enabled <= '0';
+                    when 2 =>
+                        level_one_enabled <= '0';
+                        level_two_enabled <= '1';
+                        level_three_enabled <= '0';
+                        level_four_enabled <= '0';
+                    when 3 =>
+                        level_one_enabled <= '0';
+                        level_two_enabled <= '0';
+                        level_three_enabled <= '1';
+                        level_four_enabled <= '0';
                     when others =>
-                        level_state <= 4; -- Level Four
+                        level_one_enabled <= '0';
+                        level_two_enabled <= '0';
+                        level_three_enabled <= '0';
+                        level_four_enabled <= '1';
                 end case;
-            elsif training_mode = '1' then
-                -- In training mode, override to only level one for consistent testing conditions
-                level_state <= 1;
-            end if;
 
+                -- Manual level selection via switches
+                dip_switch := SW(9) & SW(8) & SW(7);
+                case (dip_switch) is
+                    when "001" =>
+                        level_state <= 1;
+                        manual_level_change := '1';
+                    when "011" =>
+                        level_state <= 2;
+                        manual_level_change := '1';
+                    when "101" =>
+                        level_state <= 3;
+                        manual_level_change := '1';
+                    when "111" =>
+                        level_state <= 4;
+                        manual_level_change := '1';
+                    when others =>
+                        manual_level_change := '0';
+                end case; 
+
+                -- Automated level progression based on score
+                if manual_level_change = '0' then
+                    case (score) is
+                        when 0 to 10 =>
+                            level_state <= 1; -- Level One
+                        when 11 to 30 =>
+                            level_state <= 2; -- Level Two
+                        when 31 to 60 =>
+                            level_state <= 3; -- Level Three
+                        when others =>
+                            level_state <= 4; -- Level Four
+                    end case;
+                elsif training_mode = '1' then
+                  -- In training mode, override to only level one for consistent testing conditions
+                  level_state <= 1;
+                end if;
+            end if;
         end if;
     end process LEVEL_SELECT;
     

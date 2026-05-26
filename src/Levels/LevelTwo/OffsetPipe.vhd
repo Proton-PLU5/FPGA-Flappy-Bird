@@ -25,17 +25,20 @@ end entity OffsetPipe;
 
 architecture behaviour of OffsetPipe is
     signal render_out : std_logic;
-    signal pipe_x_pos : unsigned(10 downto 0) := to_unsigned(640 + START_OFFSET, 11); -- Start off-screen right
+    signal pipe_x_pos : unsigned(10 downto 0) := to_unsigned(640 + START_OFFSET, 11);
     signal pipe_top_y_pos : unsigned(9 downto 0);
     signal pipe_bottom_y_pos : unsigned(9 downto 0);
     signal pipe_width : unsigned(9 downto 0) := to_unsigned(25,10);
 
     signal player_latched_y_pos : unsigned(9 downto 0);
     signal player_latched : std_logic := '0';
+    signal is_visible : std_logic := '1';
 begin
-    -- render_out logic
+    -- Updated render_out: Now checks "enabled" so Pipe 2 stays hidden at start
     render_out <= '1' when (
-        (pipe_x_pos <= unsigned(pixel_column) + pipe_width) and (unsigned(pixel_column) <= pipe_x_pos + pipe_width)
+        (enabled = '1') and (is_visible = '1') 
+        and (pipe_x_pos <= unsigned(pixel_column) + pipe_width) 
+        and (unsigned(pixel_column) <= pipe_x_pos + pipe_width)
         and (
             ((unsigned(pixel_row) <= pipe_top_y_pos) and (part_to_render = '1')) or
             ((unsigned(pixel_row) >= pipe_bottom_y_pos) and (part_to_render = '0'))
@@ -43,52 +46,51 @@ begin
     ) else '0';
 
     PIPE_CONTROLLER : process (vert_sync)
+        -- Helper to calculate the center of the gap
+        variable gap_center : unsigned(9 downto 0);
     begin
         if rising_edge(vert_sync) then
-            -- handle reset unconditionally so it works even when menu/paused
             if reset = '1' then
                 end_reached <= '0';
-
-                -- Reset pipe positions
+                is_visible <= '1';
                 pipe_x_pos <= to_unsigned(640 + START_OFFSET, 11);
+                
+                -- Initialize pipe Y positions based on the input height
                 pipe_top_y_pos <= to_unsigned(height, 10) - to_unsigned(gap/2, 10);
                 pipe_bottom_y_pos <= to_unsigned(height, 10) + to_unsigned(gap/2, 10);
-                player_latched <= '0';  -- Reset player latched state on reset
+                player_latched <= '0';
+                
             elsif enabled = '1' then
-                if pipe_x_pos <= to_unsigned(0, 11) then
+                -- Movement Logic
+                if pipe_x_pos <= to_unsigned(2, 11) then
                     end_reached <= '1';
-                    pipe_x_pos <= to_unsigned(640 + START_OFFSET, 11); -- respawn immediately
+                    is_visible <= '0';
                 else
                     pipe_x_pos <= pipe_x_pos - to_unsigned(2, 11);
                     end_reached <= '0';
                     
-                    -- The "Jump" logic: only apply while enabled and as it approaches
-                    if pipe_x_pos <= to_unsigned(100, 11) then
+                    -- Latching and "Seeking" Logic
+                    if pipe_x_pos <= to_unsigned(300, 11) then -- Start seeking earlier for a smoother climb
                         if (player_latched = '0') then
                             player_latched <= '1';
                             player_latched_y_pos <= player_y_pos;
                         end if;
 
-                        -- If top pipe move down.
-                        if (part_to_render = '1') then
-                            if (pipe_top_y_pos < player_latched_y_pos) then
-                                pipe_top_y_pos <= pipe_top_y_pos + to_unsigned(2, 10);  -- Move down by 2 pixels
-                                pipe_bottom_y_pos <= pipe_bottom_y_pos + to_unsigned(2, 10);  -- Adjust bottom position accordingly
-                            end if;
+                        -- Calculate current gap center to decide movement
+                        gap_center := pipe_top_y_pos + to_unsigned(gap/2, 10);
+
+                        -- If gap is above player, AND we're rendering the top part, move whole pipe system DOWN (descending)
+                        if (gap_center < player_latched_y_pos - 4 and part_to_render = '1') then
+                            pipe_top_y_pos <= pipe_top_y_pos + 4;
+                            pipe_bottom_y_pos <= pipe_bottom_y_pos + 4;
                         
-                        -- If bottom pipe move up.
-                        elsif (part_to_render = '0') then
-                            if (pipe_top_y_pos > player_latched_y_pos) then
-                                pipe_top_y_pos <= pipe_top_y_pos - to_unsigned(2, 10);  -- Move up by 2 pixels
-                                pipe_bottom_y_pos <= pipe_bottom_y_pos - to_unsigned(2, 10);  -- Adjust bottom position accordingly
-                            end if;
+                        -- If gap is below player, AND we're rendering the bottom part, move whole pipe system UP (ascending)
+                        elsif (gap_center > player_latched_y_pos + 4 and part_to_render = '0') then
+                            pipe_top_y_pos <= pipe_top_y_pos - 4;
+                            pipe_bottom_y_pos <= pipe_bottom_y_pos - 4;
                         end if;
                     end if;
                 end if;
-
-            else
-                -- paused/title: freeze position
-                null;
             end if;
         end if;
     end process PIPE_CONTROLLER;

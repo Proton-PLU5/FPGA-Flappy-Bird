@@ -9,9 +9,9 @@ entity SpriteRenderer is
         clk : in std_logic;
         pixel_row    : in std_logic_vector(9 downto 0);
         pixel_column : in std_logic_vector(9 downto 0);
-        start_x  : in std_logic_vector(9 downto 0);
-        start_y  : in std_logic_vector(9 downto 0);
-        sprite_id : in integer;
+        start_x  : in std_logic_vector(10 downto 0);
+        start_y  : in std_logic_vector(10 downto 0);
+        sprite_id : in integer range 0 to 7;
         red   : out std_logic_vector(3 downto 0);
         green : out std_logic_vector(3 downto 0);
         blue  : out std_logic_vector(3 downto 0);
@@ -78,6 +78,9 @@ begin
                 when 5 =>
                     width := BLUE_BRICK_TILE_WIDTH;
                     height := BLUE_BRICK_TILE_HEIGHT;
+                when 6 =>
+                    width := L3SKULL_WIDTH;
+                    height := L3SKULL_HEIGHT;
                 when others =>
                     width := SKELETRON_HEAD_WIDTH;
                     height := SKELETRON_HEAD_HEIGHT;
@@ -119,6 +122,9 @@ begin
                     when 5 =>
                         palette_index := BLUE_BRICK_TILE_DATA(addr);
                         color := BLUE_BRICK_TILE_PALETTE(palette_index);
+                    when 6 =>
+                        palette_index := L3SKULL_DATA(addr);
+                        color := L3SKULL_PALETTE(palette_index);
                     when others =>
                         palette_index := SKELETRON_HEAD_DATA(addr);
                         color := SKELETRON_HEAD_PALETTE(palette_index);

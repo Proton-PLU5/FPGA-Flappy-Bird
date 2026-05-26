@@ -8,8 +8,8 @@ entity LevelTwo is
         clk25Mhz : IN std_logic;
         mouse_left : IN std_logic;
         vert_sync : IN std_logic;
-		SW : IN std_logic_vector(9 downto 0);
-		KEY : IN std_logic_vector(3 DOWNTO 0);
+		  SW : IN std_logic_vector(9 downto 0);
+		  KEY : IN std_logic_vector(3 DOWNTO 0);
         level_two_enable : IN std_logic := '0';
         pixel_row, pixel_column	: IN std_logic_vector(9 DOWNTO 0);
         paused : IN std_logic;
@@ -18,8 +18,10 @@ entity LevelTwo is
         pipe_2_red, pipe_2_green, pipe_2_blue : OUT std_logic_vector(3 downto 0);
         pipe_1_x_pos : OUT unsigned(10 downto 0);
         pipe_2_x_pos : OUT unsigned(10 downto 0);
-        powerup_enabled : OUT std_logic;
+        powerup_render : OUT std_logic;
         powerup_red, powerup_green, powerup_blue : OUT std_logic_vector(3 downto 0);
+        powerup_collect : IN std_logic;
+        powerup_count : OUT integer;
         pipe_1_render, pipe_2_render : OUT std_logic;
         player_y_pos : IN unsigned(9 downto 0)      
     );
@@ -45,17 +47,19 @@ architecture behavior of LevelTwo is
             player_y_pos                : in unsigned(9 downto 0)
         );
     end component OffsetPipe;
-
+	 
     component PowerUp is
         port (
-            clk, vert_sync, mouse_left  : in std_logic;
-            pixel_row, pixel_column     : in std_logic_vector(9 downto 0);
-            red, green, blue            : out std_logic_vector(3 downto 0);
-            reset                       : in std_logic;
-            enabled                     : out std_logic;
-            x_pos                       : out unsigned(10 downto 0);
-            y_pos                       : out unsigned(9 downto 0);
-            level_two_enable            : in std_logic
+            clk, vert_sync, mouse_left : in std_logic;
+            pixel_row, pixel_column : in std_logic_vector(9 downto 0);
+            red, green, blue : out std_logic_vector(3 downto 0);
+            reset : in std_logic;
+            collect : in std_logic;
+            collect_count : out integer;
+            render : out std_logic;
+            x_pos : out unsigned(10 downto 0);
+            y_pos : out unsigned(9 downto 0);
+            enable : in std_logic
         );
     end component PowerUp;
 
@@ -87,11 +91,11 @@ architecture behavior of LevelTwo is
     signal pipe_2_part_to_render : std_logic := '0'; 
     signal pipe_2_waiting : std_logic := '0';
 
-    signal powerup_enabled_s : std_logic := '0';
+    signal powerup_render_s : std_logic := '0';
     signal powerup_red_s, powerup_green_s, powerup_blue_s : std_logic_vector(3 downto 0);
     signal powerup_reset : std_logic := '0';
-    signal powerup_x_pos : unsigned(10 downto 0);
-    signal powerup_y_pos : unsigned(9 downto 0);
+    signal powerup_x_pos_s : unsigned(10 downto 0);
+    signal powerup_y_pos_s : unsigned(9 downto 0);
 
     signal last_key_3_state : std_logic := '1';
 
@@ -167,10 +171,12 @@ begin
         green => powerup_green_s,
         blue => powerup_blue_s,
         reset => powerup_reset,
-        enabled => powerup_enabled_s,
-        x_pos => powerup_x_pos,
-        y_pos => powerup_y_pos,
-        level_two_enable => level_two_enable
+        collect => powerup_collect,
+        collect_count => powerup_count,
+        render => powerup_render_s,
+        x_pos => powerup_x_pos_s,
+        y_pos => powerup_y_pos_s,
+        enable => level_two_enable
     );
 
     CLOCK_PROCESS : process(clk25Mhz)
@@ -221,7 +227,7 @@ begin
     pipe_2_blue <= pipe_2_blue_s;
     pipe_1_x_pos <= pipe_1_x_pos_s;
     pipe_2_x_pos <= pipe_2_x_pos_s;
-    powerup_enabled <= powerup_enabled_s;
+    powerup_render <= powerup_render_s;
     powerup_red <= powerup_red_s;
     powerup_green <= powerup_green_s;
     powerup_blue <= powerup_blue_s;

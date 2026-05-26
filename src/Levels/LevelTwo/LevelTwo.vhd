@@ -42,7 +42,7 @@ architecture behavior of LevelTwo is
             enabled                     : in std_logic;
             render                      : out std_logic;
             part_to_render              : in std_logic;
-            player_y_pos                : in unsigned(9 downto 0);
+            player_y_pos                : in unsigned(9 downto 0)
         );
     end component OffsetPipe;
 
@@ -103,7 +103,6 @@ architecture behavior of LevelTwo is
 
 begin
     pipe_1_enabled_s <= level_two_enable and not paused;
-    pipe_2_enabled_s <= level_two_enable and not paused and pipe_1_x_pos_s = to_unsigned(320, 11); -- Spawn pipe 2 when pipe 1 reaches mid-screen
 
     PIPE_COMPONENT : OffsetPipe
         generic map ( START_OFFSET => 0 )
@@ -191,6 +190,12 @@ begin
     PIPE_2_HEIGHT_RANDOMISER : process (vert_sync)
     begin
         if rising_edge(vert_sync) then
+				if (pipe_1_x_pos_s = to_unsigned(320, 11)) then
+					pipe_2_enabled_s <= level_two_enable and not paused; -- Spawn pipe 2 when pipe 1 reaches mid-screen
+				 else
+					pipe_2_enabled_s <= '0';
+				 end if;
+					 
             if pipe_2_enabled_s = '1' then
                 pipe_2_reset <= '0';
                 if pipe_2_end_reached = '1' then

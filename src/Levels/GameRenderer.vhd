@@ -31,7 +31,8 @@ architecture behavior of GameRenderer is
             enabled : IN std_logic;
             render : OUT std_logic;
             player_y_pos : OUT unsigned(9 downto 0);
-            hit_bottom : OUT std_logic
+            hit_bottom : OUT std_logic;
+            invincible : IN std_logic
             );
     end component Player;
 
@@ -162,6 +163,7 @@ architecture behavior of GameRenderer is
     signal ball_red, ball_green, ball_blue : std_logic_vector(3 downto 0);
     signal invincibility : integer range 0 to 300 := 0; -- frames of invincibility after pipe collision.
     signal invincibility_flash : std_logic := '0';
+	signal invincible_s : std_logic := '0';
 
     -- Obstacle Values
     signal obstacle_1_red, obstacle_1_green, obstacle_1_blue : std_logic_vector(3 downto 0);
@@ -286,7 +288,8 @@ begin
         render => player_render,
         enabled => player_enabled,
         player_y_pos => player_y_pos,
-        hit_bottom => hit_bottom_s
+        hit_bottom => hit_bottom_s,
+        invincible => invincible_s
     );
 
     LEVEL_ONE_COMPONENT : LevelOne port map (
@@ -599,9 +602,11 @@ begin
                         end if;
                     elsif (SW(6) = '0') then
                         invincibility <= 200;
+                        invincible_s <= '1';
                     else
                         -- reset flash when invincibility runs out
                         invincibility_flash <= '0';
+                        invincible_s <= '0';
                     end if;
 
                     powerup_collect_s <= '0';

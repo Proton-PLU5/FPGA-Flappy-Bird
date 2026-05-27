@@ -12,7 +12,8 @@ entity Player is
             render : OUT std_logic;
             enabled : IN std_logic;
             player_y_pos : OUT unsigned(9 downto 0);
-            hit_bottom : OUT std_logic
+            hit_bottom : OUT std_logic;
+            invincible : IN std_logic
         );
 end entity Player;
 
@@ -23,6 +24,7 @@ architecture behavior of Player is
     SIGNAL ball_x_pos				: std_logic_vector(9 DOWNTO 0);
     signal ball_velocity : std_logic_vector(9 DOWNTO 0) := (others => '0');
 	signal hit_bottom : std_logic := '0';
+	signal invincible : std_logic := '0';
 
 	 component SpriteRenderer is
 		 port (
@@ -88,7 +90,12 @@ begin
             if (enabled = '1') then
                 -- BOTTOM BOUNDARY: Die if at the bottom AND trying to fall
                 if ( ('0' & ball_y_pos >= CONV_STD_LOGIC_VECTOR(479, 10)) and (ball_velocity >= CONV_STD_LOGIC_VECTOR(0, 10)) ) then
-                    hit_bottom <= '1';
+                    if invincible = '0' then  
+                        hit_bottom <= '1';
+                    else
+                        ball_y_pos <= CONV_STD_LOGIC_VECTOR(479, 10) - size;
+                        hit_bottom <= '0';
+                    end if;
                 -- TOP BOUNDARY: Stop if at the top 
                 elsif (ball_y_pos <= size) then 
                     ball_velocity <= CONV_STD_LOGIC_VECTOR(0, 10); 

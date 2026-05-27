@@ -55,10 +55,11 @@ architecture behavior of BossRenderer is
 
     constant lower_jaw_anim_threshold : integer := 12; -- Number of clock cycles for lower jaw animation
 begin
-    BOSS_UPPER_JAW : SpriteRenderer port map (
+    BOSS_UPPER_JAW : SpriteRenderer 
     generic map (
         SCALE_FACTOR => SCALE_FACTOR
     )
+    port map (
         clk => clk25Mhz,
         pixel_row => pixel_row,
         pixel_column => pixel_column,

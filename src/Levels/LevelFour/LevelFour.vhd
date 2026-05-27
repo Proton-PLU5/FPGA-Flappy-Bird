@@ -48,16 +48,32 @@ architecture behavior of LevelFour is
         );
     end component SpriteRenderer;
 
-    --------- BOSS SIGNALS ---------
+    -- BOSS SIGNALS
     signal boss_red, boss_green, boss_blue : std_logic_vector(3 downto 0);
     signal boss_enabled : std_logic;
+
+    -- DEAD BOSS SIGNALS
+    signal dead_head_red, dead_head_green, dead_head_blue : std_logic_vector(3 downto 0);
+    signal dead_head_transparent : std_logic;
+    signal dead_head_enabled, dead_jaw_enabled : std_logic;
+    
+    signal dead_jaw_red, dead_jaw_green, dead_jaw_blue : std_logic_vector(3 downto 0);
+    signal dead_jaw_transparent : std_logic;
+
+    -- Starting Y for Head = 202
+    signal dead_head_y : unsigned(9 downto 0) := to_unsigned(202, 10);
+    
+    -- Starting X for Jaw = 280 + (13 base offset * 2 scale) = 306
+    -- Starting Y for Jaw = 202 + (57 base offset * 2 scale) = 316
+    signal dead_jaw_x : unsigned(9 downto 0) := to_unsigned(306, 10);
+    signal dead_jaw_y : unsigned(9 downto 0) := to_unsigned(316, 10);
     
     -- X = 320 (Screen Center) - 40 (Half Boss Width) = 280
     -- Y = 240 (Screen Center) - 38 (Half Boss Height) = 202
     signal boss_x_pos : std_logic_vector(9 downto 0) := std_logic_vector(to_unsigned(280, 10)); 
     signal boss_y_pos : std_logic_vector(9 downto 0) := std_logic_vector(to_unsigned(202, 10)); 
 
-    --------- LASER BEAM SIGNALS ---------
+    -- LASER BEAM SIGNALS
     signal laser_warning1_red, laser_warning1_green, laser_warning1_blue : std_logic_vector(3 downto 0);
     signal laser_warning1_transparent : std_logic;
     signal laser_warning2_red, laser_warning2_green, laser_warning2_blue : std_logic_vector(3 downto 0);
@@ -66,7 +82,7 @@ architecture behavior of LevelFour is
     
     signal laser_warning_counter : integer range 0 to 60 := 0;
 
-    --------- CENTER GAP ---------
+    -- CENTER GAP
     constant SPRITE_HEIGHT : integer := 120; 
     
     constant GAP_HALF : integer := 40;  -- Half of 150px
@@ -75,7 +91,7 @@ architecture behavior of LevelFour is
     -- Top laser bottom edge = 165 (start_y = 165 - height)
     constant L1_TARGET_INT : integer := Y_CENTER - GAP_HALF - SPRITE_HEIGHT;
     
-	 -- Bottom laser top edge = 315 (start_y = 315)
+	-- Bottom laser top edge = 315 (start_y = 315)
     constant L2_TARGET_INT : integer := Y_CENTER + GAP_HALF;
 	 
 	 
@@ -103,7 +119,8 @@ architecture behavior of LevelFour is
     
     signal cycle_counter : integer range 0 to 1000 := 0; 
 begin
-    Boss: BossRenderer
+
+    BOSS: BossRenderer
     generic map (
         SCALE_FACTOR => 2
     )
@@ -118,6 +135,36 @@ begin
         enabled => boss_enabled,
         x_pos => boss_x_pos,
         y_pos => boss_y_pos
+    );
+
+    DEAD_HEAD : SpriteRenderer 
+    generic map ( SCALE_FACTOR => 2 )
+    port map (
+        clk => clk25Mhz,
+        pixel_row => pixel_row,
+        pixel_column => pixel_column,
+        start_x => '0' & boss_x_pos,
+        start_y => '0' & std_logic_vector(dead_head_y),
+        sprite_id => 0,
+        red => dead_head_red,
+        green => dead_head_green,
+        blue => dead_head_blue,
+        transparent => dead_head_transparent
+    );
+
+    DEAD_JAW : SpriteRenderer 
+    generic map ( SCALE_FACTOR => 2 )
+    port map (
+        clk => clk25Mhz,
+        pixel_row => pixel_row,
+        pixel_column => pixel_column,
+        start_x => '0' & std_logic_vector(dead_jaw_x),
+        start_y => '0' & std_logic_vector(dead_jaw_y),
+        sprite_id => 1,
+        red => dead_jaw_red,
+        green => dead_jaw_green,
+        blue => dead_jaw_blue,
+        transparent => dead_jaw_transparent
     );
 
     -- LASER WARNING 1 SPRITE
@@ -187,7 +234,12 @@ begin
                 game_finished <= '0';
                 laser1_y_pos <= (others => '0');
                 laser2_y_pos <= to_unsigned(L2_START_INT, 10);
-                
+                dead_head_y <= to_unsigned(202, 10);
+                dead_jaw_x  <= to_unsigned(306, 10);
+                dead_jaw_y  <= to_unsigned(316, 10);
+
+                dead_head_enabled <= '0';
+                dead_jaw_enabled <= '0';
             elsif paused = '0' then
                 case current_state is
                     
@@ -203,6 +255,12 @@ begin
                             cycle_counter <= cycle_counter + 1;
                         end if;
 
+                        dead_head_y <= to_unsigned(202, 10);
+                        dead_jaw_x  <= to_unsigned(306, 10);
+                        dead_jaw_y  <= to_unsigned(316, 10);
+
+                        dead_head_enabled <= '0';
+                        dead_jaw_enabled <= '0';
                     when WARNING =>
                         -- 5 second warning (300 frames at 60Hz)
                         if cycle_counter >= 300 then 
@@ -261,6 +319,19 @@ begin
                         laser_warning_enabled <= '0';
                         game_finished <= '1'; -- Trigger the win state
                         
+                        dead_head_enabled <= '1';
+                        dead_jaw_enabled <= '1';
+                        
+                        -- Head falls slowly straight down
+                        if dead_head_y < 480 then
+                            dead_head_y <= dead_head_y + 1; 
+                        end if;
+
+                        -- Jaw falls fast and drifts to the right
+                        if dead_jaw_y < 480 then
+                            dead_jaw_y <= dead_jaw_y + 3; 
+                            dead_jaw_x <= dead_jaw_x + 1; 
+                        end if;
                 end case;
             end if;
         end if;
@@ -271,7 +342,12 @@ begin
     begin
         if rising_edge(clk25Mhz) then
             if level_four_enable = '1' then
-                if laser_warning_enabled = '1' and laser_warning1_transparent = '0' then
+
+                if dead_head_enabled = '1' and dead_head_transparent = '0' then
+                    red <= dead_head_red; green <= dead_head_green; blue <= dead_head_blue;
+                elsif dead_jaw_enabled = '1' and dead_jaw_transparent = '0' then
+                    red <= dead_jaw_red; green <= dead_jaw_green; blue <= dead_jaw_blue;
+                elsif laser_warning_enabled = '1' and laser_warning1_transparent = '0' then
                     red <= laser_warning1_red; green <= laser_warning1_green; blue <= laser_warning1_blue;
                 elsif laser_warning_enabled = '1' and laser_warning2_transparent = '0' then
                     red <= laser_warning2_red; green <= laser_warning2_green; blue <= laser_warning2_blue;
@@ -279,7 +355,7 @@ begin
                     red <= laser1_red; green <= laser1_green; blue <= laser1_blue;
                 elsif laser2_enabled = '1' and laser2_transparent = '0' then
                     red <= laser2_red; green <= laser2_green; blue <= laser2_blue;
-                elsif boss_enabled = '1' then
+                elsif boss_enabled = '1' and current_state /= VICTORY then
                     red <= boss_red; green <= boss_green; blue <= boss_blue;
                 else
                     red <= (others => '0'); green <= (others => '0'); blue <= (others => '0');

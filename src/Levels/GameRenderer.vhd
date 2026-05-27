@@ -30,8 +30,9 @@ architecture behavior of GameRenderer is
             red, green, blue : OUT std_logic_vector(3 downto 0);
             enabled : IN std_logic;
             render : OUT std_logic;
-            player_y_pos : OUT unsigned(9 downto 0)
-        );
+            player_y_pos : OUT unsigned(9 downto 0);
+            hit_bottom : OUT std_logic
+            );
     end component Player;
 
     component ScoreTextRenderer is
@@ -156,8 +157,8 @@ architecture behavior of GameRenderer is
     signal powerup_collision_pending : std_logic := '0';
     signal powerup_collected : std_logic := '0';
 
-    -- Ball Values
-    signal player_render : std_logic := '0';
+    -- Player Values
+    signal player_render, hit_bottom_s : std_logic := '0';
     signal ball_red, ball_green, ball_blue : std_logic_vector(3 downto 0);
     signal invincibility : integer range 0 to 300 := 0; -- frames of invincibility after pipe collision.
     signal invincibility_flash : std_logic := '0';
@@ -284,7 +285,8 @@ begin
         blue => ball_blue,
         render => player_render,
         enabled => player_enabled,
-        player_y_pos => player_y_pos
+        player_y_pos => player_y_pos,
+        hit_bottom => hit_bottom_s
     );
 
     LEVEL_ONE_COMPONENT : LevelOne port map (
@@ -575,13 +577,18 @@ begin
                 end if;
 
                 if vert_sync = '1' and last_vert_sync = '0' then
+                    -- Hitting bottom takes priority
+                    if hit_bottom_s = '1' then
+                        collision_count <= 0;
+                        game_over_s <= '1';
+                    end if;
                     if obstacle_collision_pending = '1' and invincibility = 0 then
                         invincibility <= 200; -- gives 5 seconds of invincibility at 60fps
 								if no_lives_left = '0' then
 									collision_count <= collision_count + 1; -- add to counter of collisions
                                 else
                                     collision_count <= 0; -- reset collision count if no lives left
-                                    -- GAME OVER CONDITION HERE :)
+                                    game_over_s <= '1';
 								end if;
                     elsif invincibility > 0 then
                         invincibility <= invincibility - 1;

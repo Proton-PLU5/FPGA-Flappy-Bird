@@ -11,7 +11,8 @@ entity Player is
             red, green, blue : OUT std_logic_vector(3 downto 0);
             render : OUT std_logic;
             enabled : IN std_logic;
-            player_y_pos : OUT unsigned(9 downto 0)
+            player_y_pos : OUT unsigned(9 downto 0);
+            hit_bottom : OUT std_logic
         );
 end entity Player;
 
@@ -21,7 +22,8 @@ architecture behavior of Player is
     SIGNAL ball_y_pos : std_logic_vector(9 DOWNTO 0) := CONV_STD_LOGIC_VECTOR(240, 10);
     SIGNAL ball_x_pos				: std_logic_vector(9 DOWNTO 0);
     signal ball_velocity : std_logic_vector(9 DOWNTO 0) := (others => '0');
-	 
+	signal hit_bottom : std_logic := '0';
+
 	 component SpriteRenderer is
 		 port (
 			  clk : in std_logic;
@@ -84,15 +86,17 @@ begin
         -- Move ball once every vertical sync
 	    if (rising_edge(vert_sync)) then	
             if (enabled = '1') then
-                -- BOTTOM BOUNDARY: Stop if at the bottom AND trying to fall
-                if ( ('0' & ball_y_pos >= CONV_STD_LOGIC_VECTOR(479, 10) - size) and (ball_velocity >= CONV_STD_LOGIC_VECTOR(0, 10)) ) then
-                    ball_y_pos <= CONV_STD_LOGIC_VECTOR(479, 10) - size;
+                -- BOTTOM BOUNDARY: Die if at the bottom AND trying to fall
+                if ( ('0' & ball_y_pos >= CONV_STD_LOGIC_VECTOR(479, 10)) and (ball_velocity >= CONV_STD_LOGIC_VECTOR(0, 10)) ) then
+                    hit_bottom <= '1';
                 -- TOP BOUNDARY: Stop if at the top 
                 elsif (ball_y_pos <= size) then 
                     ball_velocity <= CONV_STD_LOGIC_VECTOR(0, 10); 
                     ball_y_pos <= CONV_STD_LOGIC_VECTOR(0, 10) + (size + 1); -- +1 to prevent getting stuck at top boundary 
+                    hit_bottom <= '0';
                 else
                     ball_y_pos <= ball_y_pos + ball_velocity; 
+                    hit_bottom <= '0';
                 end if;
 
                 

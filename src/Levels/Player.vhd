@@ -22,8 +22,8 @@ architecture behavior of Player is
     SIGNAL size 					: std_logic_vector(9 DOWNTO 0);  
     SIGNAL ball_y_pos : std_logic_vector(9 DOWNTO 0) := CONV_STD_LOGIC_VECTOR(240, 10);
     SIGNAL ball_x_pos				: std_logic_vector(9 DOWNTO 0);
-    signal ball_velocity : std_logic_vector(9 DOWNTO 0) := (others => '0');
-	 signal hit_bottom_s : std_logic := '0';
+    SIGNAL ball_velocity : std_logic_vector(9 DOWNTO 0) := (others => '0');
+	SIGNAL hit_bottom_s : std_logic := '0';
 
 	 component SpriteRenderer is
 		 port (
@@ -85,10 +85,14 @@ begin
 	 
     begin
         -- Move ball once every vertical sync
-	    if (rising_edge(vert_sync)) then	
-            if (enabled = '1') then
+	    if (rising_edge(vert_sync)) then
+            if enabled = '0' then
+                if (('0' & ball_y_pos >= CONV_STD_LOGIC_VECTOR(479, 10)) and (ball_velocity >= CONV_STD_LOGIC_VECTOR(0, 10))) then -- Game reset
+                    ball_y_pos <= CONV_STD_LOGIC_VECTOR(240, 10); -- Reset to middle
+                end if;
+            elsif enabled = '1' then -- Normal movement
                 -- BOTTOM BOUNDARY: Die if at the bottom AND trying to fall
-                if ( ('0' & ball_y_pos >= CONV_STD_LOGIC_VECTOR(479, 10)) and (ball_velocity >= CONV_STD_LOGIC_VECTOR(0, 10)) ) then
+                if (('0' & ball_y_pos >= CONV_STD_LOGIC_VECTOR(479, 10)) and (ball_velocity >= CONV_STD_LOGIC_VECTOR(0, 10))) then
                     if invincible = '0' then  
                         hit_bottom_s <= '1';
                     else
@@ -117,7 +121,7 @@ begin
         red <= red_s;
         green <= green_s;
         blue <= blue_s;
-		  hit_bottom <= hit_bottom_s;
+		hit_bottom <= hit_bottom_s;
     end process;
     
     -- glad we did it like this, cuz its so easy to do transparency!

@@ -5,6 +5,9 @@ use ieee.std_logic_unsigned.all;
 use ieee.std_logic_arith.all;
 
 entity BossRenderer is
+  generic (
+    SCALE_FACTOR : integer := 1
+  );
   port (
     clk25Mhz : IN std_logic;
     pixel_row, pixel_column : IN std_logic_vector(9 downto 0);
@@ -18,13 +21,16 @@ end BossRenderer;
 
 architecture behavior of BossRenderer is
     component SpriteRenderer is
+        generic (
+            SCALE_FACTOR : integer := 1
+        );
         port (
             clk : in std_logic;
             pixel_row : in std_logic_vector(9 downto 0);
             pixel_column : in std_logic_vector(9 downto 0);
-			   start_x  : in std_logic_vector(10 downto 0);
-			   start_y  : in std_logic_vector(10 downto 0);
-			   sprite_id : in integer range 0 to 64;
+			start_x  : in std_logic_vector(10 downto 0);
+			start_y  : in std_logic_vector(10 downto 0);
+			sprite_id : in integer range 0 to 64;
             red : out std_logic_vector(3 downto 0);
             green : out std_logic_vector(3 downto 0);
             blue : out std_logic_vector(3 downto 0);
@@ -36,12 +42,23 @@ architecture behavior of BossRenderer is
     signal red_lower_jaw, green_lower_jaw, blue_lower_jaw : std_logic_vector(3 downto 0) := (others => '1');
     signal transparent_upper_jaw, transparent_lower_jaw : std_logic := '0';
 
-    signal lower_jaw_x_offset : std_logic_vector(9 downto 0) := CONV_STD_LOGIC_VECTOR(13, 10); -- Adjust as needed for jaw positioning
-    signal lower_jaw_y_offset : std_logic_vector(9 downto 0) := CONV_STD_LOGIC_VECTOR(57, 10); -- Adjust as needed for jaw positioning
+    constant lower_jaw_x_offset_base : integer := 13; -- Base jaw x offset in unscaled pixels
+    constant lower_jaw_y_offset_base : integer := 57; -- Base jaw y offset in unscaled pixels
+
+    constant lower_jaw_anim_step : std_logic_vector(9 downto 0) :=
+        CONV_STD_LOGIC_VECTOR(SCALE_FACTOR, 10);
+
+    signal lower_jaw_x_offset : std_logic_vector(9 downto 0) :=
+        CONV_STD_LOGIC_VECTOR(lower_jaw_x_offset_base * SCALE_FACTOR, 10);
+    signal lower_jaw_y_offset : std_logic_vector(9 downto 0) :=
+        CONV_STD_LOGIC_VECTOR(lower_jaw_y_offset_base * SCALE_FACTOR, 10);
 
     constant lower_jaw_anim_threshold : integer := 12; -- Number of clock cycles for lower jaw animation
 begin
     BOSS_UPPER_JAW : SpriteRenderer port map (
+    generic map (
+        SCALE_FACTOR => SCALE_FACTOR
+    )
         clk => clk25Mhz,
         pixel_row => pixel_row,
         pixel_column => pixel_column,
@@ -54,7 +71,11 @@ begin
         transparent => transparent_upper_jaw
     );
 
-    BOSS_LOWER_JAW : SpriteRenderer port map (
+    BOSS_LOWER_JAW : SpriteRenderer 
+    generic map (
+        SCALE_FACTOR => SCALE_FACTOR
+    )
+    port map (
         clk => clk25Mhz,
         pixel_row => pixel_row,
         pixel_column => pixel_column,
@@ -73,9 +94,9 @@ begin
     begin
         if rising_edge(vert_sync) then
             if moving_down then
-                lower_jaw_y_offset <= lower_jaw_y_offset + 1;
+                lower_jaw_y_offset <= lower_jaw_y_offset + lower_jaw_anim_step;
             else
-                lower_jaw_y_offset <= lower_jaw_y_offset - 1;
+                lower_jaw_y_offset <= lower_jaw_y_offset - lower_jaw_anim_step;
             end if;
 
             if lower_jaw_anim_counter = lower_jaw_anim_threshold then

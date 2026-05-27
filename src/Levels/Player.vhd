@@ -23,22 +23,25 @@ architecture behavior of Player is
     signal ball_velocity : std_logic_vector(9 DOWNTO 0) := (others => '0');
 	 
 	 component SpriteRenderer is
-		 port (
-			  clk : in std_logic;
+        generic (
+            SCALE_FACTOR : integer := 1
+        );
+		port (
+            clk : in std_logic;
 
-			  pixel_row    : in std_logic_vector(9 downto 0);
-			  pixel_column : in std_logic_vector(9 downto 0);
+            pixel_row    : in std_logic_vector(9 downto 0);
+            pixel_column : in std_logic_vector(9 downto 0);
 
-			  start_x  : in std_logic_vector(10 downto 0);
-			  start_y  : in std_logic_vector(10 downto 0);
-			  sprite_id : in integer range 0 to 64;
+            start_x  : in std_logic_vector(10 downto 0);
+            start_y  : in std_logic_vector(10 downto 0);
+            sprite_id : in integer range 0 to 64;
 
-			  red   : out std_logic_vector(3 downto 0);
-			  green : out std_logic_vector(3 downto 0);
-			  blue  : out std_logic_vector(3 downto 0);
+            red   : out std_logic_vector(3 downto 0);
+            green : out std_logic_vector(3 downto 0);
+            blue  : out std_logic_vector(3 downto 0);
 
-              transparent : out std_logic
-		 );
+            transparent : out std_logic
+		);
 	 end component;
 	 
 

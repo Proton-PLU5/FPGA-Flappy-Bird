@@ -730,9 +730,9 @@ begin
                     case (score) is
                         when 0 to 10 =>
                             level_state <= 1; -- Level One
-                        when 11 to 160 =>
+                        when 11 to 260 =>
                             level_state <= 2; -- Level Two
-                        when 161 to 310 =>
+                        when 260 to 410 =>
                             level_state <= 3; -- Level Three
                         when others =>
                             level_state <= 4; -- Level Four

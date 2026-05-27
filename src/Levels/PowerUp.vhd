@@ -22,7 +22,7 @@ architecture behaviour of PowerUp is
     constant SCREEN_HEIGHT  : integer := 480;
     constant POWERUP_WIDTH   : integer := 22;
     constant POWERUP_HEIGHT : integer := 24;
-    constant SPEED          : integer := 4;
+    constant SPEED          : integer := 8;
     constant COOLDOWN_MAX   : integer := 180;
 
     signal powerup_x_pos : unsigned(10 downto 0) := to_unsigned(SCREEN_WIDTH, 11);

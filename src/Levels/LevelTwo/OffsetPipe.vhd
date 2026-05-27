@@ -24,6 +24,8 @@ entity OffsetPipe is
 end entity OffsetPipe;
 
 architecture behaviour of OffsetPipe is
+    constant SPEED : integer := 4;
+
     signal render_out : std_logic;
     signal pipe_x_pos : unsigned(10 downto 0) := to_unsigned(640 + START_OFFSET, 11);
     signal pipe_top_y_pos : unsigned(9 downto 0);
@@ -62,11 +64,11 @@ begin
                 
             elsif enabled = '1' then
                 -- Movement Logic
-                if pipe_x_pos <= to_unsigned(2, 11) then
+                if pipe_x_pos <= to_unsigned(SPEED, 11) then
                     end_reached <= '1';
                     is_visible <= '0';
                 else
-                    pipe_x_pos <= pipe_x_pos - to_unsigned(2, 11);
+                    pipe_x_pos <= pipe_x_pos - to_unsigned(SPEED, 11);
                     end_reached <= '0';
                     
                     -- Latching and "Seeking" Logic

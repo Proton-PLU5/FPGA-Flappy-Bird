@@ -23,6 +23,8 @@ entity Pipe is
 end entity Pipe;
 
 architecture behaviour of Pipe is
+    constant SPEED : integer := 2;
+
     signal render_out : std_logic;
     signal pipe_x_pos : unsigned(10 downto 0) := to_unsigned(640 + START_OFFSET, 11); -- Start off-screen right (staggerable)
     signal pipe_x_pos_effective : unsigned(10 downto 0);
@@ -63,11 +65,11 @@ begin
                 if follow_enable = '0' then
                     
                     -- Check if it reached the end
-                    if pipe_x_pos <= to_unsigned(2, 11) then
+                    if pipe_x_pos <= to_unsigned(SPEED, 11) then
                         end_reached <= '1';
                         is_visible <= '0'; -- Hide the pipe while it waits for the parent reset
                     else
-                        pipe_x_pos <= pipe_x_pos - to_unsigned(2, 11);
+                        pipe_x_pos <= pipe_x_pos - to_unsigned(SPEED, 11);
                         end_reached <= '0';
                     end if;
                 else

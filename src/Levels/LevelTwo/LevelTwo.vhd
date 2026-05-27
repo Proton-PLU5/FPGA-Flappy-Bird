@@ -90,6 +90,7 @@ architecture behavior of LevelTwo is
     signal pipe_2_part_to_render : std_logic := '0'; 
     signal pipe_2_waiting : std_logic := '0';
 
+    signal powerup_enabled_s : std_logic := '0';
     signal powerup_render_s : std_logic := '0';
     signal powerup_red_s, powerup_green_s, powerup_blue_s : std_logic_vector(3 downto 0);
     signal powerup_reset : std_logic := '0';
@@ -108,6 +109,7 @@ architecture behavior of LevelTwo is
 begin
     pipe_1_enabled_s <= level_two_enable and not paused;
     pipe_2_enabled_s <= level_two_enable and not paused and start_rendering_pipe_2;
+    powerup_enabled_s <= level_two_enable and not paused;
 
     PIPE_COMPONENT : OffsetPipe
         generic map ( START_OFFSET => 0 )
@@ -175,7 +177,7 @@ begin
         render => powerup_render_s,
         x_pos => powerup_x_pos_s,
         y_pos => powerup_y_pos_s,
-        enable => level_two_enable
+        enable => powerup_enabled_s
     );
 
     CLOCK_PROCESS : process(clk25Mhz)

@@ -115,6 +115,7 @@ architecture behavior of LevelThree is
     signal skull_5_reset : std_logic := '0';
     signal skull_5_waiting : std_logic := '0';
 
+    signal powerup_enabled_s : std_logic := '0';
     signal powerup_render_s : std_logic := '0';
     signal powerup_red_s, powerup_green_s, powerup_blue_s : std_logic_vector(3 downto 0);
     signal powerup_reset : std_logic := '0';
@@ -128,6 +129,7 @@ begin
     skull_3_enabled_s <= level_three_enable and not paused;
     skull_4_enabled_s <= level_three_enable and not paused;
     skull_5_enabled_s <= level_three_enable and not paused;
+    powerup_enabled_s <= level_two_enable and not paused;
 
     SKULL_1_COMPONENT : Skull port map (
         clk => clk25Mhz,
@@ -224,7 +226,7 @@ begin
         render => powerup_render_s,
         x_pos => powerup_x_pos_s,
         y_pos => powerup_y_pos_s,
-        enable => level_three_enable
+        enable => powerup_enabled_s
     );
 
     LFSR_COMPONENT : LFSR port map (

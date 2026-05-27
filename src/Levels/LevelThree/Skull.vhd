@@ -19,13 +19,14 @@ end entity Skull;
 architecture behaviour of Skull is
     constant SCREEN_WIDTH  : integer := 640;
     constant SCREEN_HEIGHT : integer := 480;
-    constant SKULL_WIDTH   : integer := 48;
-    constant SKULL_HEIGHT  : integer := 56;
+    constant SKULL_WIDTH   : integer := 52;
+    constant SKULL_HEIGHT  : integer := 60;
     constant SPEED         : integer := 2;
 
     signal skull_x_pos : unsigned(10 downto 0) := to_unsigned(SCREEN_WIDTH, 11); -- Start offscreen right
     signal skull_y_pos : integer range 0 to 480 := 0;
 
+    -- To scale
     -- signal diff_col : unsigned(10 downto 0);
     -- signal diff_row : unsigned(9 downto 0);
     -- signal scaled_pixel_row, scaled_pixel_column : std_logic_vector(9 downto 0);
@@ -61,6 +62,7 @@ begin
         unsigned(pixel_row) < to_unsigned(skull_y_pos + SKULL_HEIGHT, 10)
     ) else '0';
 
+    -- To scale
     -- diff_col <= unsigned(pixel_column) - skull_x_pos;
     -- diff_row <= unsigned(pixel_row) - to_unsigned(skull_y_pos, 10);
 
@@ -99,7 +101,11 @@ begin
 
                     -- Check if spawn_y_pos is too big (clamp)
                     if skull_y_pos > SCREEN_HEIGHT - SKULL_HEIGHT then
-                        skull_y_pos <= SCREEN_HEIGHT - SKULL_HEIGHT;
+                        skull_y_pos <= SCREEN_HEIGHT - SKULL_HEIGHT - 50;
+                    end if;
+
+                    if skull_y_pos < 0 then
+                        skull_y_pos <= 50;
                     end if;
 
                 else

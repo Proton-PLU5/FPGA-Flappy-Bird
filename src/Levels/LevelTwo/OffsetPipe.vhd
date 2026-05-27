@@ -64,7 +64,7 @@ begin
                 
             elsif enabled = '1' then
                 -- Movement Logic
-                if (pipe_x_pos + pipe_width) <= to_unsigned(0, 11) then
+                if pipe_x_pos <= to_unsigned(SPEED, 11) then
                     end_reached <= '1';
                     is_visible <= '0';
                 else

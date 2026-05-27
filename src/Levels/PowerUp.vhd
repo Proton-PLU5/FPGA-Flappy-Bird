@@ -101,7 +101,7 @@ begin
                 powerup_x_pos <= to_unsigned(SCREEN_WIDTH, 11);
                 cooldown <= COOLDOWN_MAX;
             elsif active = '1' then
-                if (powerup_x_pos + to_unsigned(POWERUP_WIDTH, 11)) <= to_unsigned(0, 11) then
+                if powerup_x_pos <= to_unsigned(SPEED, 11) then
                     active <= '0';
                     powerup_x_pos <= to_unsigned(SCREEN_WIDTH, 11);
                     cooldown <= COOLDOWN_MAX;

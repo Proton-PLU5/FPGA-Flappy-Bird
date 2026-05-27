@@ -21,7 +21,7 @@ architecture behaviour of Skull is
     constant SCREEN_HEIGHT : integer := 480;
     constant SKULL_WIDTH   : integer := 52;
     constant SKULL_HEIGHT  : integer := 60;
-    constant SPEED         : integer := 6;
+    constant SPEED         : integer := 8;
 
     signal skull_x_pos : unsigned(10 downto 0) := to_unsigned(SCREEN_WIDTH, 11); -- Start offscreen right
     signal skull_y_pos : integer range 0 to 480 := 0;
@@ -95,7 +95,7 @@ begin
                 skull_y_pos <= spawn_y_pos;
                 end_reached <= '0';
             elsif enabled = '1' then
-                if skull_x_pos <= to_unsigned(0, 11) then -- Reached left end
+                if (skull_x_pos + to_unsigned(SKULL_WIDTH, 11)) <= to_unsigned(0, 11) then -- Reached left end
                     end_reached <= '1';
                     skull_x_pos <= to_unsigned(640, 11); -- respawn immediately to avoid visible hang at edge
 

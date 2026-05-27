@@ -65,7 +65,7 @@ begin
                 if follow_enable = '0' then
                     
                     -- Check if it reached the end
-                    if pipe_x_pos <= to_unsigned(SPEED, 11) then
+                    if (pipe_x_pos_effective + pipe_width) <= to_unsigned(0, 11) then
                         end_reached <= '1';
                         is_visible <= '0'; -- Hide the pipe while it waits for the parent reset
                     else

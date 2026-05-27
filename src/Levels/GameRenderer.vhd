@@ -637,21 +637,21 @@ begin
                     end if;
 
                     if (obstacle_3_x_pos < to_unsigned(50, 11) and obstacle_3_score_incremented = '0') then
-                        score <= score + 2;
+                        score <= score + 1;
                         obstacle_3_score_incremented <= '1';
                     elsif (obstacle_3_x_pos >= to_unsigned(50, 11)) then
                         obstacle_3_score_incremented <= '0';
                     end if;
 
                     if (obstacle_4_x_pos < to_unsigned(50, 11) and obstacle_4_score_incremented = '0') then
-                        score <= score + 2;
+                        score <= score + 1;
                         obstacle_4_score_incremented <= '1';
                     elsif (obstacle_4_x_pos >= to_unsigned(50, 11)) then
                         obstacle_4_score_incremented <= '0';
                     end if;
 
                     if (obstacle_5_x_pos < to_unsigned(50, 11) and obstacle_5_score_incremented = '0') then
-                        score <= score + 2;
+                        score <= score + 1;
                         obstacle_5_score_incremented <= '1';
                     elsif (obstacle_5_x_pos >= to_unsigned(50, 11)) then
                         obstacle_5_score_incremented <= '0';

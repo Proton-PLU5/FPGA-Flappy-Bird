@@ -11,7 +11,6 @@ entity GameRenderer is
         KEY : IN std_logic_vector(3 DOWNTO 0);
         pixel_row, pixel_column : IN std_logic_vector(9 DOWNTO 0);
         red, green, blue : OUT std_logic_vector(3 downto 0);
-        training_mode : IN std_logic; 
         request_back : OUT std_logic;
         enabled : IN std_logic;
         training_mode_selected : IN std_logic;
@@ -610,7 +609,7 @@ begin
 									collision_count <= collision_count + 1; -- add to counter of collisions
                                 else
                                     collision_count <= 0; -- reset collision count if no lives left
-                                    -- GAME OVER CONDITION HERE :)
+                                    game_over_s <= '1'; 
 								end if;
                     elsif invincibility > 0 then
                         invincibility <= invincibility - 1;
@@ -756,7 +755,7 @@ begin
 
                 -- Automated level progression based on score
                 if manual_level_change = '0' then
-                    if training_mode = '0' then
+                    if training_mode_selected = '0' then
                         case (score) is
                             when 0 to 10 =>
                                 level_state <= 1; -- Level One

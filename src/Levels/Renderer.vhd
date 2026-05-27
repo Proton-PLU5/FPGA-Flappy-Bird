@@ -160,9 +160,9 @@ begin
         horz_sync => horz_sync,
         pixel_row => pixel_row,
         pixel_column => pixel_column,
-        red => win_red, 
-        green => win_green, 
-        blue => win_blue, 
+        red => red_win, 
+        green => green_win, 
+        blue => blue_win, 
         request_back => win_request_back,
         enabled => win_enabled -- Win renderer is not enabled by default; it will be enabled when the player wins
     );

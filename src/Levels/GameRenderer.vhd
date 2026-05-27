@@ -756,19 +756,20 @@ begin
 
                 -- Automated level progression based on score
                 if manual_level_change = '0' then
-                    case (score) is
-                        when 0 to 10 =>
-                            level_state <= 1; -- Level One
-                        when 11 to 160 =>
-                            level_state <= 2; -- Level Two
-                        when 161 to 310 =>
-                            level_state <= 3; -- Level Three
-                        when others =>
-                            level_state <= 4; -- Level Four
-                    end case;
-                elsif training_mode = '1' then
-                  -- In training mode, override to only level one for consistent testing conditions
-                  level_state <= 1;
+                    if training_mode = '0' then
+                        case (score) is
+                            when 0 to 10 =>
+                                level_state <= 1; -- Level One
+                            when 11 to 160 =>
+                                level_state <= 2; -- Level Two
+                            when 161 to 310 =>
+                                level_state <= 3; -- Level Three
+                            when others =>
+                                level_state <= 4; -- Level Four
+                        end case;
+                    else
+                        level_state <= 1; -- In training mode, always stay on level one
+                    end if;
                 end if;
             end if;
         end if;

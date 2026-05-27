@@ -11,7 +11,6 @@ entity GameRenderer is
         KEY : IN std_logic_vector(3 DOWNTO 0);
         pixel_row, pixel_column : IN std_logic_vector(9 DOWNTO 0);
         red, green, blue : OUT std_logic_vector(3 downto 0);
-        training_mode : IN std_logic; 
         request_back : OUT std_logic;
         enabled : IN std_logic;
         training_mode_selected : IN std_logic;
@@ -591,7 +590,11 @@ begin
 									collision_count <= collision_count + 1; -- add to counter of collisions
                                 else
                                     collision_count <= 0; -- reset collision count if no lives left
+<<<<<<< HEAD
                                     game_over_s <= '1';
+=======
+                                    game_over_s <= '1'; 
+>>>>>>> main
 								end if;
                     elsif invincibility > 0 then
                         invincibility <= invincibility - 1;
@@ -739,19 +742,20 @@ begin
 
                 -- Automated level progression based on score
                 if manual_level_change = '0' then
-                    case (score) is
-                        when 0 to 10 =>
-                            level_state <= 1; -- Level One
-                        when 11 to 260 =>
-                            level_state <= 2; -- Level Two
-                        when 261 to 410 =>
-                            level_state <= 3; -- Level Three
-                        when others =>
-                            level_state <= 4; -- Level Four
-                    end case;
-                elsif training_mode = '1' then
-                  -- In training mode, override to only level one for consistent testing conditions
-                  level_state <= 1;
+                    if training_mode_selected = '0' then
+                        case (score) is
+                            when 0 to 10 =>
+                                level_state <= 1; -- Level One
+                            when 11 to 260 =>
+                                level_state <= 2; -- Level Two
+                            when 261 to 410 =>
+                                level_state <= 3; -- Level Three
+                            when others =>
+                                level_state <= 4; -- Level Four
+                        end case;
+                    else
+                        level_state <= 1; -- In training mode, always stay on level one
+                    end if;
                 end if;
             end if;
         end if;

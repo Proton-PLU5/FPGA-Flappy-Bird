@@ -59,6 +59,18 @@ architecture behaviour of Renderer is
         );
     end component GameOverRenderer;
 
+    component WinRenderer is
+        port (
+            clk25Mhz : IN std_logic;
+            mouse_left : IN std_logic;
+            vert_sync, horz_sync : IN std_logic;
+            pixel_row, pixel_column : IN std_logic_vector(9 DOWNTO 0);
+            red, green, blue : OUT std_logic_vector(3 downto 0);
+            request_back : OUT std_logic;
+            enabled : IN std_logic
+        );
+    end component WinRenderer;
+
     signal red_play, green_play, blue_play : std_logic_vector(3 downto 0);
     signal red_title, green_title, blue_title : std_logic_vector(3 downto 0);
 
@@ -66,6 +78,12 @@ architecture behaviour of Renderer is
     signal red_gameover, green_gameover, blue_gameover : std_logic_vector(3 downto 0);
     signal game_over_s : std_logic := '0';
 	 signal gameover_request_back : std_logic := '0';
+
+    -- Win signals
+    signal red_win, green_win, blue_win : std_logic_vector(3 downto 0);
+    signal win_request_back : std_logic := '0';
+    signal win_s : std_logic := '0';
+    signal win_enabled : std_logic := '0';
 
     -- FSM control signals
     signal title_selected_mode : integer range 0 to 2 := 0; -- 0 for training, 1 for play, 2 for settings
@@ -134,6 +152,22 @@ begin
         request_back => gameover_request_back,
         enabled => gameover_enabled
     );
+
+    WIN_RENDERER_COMPONENT : WinRenderer port map (
+        clk25Mhz => clk25Mhz,
+        mouse_left => mouse_left,
+        vert_sync => vert_sync,
+        horz_sync => horz_sync,
+        pixel_row => pixel_row,
+        pixel_column => pixel_column,
+        red => red_win, 
+        green => green_win, 
+        blue => blue_win, 
+        request_back => win_request_back,
+        enabled => win_enabled -- Win renderer is not enabled by default; it will be enabled when the player wins
+    );
+
+
     
     -- FSM
     process(clk25Mhz)
@@ -166,6 +200,10 @@ begin
                         fsm_state <= 2; -- Move to game over screen
                     end if;
 
+                    if win_s = '1' then
+                        fsm_state <= 3; -- Stay on win screen until user clicks to go back
+                    end if;
+
                     red <= red_play;
                     green <= green_play;
                     blue <= blue_play;
@@ -173,7 +211,7 @@ begin
                     game_enabled <= '1';
                     title_enabled <= '0';
                     gameover_enabled <= '0';
-
+                    win_enabled <= '0';
                 when 2 => -- Game Over screen
                     if gameover_request_back = '1' then
                         fsm_state <= 0; -- Move back to title screen
@@ -186,6 +224,22 @@ begin
                     game_enabled <= '0';
                     title_enabled <= '0';
                     gameover_enabled <= '1';
+                    win_enabled <= '0';
+
+                when 3 => -- Win screen
+                    if win_request_back = '1' then
+                        fsm_state <= 0; -- Move back to title screen
+                    end if;
+
+                    red <= red_win;
+                    green <= green_win;
+                    blue <= blue_win;
+
+                    game_enabled <= '0';
+                    title_enabled <= '0';
+                    gameover_enabled <= '0';
+                    win_enabled <= '1';
+
                 when others =>
                     fsm_state <= 0; -- Default back to title screen
             end case;

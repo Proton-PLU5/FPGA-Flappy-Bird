@@ -12,7 +12,6 @@ entity LevelThree is
         level_three_enable : IN std_logic := '0';
         pixel_row, pixel_column	: IN std_logic_vector(9 DOWNTO 0);
         paused : IN std_logic;
-        skull_1_enabled, skull_2_enabled, skull_3_enabled, skull_4_enabled, skull_5_enabled : OUT std_logic;
         skull_1_red, skull_1_green, skull_1_blue : OUT std_logic_vector(3 downto 0);
         skull_2_red, skull_2_green, skull_2_blue : OUT std_logic_vector(3 downto 0);
         skull_3_red, skull_3_green, skull_3_blue : OUT std_logic_vector(3 downto 0);
@@ -385,35 +384,30 @@ begin
         end if;
     end process SKULL_5_RANDOMISER;
 
-    skull_1_enabled <= skull_1_enabled_s;
     skull_1_red <= skull_1_red_s;
     skull_1_green <= skull_1_green_s;
     skull_1_blue <= skull_1_blue_s;
     skull_1_x_pos <= skull_1_x_pos_s;
     skull_1_render <= skull_1_render_s;
 
-    skull_2_enabled <= skull_2_enabled_s;
     skull_2_red <= skull_2_red_s;
     skull_2_green <= skull_2_green_s;
     skull_2_blue <= skull_2_blue_s;
     skull_2_x_pos <= skull_2_x_pos_s;
     skull_2_render <= skull_2_render_s;
 
-    skull_3_enabled <= skull_3_enabled_s;
     skull_3_red <= skull_3_red_s;
     skull_3_green <= skull_3_green_s;
     skull_3_blue <= skull_3_blue_s;
     skull_3_x_pos <= skull_3_x_pos_s;
     skull_3_render <= skull_3_render_s;
 
-    skull_4_enabled <= skull_4_enabled_s;
     skull_4_red <= skull_4_red_s;
     skull_4_green <= skull_4_green_s;
     skull_4_blue <= skull_4_blue_s;
     skull_4_x_pos <= skull_4_x_pos_s;
     skull_4_render <= skull_4_render_s;
 
-    skull_5_enabled <= skull_5_enabled_s;
     skull_5_red <= skull_5_red_s;
     skull_5_green <= skull_5_green_s;
     skull_5_blue <= skull_5_blue_s;

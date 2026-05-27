@@ -129,7 +129,7 @@ begin
     skull_3_enabled_s <= level_three_enable and not paused;
     skull_4_enabled_s <= level_three_enable and not paused;
     skull_5_enabled_s <= level_three_enable and not paused;
-    powerup_enabled_s <= level_two_enable and not paused;
+    powerup_enabled_s <= level_three_enable and not paused;
 
     SKULL_1_COMPONENT : Skull port map (
         clk => clk25Mhz,

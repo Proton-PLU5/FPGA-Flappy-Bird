@@ -23,8 +23,7 @@ architecture behavior of Player is
     SIGNAL ball_y_pos : std_logic_vector(9 DOWNTO 0) := CONV_STD_LOGIC_VECTOR(240, 10);
     SIGNAL ball_x_pos				: std_logic_vector(9 DOWNTO 0);
     signal ball_velocity : std_logic_vector(9 DOWNTO 0) := (others => '0');
-	signal hit_bottom : std_logic := '0';
-	signal invincible : std_logic := '0';
+	 signal hit_bottom_s : std_logic := '0';
 
 	 component SpriteRenderer is
 		 port (
@@ -67,7 +66,7 @@ begin
     render_out <= '1' when ( ('0' & pixel_column >= '0' & ball_x_pos) and ('0' & pixel_column < '0' & ball_x_pos + size) 	
 				and ('0' & pixel_row >= '0' & ball_y_pos) and ('0' & pixel_row < '0' & ball_y_pos + size) )	
 	            else '0';
-					
+										
 					
     SPRITE_RENDERER : SpriteRenderer port map (
         clk => clk,
@@ -91,19 +90,19 @@ begin
                 -- BOTTOM BOUNDARY: Die if at the bottom AND trying to fall
                 if ( ('0' & ball_y_pos >= CONV_STD_LOGIC_VECTOR(479, 10)) and (ball_velocity >= CONV_STD_LOGIC_VECTOR(0, 10)) ) then
                     if invincible = '0' then  
-                        hit_bottom <= '1';
+                        hit_bottom_s <= '1';
                     else
                         ball_y_pos <= CONV_STD_LOGIC_VECTOR(479, 10) - size;
-                        hit_bottom <= '0';
+                        hit_bottom_s <= '0';
                     end if;
                 -- TOP BOUNDARY: Stop if at the top 
                 elsif (ball_y_pos <= size) then 
                     ball_velocity <= CONV_STD_LOGIC_VECTOR(0, 10); 
                     ball_y_pos <= CONV_STD_LOGIC_VECTOR(0, 10) + (size + 1); -- +1 to prevent getting stuck at top boundary 
-                    hit_bottom <= '0';
+                    hit_bottom_s <= '0';
                 else
                     ball_y_pos <= ball_y_pos + ball_velocity; 
-                    hit_bottom <= '0';
+                    hit_bottom_s <= '0';
                 end if;
 
                 
@@ -118,6 +117,7 @@ begin
         red <= red_s;
         green <= green_s;
         blue <= blue_s;
+		  hit_bottom <= hit_bottom_s;
     end process;
     
     -- glad we did it like this, cuz its so easy to do transparency!

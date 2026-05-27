@@ -21,7 +21,7 @@ architecture behaviour of Skull is
     constant SCREEN_HEIGHT : integer := 480;
     constant SKULL_WIDTH   : integer := 52;
     constant SKULL_HEIGHT  : integer := 60;
-    constant SPEED         : integer := 8;
+    constant SPEED         : integer := 6;
 
     signal skull_x_pos : unsigned(10 downto 0) := to_unsigned(SCREEN_WIDTH, 11); -- Start offscreen right
     signal skull_y_pos : integer range 0 to 480 := 0;

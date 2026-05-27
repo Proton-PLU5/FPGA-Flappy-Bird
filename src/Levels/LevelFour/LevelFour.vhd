@@ -19,6 +19,9 @@ end entity LevelFour;
 
 architecture behavior of LevelFour is
     component BossRenderer is
+        generic (
+            SCALE_FACTOR : integer := 1
+        );
         port (
             clk25Mhz : IN std_logic;
             pixel_row, pixel_column : IN std_logic_vector(9 downto 0);
@@ -26,7 +29,7 @@ architecture behavior of LevelFour is
             vert_sync : IN std_logic;
             enabled : OUT std_logic;
             x_pos : IN std_logic_vector(9 downto 0);
-            y_pos : in std_logic_vector(9 downto 0)
+            y_pos : IN std_logic_vector(9 downto 0)
         );
     end component BossRenderer;
 

@@ -103,7 +103,11 @@ architecture behavior of LevelFour is
     
     signal cycle_counter : integer range 0 to 1000 := 0; 
 begin
-    Boss: BossRenderer port map (
+    Boss: BossRenderer
+    generic map (
+        SCALE_FACTOR => 2
+    )
+    port map (
         clk25Mhz => clk25Mhz,
         pixel_row => pixel_row,
         pixel_column => pixel_column,

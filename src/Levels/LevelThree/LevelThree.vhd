@@ -290,6 +290,7 @@ begin
                 end if;
             elsif (level_three_enable = '0') then
                 skull_2_reset <= '1'; -- Reset the skull when the level is not enabled
+                skull_2_waiting <= '0';
             end if;
         end if;
     end process SKULL_2_RANDOMISER;
@@ -320,6 +321,7 @@ begin
                 end if;
             elsif (level_three_enable = '0') then
                 skull_3_reset <= '1'; -- Reset the skull when the level is not enabled
+                skull_3_waiting <= '0';
             end if;
         end if;
     end process SKULL_3_RANDOMISER;
@@ -350,6 +352,7 @@ begin
                 end if;
             elsif (level_three_enable = '0') then
                 skull_4_reset <= '1'; -- Reset the skull when the level is not enabled
+                skull_4_waiting <= '0';
             end if;
         end if;
     end process SKULL_4_RANDOMISER;
@@ -380,6 +383,7 @@ begin
                 end if;
             elsif (level_three_enable = '0') then
                 skull_5_reset <= '1'; -- Reset the skull when the level is not enabled
+                skull_5_waiting <= '0';
             end if;
         end if;
     end process SKULL_5_RANDOMISER;

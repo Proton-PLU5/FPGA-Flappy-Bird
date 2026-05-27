@@ -95,7 +95,7 @@ begin
                 skull_y_pos <= spawn_y_pos;
                 end_reached <= '0';
             elsif enabled = '1' then
-                if skull_x_pos <= to_unsigned(0, 11) then -- Reached left end
+                if (skull_x_pos + to_unsigned(SKULL_WIDTH, 11)) <= to_unsigned(0, 11) then -- Reached left end
                     end_reached <= '1';
                     skull_x_pos <= to_unsigned(640, 11); -- respawn immediately to avoid visible hang at edge
 

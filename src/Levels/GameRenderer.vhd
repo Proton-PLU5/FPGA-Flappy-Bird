@@ -590,11 +590,7 @@ begin
 									collision_count <= collision_count + 1; -- add to counter of collisions
                                 else
                                     collision_count <= 0; -- reset collision count if no lives left
-<<<<<<< HEAD
                                     game_over_s <= '1';
-=======
-                                    game_over_s <= '1'; 
->>>>>>> main
 								end if;
                     elsif invincibility > 0 then
                         invincibility <= invincibility - 1;

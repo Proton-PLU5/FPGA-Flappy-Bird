@@ -195,18 +195,16 @@ begin
 
                 -- PIPE 1 HANDSHAKE
                 if pipe_1_end_reached = '1' then
-                    pipe_1_reset <= '1'; -- Pulse reset
-                    -- Randomize height and variation
-                    pipe_1_height <= to_integer(unsigned(lfsr_out)) * 280 / 256 + 100;
+                    pipe_1_reset <= '1'; 
+                    pipe_1_height <= to_integer(unsigned('0' & lfsr_out(7 downto 1))) + 160;
                     pipe_1_part_to_render <= lfsr_out(7); 
                 end if;
 
                 -- PIPE 2 HANDSHAKE
                 if pipe_2_end_reached = '1' then
-                    pipe_2_reset <= '1'; -- Pulse reset
-                    -- Randomize height and variation
-                    pipe_2_height <= to_integer(unsigned(lfsr_out)) * 280 / 256 + 100;
-                    pipe_2_part_to_render <= not lfsr_out(7); -- Make it different from Pipe 1
+                    pipe_2_reset <= '1'; 
+                    pipe_2_height <= to_integer(unsigned('0' & lfsr_out(7 downto 1))) + 160;
+                    pipe_2_part_to_render <= not lfsr_out(7); 
                 end if;
 
             else

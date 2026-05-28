@@ -636,7 +636,7 @@ begin
                             invincibility_flash <= not invincibility_flash;
                         end if;
 
-                    elsif (SW(6) = '1') then
+                    elsif (SW(5) = '1') then
                         invincibility <= 200;
                         invincible_s <= '1';
                     else

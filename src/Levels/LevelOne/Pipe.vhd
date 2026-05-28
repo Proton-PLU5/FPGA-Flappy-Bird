@@ -73,7 +73,6 @@ architecture behaviour of Pipe is
             start_y      : in  std_logic_vector(10 downto 0);
             sprite_id    : in  integer range 0 to 64;
             flip_y       : in  std_logic := '0';
-            tile_y       : in  std_logic := '1';
             red          : out std_logic_vector(3 downto 0);
             green        : out std_logic_vector(3 downto 0);
             blue         : out std_logic_vector(3 downto 0);
@@ -136,7 +135,6 @@ begin
         start_y      => std_logic_vector(top_cap_start_y),
         sprite_id    => BONE_CAP_SPRITE_ID,
         flip_y       => '1',
-        tile_y       => '0',
         red          => top_cap_r,
         green        => top_cap_g,
         blue         => top_cap_b,
@@ -151,7 +149,6 @@ begin
         start_y      => (others => '0'),   -- tiling from top of screen
         sprite_id    => BONE_BODY_SPRITE_ID,
         flip_y       => '0',
-        tile_y       => '1',
         red          => top_body_r,
         green        => top_body_g,
         blue         => top_body_b,
@@ -166,7 +163,6 @@ begin
         start_y      => std_logic_vector(bottom_cap_start_y),
         sprite_id    => BONE_CAP_SPRITE_ID,
         flip_y       => '0',
-        tile_y       => '0',
         red          => bottom_cap_r,
         green        => bottom_cap_g,
         blue         => bottom_cap_b,
@@ -181,7 +177,6 @@ begin
         start_y      => (others => '0'),
         sprite_id    => BONE_BODY_SPRITE_ID,
         flip_y       => '0',
-        tile_y       => '1',
         red          => bottom_body_r,
         green        => bottom_body_g,
         blue         => bottom_body_b,

@@ -41,8 +41,8 @@ begin
         variable screen_y : integer range 0 to 480;
         variable local_x : integer range 0 to 640;
         variable local_y : integer range 0 to 480;
-        variable addr : integer;
-        variable palette_index : integer;
+        variable addr : integer range 0 to 307199;
+        variable palette_index : integer range 0 to 255;
         variable color : std_logic_vector(11 downto 0);
         variable width : integer range 0 to 640;
         variable height : integer range 0 to 480;

@@ -27,6 +27,7 @@ architecture behaviour of Renderer is
             training_mode_selected : IN std_logic; 
             request_back : OUT std_logic;
             enabled : IN std_logic;
+            win : OUT std_logic;
             game_over : OUT std_logic;
             score_out   : OUT integer range 0 to 999
         );
@@ -115,6 +116,7 @@ begin
         red              => red_play,
         green            => green_play,
         blue             => blue_play,
+        win             => win_s,
         request_back     => game_request_back,
         training_mode_selected => training_mode,
         enabled          => game_enabled,

@@ -110,8 +110,9 @@ begin
             if (cutscene_enable = '1') then 
                 frame_counter <= frame_counter + 1;
                 if frame_counter >= 10 then -- Adjust timing as needed
-                    if (boss_frame_index = 31) then
-                        cutscene_end <= '1'; -- Signal that cutscene is done after last frame
+                    if (boss_frame_index >= 31) then
+                        -- Signal cutscene end and hold on the last frame
+                        cutscene_end <= '1';
                     else 
                         cutscene_end <= '0';
                         frame_counter <= 0;

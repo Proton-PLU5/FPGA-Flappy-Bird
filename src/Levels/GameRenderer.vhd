@@ -276,7 +276,7 @@ architecture behavior of GameRenderer is
 
 begin
     score_out          <= score; 
-    player_enabled <= enabled and (not paused);
+    player_enabled <= enabled and (not paused) and (not cutscene_enabled);
 
     SCORE_COMPONENT : ScoreTextRenderer
 	 generic map (
@@ -289,7 +289,7 @@ begin
         pixel_column => pixel_column,
         pixel_on => score_enable,
         text_row => 50,
-        text_col_start => 288
+        text_col_start => 289
     );
     
     PLAYER_COMPONENT : Player port map (

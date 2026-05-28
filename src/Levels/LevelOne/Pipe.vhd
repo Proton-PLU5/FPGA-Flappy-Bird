@@ -26,7 +26,7 @@ architecture behaviour of Pipe is
     constant BONE_CAP_WIDTH   : integer := 45;
     constant BONE_CAP_HEIGHT  : integer := 25;
     constant BONE_BODY_WIDTH  : integer := 25;
-    constant BONE_BODY_HEIGHT : integer := 1;
+    constant BONE_BODY_HEIGHT : integer := 480;
 
     constant BONE_CAP_SPRITE_ID  : integer := 11;
     constant BONE_BODY_SPRITE_ID : integer := 10;
@@ -178,7 +178,7 @@ begin
         pixel_row    => pixel_row,
         pixel_column => pixel_column,
         start_x      => std_logic_vector(pipe_x_pos_effective),
-        start_y      => std_logic_vector(bottom_cap_start_y + BONE_CAP_HEIGHT),
+        start_y      => (others => '0'),
         sprite_id    => BONE_BODY_SPRITE_ID,
         flip_y       => '0',
         tile_y       => '1',

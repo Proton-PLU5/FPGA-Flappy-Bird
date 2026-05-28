@@ -24,7 +24,6 @@ architecture behaviour of TileRenderer is
 			start_y  : in std_logic_vector(10 downto 0);
 			sprite_id : in integer range 0 to 64;
             flip_y  : in std_logic := '0';
-            tile_y  : in std_logic := '0';
             red   : out std_logic_vector(3 downto 0);
             green : out std_logic_vector(3 downto 0);
             blue  : out std_logic_vector(3 downto 0);
@@ -62,7 +61,6 @@ begin
         start_y => '0' & tile_start_y,
         sprite_id => tile_id,  -- Use the provided tile_id
         flip_y => '0',
-        tile_y => '0',
         red => sprite_red,
         green => sprite_green,
         blue => sprite_blue,

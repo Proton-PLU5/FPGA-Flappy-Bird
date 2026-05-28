@@ -13,7 +13,6 @@ entity SpriteRenderer is
         start_y  : in std_logic_vector(10 downto 0);
         sprite_id : in integer range 0 to 64;
         flip_y  : in std_logic := '0';
-        tile_y  : in std_logic := '0';
         red   : out std_logic_vector(3 downto 0);
         green : out std_logic_vector(3 downto 0);
         blue  : out std_logic_vector(3 downto 0);
@@ -107,83 +106,73 @@ begin
             -- very simple rectangle bb check.
             if screen_x >= sprite_x and
                screen_x < sprite_x + width then
+                -- Calculate the local pixel coordinates within the sprite
+                local_x := screen_x - sprite_x;
 
-                if (tile_y = '1' and screen_y >= sprite_y) or 
-                (tile_y = '0' and screen_y >= sprite_y and screen_y < sprite_y + height) then
+                -- flip_y reverses the row lookup so the sprite renders upside-down
+                if flip_y = '1' then
+                    local_y := (height - 1) - (screen_y - sprite_y);
+                else
+                    local_y := screen_y - sprite_y;
+                end if;
 
-                    -- Calculate the local pixel coordinates within the sprite
-                    local_x := screen_x - sprite_x;
+                -- used to search thru the 1d array to find the pixel pallete data.
+                -- cuz the data is actually 1d array and not a 2d array.
+                -- so we do some math to emulate 2d indexing.
+                addr := local_y * width + local_x;
 
-                    -- flip_y reverses the row lookup so the sprite renders upside-down
-                    if flip_y = '1' then
-                        local_y := (height - 1) - (screen_y - sprite_y);
-                    else
-                        local_y := screen_y - sprite_y;
-                    end if;
+                -- Select the colors using the sprite we are rendering
+                case sprite_id is
+                    when 0 =>
+                        palette_index := SKELETRON_HEAD_DATA(addr);
+                        color := SKELETRON_HEAD_PALETTE(palette_index);
+                    when 1 =>
+                        palette_index := SKELETRON_JAW_DATA(addr);
+                        color := SKELETRON_JAW_PALETTE(palette_index);
+                    when 2 =>
+                        palette_index := FLAPPY_BIRD_DATA(addr);
+                        color := FLAPPY_BIRD_PALETTE(palette_index);
+                    when 3 =>
+                        palette_index := FULL_HEART_DATA(addr);
+                        color := FULL_HEART_PALETTE(palette_index);
+                    when 4 =>
+                        palette_index := EMPTY_HEART_DATA(addr);
+                        color := EMPTY_HEART_PALETTE(palette_index);
+                    when 5 =>
+                        palette_index := BLUE_BRICK_TILE_DATA(addr);
+                        color := BLUE_BRICK_TILE_PALETTE(palette_index);
+                    when 6 =>
+                        palette_index := LASER_BEAM_WARNING_DATA(addr);
+                        color := LASER_BEAM_WARNING_PALETTE(palette_index);
+                    when 7 =>
+                        palette_index := LASER_BEAM_DATA(addr);
+                        color := LASER_BEAM_PALETTE(palette_index);
+                    when 8 =>
+                        palette_index := L3SKULL_DATA(addr);
+                        color := L3SKULL_PALETTE(palette_index);
+                    when 9 =>
+                        palette_index := POWERUP_DATA(addr);
+                        color := POWERUP_PALETTE(palette_index);
+                    when 10 =>
+                        palette_index := BONE_BODY_DATA(addr);
+                        color := BONE_BODY_PALETTE(palette_index);
+                    when 11 =>
+                        palette_index := BONE_CAP_DATA(addr);
+                        color := BONE_CAP_PALETTE(palette_index);
+                    when others =>
+                        palette_index := SKELETRON_HEAD_DATA(addr);
+                        color := SKELETRON_HEAD_PALETTE(palette_index);
+                end case;
 
-                    -- tile_y repeats the sprite (for the bones)
-                    if tile_y = '1' then
-                        local_y := local_y mod height;
-                    end if;
-
-                    -- used to search thru the 1d array to find the pixel pallete data.
-                    -- cuz the data is actually 1d array and not a 2d array.
-                    -- so we do some math to emulate 2d indexing.
-                    addr := local_y * width + local_x;
-
-                    -- Select the colors using the sprite we are rendering
-                    case sprite_id is
-                        when 0 =>
-                            palette_index := SKELETRON_HEAD_DATA(addr);
-                            color := SKELETRON_HEAD_PALETTE(palette_index);
-                        when 1 =>
-                            palette_index := SKELETRON_JAW_DATA(addr);
-                            color := SKELETRON_JAW_PALETTE(palette_index);
-                        when 2 =>
-                            palette_index := FLAPPY_BIRD_DATA(addr);
-                            color := FLAPPY_BIRD_PALETTE(palette_index);
-                        when 3 =>
-                            palette_index := FULL_HEART_DATA(addr);
-                            color := FULL_HEART_PALETTE(palette_index);
-                        when 4 =>
-                            palette_index := EMPTY_HEART_DATA(addr);
-                            color := EMPTY_HEART_PALETTE(palette_index);
-                        when 5 =>
-                            palette_index := BLUE_BRICK_TILE_DATA(addr);
-                            color := BLUE_BRICK_TILE_PALETTE(palette_index);
-                        when 6 =>
-                            palette_index := LASER_BEAM_WARNING_DATA(addr);
-                            color := LASER_BEAM_WARNING_PALETTE(palette_index);
-                        when 7 =>
-                            palette_index := LASER_BEAM_DATA(addr);
-                            color := LASER_BEAM_PALETTE(palette_index);
-                        when 8 =>
-                            palette_index := L3SKULL_DATA(addr);
-                            color := L3SKULL_PALETTE(palette_index);
-                        when 9 =>
-                            palette_index := POWERUP_DATA(addr);
-                            color := POWERUP_PALETTE(palette_index);
-                        when 10 =>
-                            palette_index := BONE_BODY_DATA(addr);
-                            color := BONE_BODY_PALETTE(palette_index);
-                        when 11 =>
-                            palette_index := BONE_CAP_DATA(addr);
-                            color := BONE_CAP_PALETTE(palette_index);
-                        when others =>
-                            palette_index := SKELETRON_HEAD_DATA(addr);
-                            color := SKELETRON_HEAD_PALETTE(palette_index);
-                    end case;
-
-                    -- Check for transparency (palette index 0 is transparent)
-                    -- we can use this to just turn off the pixel so its super simple.
-                    if (palette_index /= 0) then
-                        red   <= color(11 downto 8);
-                        green <= color(7 downto 4);
-                        blue  <= color(3 downto 0);
-                        transparent <= '0';
-                    else
-                        transparent <= '1';
-                    end if;
+                -- Check for transparency (palette index 0 is transparent)
+                -- we can use this to just turn off the pixel so its super simple.
+                if (palette_index /= 0) then
+                    red   <= color(11 downto 8);
+                    green <= color(7 downto 4);
+                    blue  <= color(3 downto 0);
+                    transparent <= '0';
+                else
+                    transparent <= '1';
                 end if;
             end if;
         end if;

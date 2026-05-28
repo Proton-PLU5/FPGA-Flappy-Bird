@@ -29,7 +29,6 @@ architecture behavior of LivesRenderer is
 			start_y  : in std_logic_vector(10 downto 0);
 			sprite_id : in integer range 0 to 64;
             flip_y  : in std_logic := '0';
-            tile_y  : in std_logic := '0';
             red   : out std_logic_vector(3 downto 0);
             green : out std_logic_vector(3 downto 0);
             blue  : out std_logic_vector(3 downto 0);
@@ -71,7 +70,6 @@ begin
         start_y => '0' & start_y1,
         sprite_id => sprite_id1,
         flip_y => '0',
-        tile_y => '0',
         red => red1,
         green => green1,
         blue => blue1,
@@ -86,7 +84,6 @@ begin
         start_y => '0' & start_y2,
         sprite_id => sprite_id2,
         flip_y => '0',
-        tile_y => '0',
         red => red2,
         green => green2,
         blue => blue2,
@@ -101,7 +98,6 @@ begin
         start_y => '0' & start_y3,
         sprite_id => sprite_id3,
         flip_y => '0',
-        tile_y => '0',
         red => red3,
         green => green3,
         blue => blue3,

@@ -26,7 +26,6 @@ architecture behavior of BossRenderer is
 			start_y  : in std_logic_vector(10 downto 0);
 			sprite_id : in integer range 0 to 64;
             flip_y  : in std_logic := '0';
-            tile_y  : in std_logic := '0';
             red : out std_logic_vector(3 downto 0);
             green : out std_logic_vector(3 downto 0);
             blue : out std_logic_vector(3 downto 0);
@@ -51,7 +50,6 @@ begin
         start_y => '0' & y_pos,
         sprite_id => 0, -- Assuming 0 is the ID for the boss sprite
         flip_y => '0',
-        tile_y => '0',
         red => red_upper_jaw,
         green => green_upper_jaw,
         blue => blue_upper_jaw,
@@ -66,7 +64,6 @@ begin
         start_y => '0' & y_pos + lower_jaw_y_offset, -- Adjust y position for lower jaw
         sprite_id => 1, -- Assuming 1 is the ID for the boss lower jaw sprite
         flip_y => '0',
-        tile_y => '0',
         red => red_lower_jaw,
         green => green_lower_jaw,
         blue => blue_lower_jaw,

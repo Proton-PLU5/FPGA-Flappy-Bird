@@ -44,7 +44,6 @@ architecture behaviour of Skull is
 			start_y  : in std_logic_vector(10 downto 0);
             sprite_id : in integer range 0 to 64;
             flip_y  : in std_logic := '0';
-            tile_y  : in std_logic := '0';
 			red   : out std_logic_vector(3 downto 0);
 			green : out std_logic_vector(3 downto 0);
 			blue  : out std_logic_vector(3 downto 0);
@@ -80,7 +79,6 @@ begin
         start_y      => '0' & std_logic_vector(to_unsigned(skull_y_pos, 10)),
         sprite_id => 8,
         flip_y => '0',
-        tile_y => '0',
         red => red_s,
         blue => blue_s,
         green => green_s,

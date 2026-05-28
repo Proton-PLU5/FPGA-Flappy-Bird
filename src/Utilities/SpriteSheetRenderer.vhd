@@ -15,7 +15,7 @@ entity SpriteSheetRenderer is
         pixel_column : in std_logic_vector(9 downto 0);
         start_x      : in std_logic_vector(10 downto 0);
         start_y      : in std_logic_vector(10 downto 0);
-        frame_index  : in integer range 0 to 15; -- Which frame in the sheet to show
+        frame_index  : in integer range 0 to 31; -- Which frame in the sheet to show
         sprite_id    : in integer range 0 to 64;
         red, green, blue : out std_logic_vector(3 downto 0);
         transparent  : out std_logic

@@ -36,7 +36,7 @@ architecture behavior of Cutscene is
     end component;
 
     signal boss_red, boss_green, boss_blue : std_logic_vector(3 downto 0);
-    signal boss_enabled : std_logic;
+    signal boss_enabled : std_logic := '1';
     signal boss_transparent : std_logic;
     signal boss_frame_index : integer range 0 to 32 := 0;
 
@@ -66,20 +66,22 @@ begin
     process (vert_sync)
     begin
         if rising_edge(vert_sync) then
-            frame_counter <= frame_counter + 1;
-            if frame_counter >= 10 then -- Adjust timing as needed
-                if (boss_frame_index = 31) then
-                    cutscene_end <= '1'; -- Signal that cutscene is done after last frame
-                else 
-                    cutscene_end <= '0';
-                    frame_counter <= 0;
-                    boss_frame_index <= boss_frame_index + 1;
-                end if;    
+            if (cutscene_enable = '1') then 
+                frame_counter <= frame_counter + 1;
+                if frame_counter >= 10 then -- Adjust timing as needed
+                    if (boss_frame_index = 31) then
+                        cutscene_end <= '1'; -- Signal that cutscene is done after last frame
+                    else 
+                        cutscene_end <= '0';
+                        frame_counter <= 0;
+                        boss_frame_index <= boss_frame_index + 1;
+                    end if;    
+                end if;
             end if;
         end if;
     end process;
 
     red   <= boss_red   when boss_enabled = '1' and boss_transparent = '0' else (others => '0');
-	 green <= boss_green when boss_enabled = '1' and boss_transparent = '0' else (others => '0');
-	 blue  <= boss_blue  when boss_enabled = '1' and boss_transparent = '0' else (others => '0');
+	green <= boss_green when boss_enabled = '1' and boss_transparent = '0' else (others => '0');
+	blue  <= boss_blue  when boss_enabled = '1' and boss_transparent = '0' else (others => '0');
 end architecture;

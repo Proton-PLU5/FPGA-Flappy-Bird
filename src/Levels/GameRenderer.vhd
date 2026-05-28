@@ -13,6 +13,7 @@ entity GameRenderer is
         red, green, blue : OUT std_logic_vector(3 downto 0);
         request_back : OUT std_logic;
         enabled : IN std_logic;
+        win : OUT std_logic;
         training_mode_selected : IN std_logic;
         game_over : OUT std_logic;
         score_out   : OUT integer range 0 to 999;
@@ -145,6 +146,17 @@ architecture behavior of GameRenderer is
             no_lives_left : out std_logic
         );
     end component LivesRenderer;
+
+    
+    component BackgroundRenderer is
+        port (
+            clk25Mhz : IN std_logic;
+            vert_sync, horz_sync : IN std_logic;
+            pixel_row, pixel_column	: IN std_logic_vector(9 DOWNTO 0);
+            red, green, blue : OUT std_logic_vector(3 downto 0);
+            enabled : OUT std_logic
+        );
+    end component BackgroundRenderer;
      
     -- Game Logic Values
     signal paused : std_logic := '0';
@@ -247,6 +259,8 @@ architecture behavior of GameRenderer is
 
     -- Background Values (Black)
     signal background_red, background_green, background_blue : std_logic_vector(3 downto 0) := "0000";
+    signal background_enabled : std_logic := '0';
+    signal fullbackground_red, fullbackground_green, fullbackground_blue : std_logic_vector(3 downto 0);
 
     -- Score Values
     signal score_enable : std_logic := '0';
@@ -403,6 +417,18 @@ begin
         game_finished => level_four_game_finished,
         laser1_render => level_four_1_render,
         laser2_render => level_four_2_render
+    );
+
+    BACKGROUND_COMPONENT : BackgroundRenderer port map (
+        clk25Mhz => clk25Mhz,
+        vert_sync => vert_sync,
+        horz_sync => horz_sync,
+        pixel_row => pixel_row,
+        pixel_column => pixel_column,
+        red => fullbackground_red,
+        green => fullbackground_green,
+        blue => fullbackground_blue,
+        enabled => background_enabled
     );
     
     -- Multiplexer
@@ -561,6 +587,10 @@ begin
                     red <= powerup_red;
 					green <= powerup_green;
 					blue <= powerup_blue;
+                elsif background_enabled = '1' then
+                    red <= fullbackground_red;
+					green <= fullbackground_green;
+					blue <= fullbackground_blue;
                 else
                     red <= background_red;
 					green <= background_green;
@@ -665,6 +695,8 @@ begin
                     obstacle_collision_pending <= '0';
                     powerup_collision_pending <= '0';
                 end if;
+
+                win <= level_four_game_finished; -- Set win signal based on level four's output
 					 
             else
                 --While the game is disabled (on Title Screen), constantly hold the score at 0.
@@ -673,6 +705,7 @@ begin
                 obstacle_collision_pending <= '0';
                 powerup_collision_pending <= '0';
                 game_over_s <= '0';
+                win <= '0';
             end if;
 
             last_vert_sync <= vert_sync;

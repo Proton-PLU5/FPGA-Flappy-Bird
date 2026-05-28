@@ -116,6 +116,7 @@ begin
         red              => red_play,
         green            => green_play,
         blue             => blue_play,
+        win             => win_s,
         request_back     => game_request_back,
         training_mode_selected => training_mode,
         enabled          => game_enabled,

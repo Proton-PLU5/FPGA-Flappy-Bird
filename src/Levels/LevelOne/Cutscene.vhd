@@ -66,7 +66,7 @@ architecture behavior of Cutscene is
 
     signal text_enabled : std_logic := '0';
 
-    signal frame_counter : integer := 0; -- Counts frames for animation timing
+    signal frame_counter : integer range 0 to 100 := 0; -- Counts frames for animation timing
 begin
 
     CUTSCENE_SPRITE : SpriteSheetRenderer 
@@ -91,8 +91,8 @@ begin
 
     MSG_ONE : title_display
     generic map (
-        text_string => "SKELETRON HAS AWAKENED!",
-        text_size => 23,
+        text_string => "SKELEKING HAS AWAKENED",
+        text_size => 22,
         SIZE => 3
     )
     port map (
@@ -101,18 +101,21 @@ begin
         pixel_column => pixel_column,
         pixel_on => text_enabled,
         text_row => 300,
-        text_col_start => 30
+        text_col_start => 144
     );
 
     LOGIC_PROCESS : process (vert_sync)
     begin
         if rising_edge(vert_sync) then
             if (cutscene_enable = '1') then 
-                frame_counter <= frame_counter + 1;
+                frame_counter <= frame_counter + 2;
                 if frame_counter >= 10 then -- Adjust timing as needed
                     if (boss_frame_index >= 31) then
-                        -- Signal cutscene end and hold on the last frame
-                        cutscene_end <= '1';
+                        if frame_counter >= 50 then -- Hold on last frame for a bit
+                            cutscene_end <= '1';
+                        else
+                            cutscene_end <= '0';
+                        end if;
                     else 
                         cutscene_end <= '0';
                         frame_counter <= 0;
@@ -130,14 +133,14 @@ begin
     RENDER_PROCESS : process (clk25Mhz)
     begin
         if rising_edge(clk25Mhz) then
-            if (boss_enabled = '1' and boss_transparent = '0') then
-                red <= boss_red;
-                green <= boss_green;
-                blue <= boss_blue;
-            elsif (text_enabled = '1') then
+            if (text_enabled = '1') then
                 red <= "1111"; -- White text
                 green <= "1111";
                 blue <= "1111";
+            elsif (boss_enabled = '1' and boss_transparent = '0') then
+                red <= boss_red;
+                green <= boss_green;
+                blue <= boss_blue;
             else
                 red <= "0000"; -- Black background
                 green <= "0000";

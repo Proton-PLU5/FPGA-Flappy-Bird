@@ -84,13 +84,12 @@ architecture behavior of DE0_CV_Default is
     signal mouse_down : std_Logic := '0';
 
     signal pll_locked : std_logic;
-    signal pll_reset : std_logic := '0';
 
 begin
   
     PLL_COMPONENT : PLL port map (
         refclk => CLOCK_50,
-        rst => pll_reset,
+        rst => '0',
         outclk_0 => Clk25Mhz,
         locked => pll_locked
 	);
@@ -172,6 +171,4 @@ begin
     ones <= CONV_STD_LOGIC_VECTOR(count mod 10, 4);
     tens <= CONV_STD_LOGIC_VECTOR((count / 10) mod 10, 4);
     hundreds <= CONV_STD_LOGIC_VECTOR(count / 100, 4);
-
-    pll_reset <= pll_locked; -- Hold reset until PLL is locked to ensure stable clock output
 end architecture behavior;

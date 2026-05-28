@@ -502,4 +502,6 @@ set_global_assignment -name VHDL_FILE src/Utilities/ClockDivider.vhd
 set_global_assignment -name VHDL_FILE src/Utilities/char_rom.vhd
 set_global_assignment -name VHDL_FILE src/Utilities/BCD_to_7Seg.vhd
 set_global_assignment -name VHDL_FILE src/Utilities/BCD_Counter.vhd
+set_global_assignment -name QIP_FILE src/Utilities/PLL.qip
+set_global_assignment -name SIP_FILE src/Utilities/PLL.sip
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top

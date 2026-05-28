@@ -26,10 +26,12 @@ architecture behavior of DE0_CV_Default is
             pixel_row, pixel_column: OUT STD_LOGIC_VECTOR(9 DOWNTO 0));
     end component;
 
-    component ClockDivider
+    component PLL is
         port (
-            Clk_in : in std_logic;
-            Clk_out : out std_logic
+            refclk   : in  std_logic;
+            rst      : in  std_logic;
+            outclk_0 : out std_logic;
+            locked   : out std_logic
         );
     end component;
 
@@ -47,7 +49,7 @@ architecture behavior of DE0_CV_Default is
             clk25Mhz : IN std_logic;
             mouse_left : IN std_logic;
             vert_sync, horz_sync : IN std_logic;
-           SW : in std_logic_vector(9 downto 0);
+            SW : in std_logic_vector(9 downto 0);
             KEY : IN std_logic_vector(3 DOWNTO 0);
             pixel_row, pixel_column    : IN std_logic_vector(9 DOWNTO 0);
             red, green, blue : OUT std_logic_vector(3 downto 0)
@@ -81,12 +83,16 @@ architecture behavior of DE0_CV_Default is
     signal left_button : std_logic;
     signal mouse_down : std_Logic := '0';
 
+    signal pll_locked : std_logic;
+
 begin
   
-    Clock_Divider : ClockDivider port map (
-        Clk_in => CLOCK_50,
-        Clk_out => Clk25Mhz
-    );
+    PLL_COMPONENT : PLL port map (
+        refclk => CLOCK_50,
+        rst => '0',
+        outclk_0 => Clk25Mhz,
+        locked => pll_locked
+	);
     
     MOUSE_COMPONENT : MOUSE port map (
         clock_25Mhz => clk25Mhz,
@@ -165,5 +171,4 @@ begin
     ones <= CONV_STD_LOGIC_VECTOR(count mod 10, 4);
     tens <= CONV_STD_LOGIC_VECTOR((count / 10) mod 10, 4);
     hundreds <= CONV_STD_LOGIC_VECTOR(count / 100, 4);
-     
 end architecture behavior;

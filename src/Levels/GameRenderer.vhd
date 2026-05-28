@@ -704,6 +704,7 @@ begin
                 obstacle_collision_pending <= '0';
                 powerup_collision_pending <= '0';
                 game_over_s <= '0';
+                cutscene_has_played <= '0'; -- Reset cutscene play state on game disable to allow replaying after death
             end if;
 
             last_vert_sync <= vert_sync;
@@ -802,7 +803,7 @@ begin
 
                 -- Automated level progression based on score
                 if manual_level_change = '0' then
-                    if training_mode = '1' then
+                    if training_mode_selected = '1' then
                         -- In training mode, override to only level one
                         level_state <= 1;
                     else

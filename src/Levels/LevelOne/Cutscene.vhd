@@ -28,7 +28,7 @@ architecture behavior of Cutscene is
             pixel_column : in std_logic_vector(9 downto 0);
             start_x      : in std_logic_vector(10 downto 0);
             start_y      : in std_logic_vector(10 downto 0);
-            frame_index  : in integer range 0 to 15; -- Which frame in the sheet to show
+            frame_index  : in integer range 0 to 31; -- Which frame in the sheet to show
             sprite_id    : in integer range 0 to 64;
             red, green, blue : out std_logic_vector(3 downto 0);
             transparent  : out std_logic
@@ -38,7 +38,7 @@ architecture behavior of Cutscene is
     signal boss_red, boss_green, boss_blue : std_logic_vector(3 downto 0);
     signal boss_enabled : std_logic := '1';
     signal boss_transparent : std_logic;
-    signal boss_frame_index : integer range 0 to 32 := 0;
+    signal boss_frame_index : integer range 0 to 31 := 0;
 
     signal frame_counter : integer := 0; -- Counts frames for animation timing
 begin
@@ -77,6 +77,10 @@ begin
                         boss_frame_index <= boss_frame_index + 1;
                     end if;    
                 end if;
+            else
+                cutscene_end <= '0';
+                frame_counter <= 0;
+                boss_frame_index <= 0; -- Reset animation
             end if;
         end if;
     end process;

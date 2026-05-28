@@ -93,7 +93,7 @@ begin
     generic map (
         text_string => "SKELETRON HAS AWAKENED!",
         text_size => 23,
-        SIZE => 4
+        SIZE => 3
     )
     port map (
         clk => clk25Mhz,

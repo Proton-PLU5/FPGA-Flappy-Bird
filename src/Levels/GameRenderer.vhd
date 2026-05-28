@@ -542,6 +542,9 @@ begin
     begin
         if rising_edge(clk25Mhz) then
             if enabled = '1' then
+
+                lives_reset <= '0';
+
                 if (SW(0) = '1') then background_red <= "1111"; else background_red <= "0000"; end if;
                 if (SW(1) = '1') then background_green <= "1111"; else background_green <= "0000"; end if;
                 if (SW(2) = '1') then background_blue <= "1111"; else background_blue <= "0000"; end if;
@@ -703,6 +706,7 @@ begin
                 mouse_down <= '0';
                 obstacle_collision_pending <= '0';
                 powerup_collision_pending <= '0';
+                lives_reset <= '1';
                 game_over_s <= '0';
             end if;
 

@@ -97,6 +97,12 @@ begin
                 when 11 =>
                     width := BONE_CAP_WIDTH;
                     height := BONE_CAP_HEIGHT;
+                when 12 =>
+                    width := BONE_BODY_2_WIDTH;
+                    height := BONE_BODY_2_HEIGHT;
+                when 13 =>
+                    width := BONE_CAP_2_WIDTH;
+                    height := BONE_CAP_2_HEIGHT;
                 when others =>
                     width := SKELETRON_HEAD_WIDTH;
                     height := SKELETRON_HEAD_HEIGHT;
@@ -172,6 +178,14 @@ begin
                         palette_index := BONE_CAP_DATA(addr);
                         color := BONE_CAP_PALETTE(palette_index);
                         addr := local_y * BONE_CAP_WIDTH + local_x;
+                    when 12 =>
+                        palette_index := BONE_BODY_2_DATA(addr);
+                        color := BONE_BODY_2_PALETTE(palette_index);
+                        addr := local_y * BONE_BODY_2_WIDTH + local_x;
+                    when 13 =>
+                        palette_index := BONE_CAP_2_DATA(addr);
+                        color := BONE_CAP_2_PALETTE(palette_index);
+                        addr := local_y * BONE_CAP_2_WIDTH + local_x;
                     when others =>
                         palette_index := SKELETRON_HEAD_DATA(addr);
                         color := SKELETRON_HEAD_PALETTE(palette_index);

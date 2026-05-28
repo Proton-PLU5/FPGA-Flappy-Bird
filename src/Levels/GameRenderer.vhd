@@ -271,7 +271,7 @@ architecture behavior of GameRenderer is
     signal level_state : integer range 1 to 5 := 1;
     signal level_one_enabled, level_two_enabled, level_three_enabled, level_four_enabled, cutscene_enabled : std_logic := '0';
 
-    -- Background Values (Black)
+    -- Background Values 
     signal background_red, background_green, background_blue : std_logic_vector(3 downto 0) := "0000";
     signal background_enabled : std_logic := '0';
     signal fullbackground_red, fullbackground_green, fullbackground_blue : std_logic_vector(3 downto 0);
@@ -466,7 +466,7 @@ begin
         paused => paused
     );
     
-    -- Multiplexer
+    -- Rendering logic for all obstacles based on current level (multiplexer)
     obstacle_1_red      <= level_one_1_red when level_state = 1 else
                            level_two_1_red when level_state = 2 else 
                            level_three_1_red when level_state = 3 else "0000";
@@ -580,11 +580,12 @@ begin
 
                 lives_reset <= '0';
 
+                -- Manual background change for testing  
                 if (SW(0) = '1') then background_red <= "1111"; else background_red <= "0000"; end if;
                 if (SW(1) = '1') then background_green <= "1111"; else background_green <= "0000"; end if;
                 if (SW(2) = '1') then background_blue <= "1111"; else background_blue <= "0000"; end if;
                 
-                -- Render priority: Ball > Score > Pipes > Background
+                -- Render priority: Ball > Score > Lives > Obstacles > Background
                 if (cutscene_enabled = '1') then
                     red <= cutscene_red;
                     green <= cutscene_green;
@@ -657,7 +658,7 @@ begin
                 end if;
 
                 if vert_sync = '1' and last_vert_sync = '0' then
-                    -- Hitting bottom takes priority
+                    -- Hitting bottom takes priority in collision
                     if hit_bottom_s = '1' then
                         collision_count <= 0;
                         game_over_s <= '1';
@@ -701,14 +702,14 @@ begin
 
                     -- Score increment: one point per pipe pass.
                     if (obstacle_1_x_pos < to_unsigned(50, 11) and obstacle_1_score_incremented = '0') then
-                        score <= score + 2;
+                        score <= score + 1;
                         obstacle_1_score_incremented <= '1';
                     elsif (obstacle_1_x_pos >= to_unsigned(50, 11)) then
                         obstacle_1_score_incremented <= '0';
                     end if;
 
                     if (obstacle_2_x_pos < to_unsigned(50, 11) and obstacle_2_score_incremented = '0') then
-                        score <= score + 2;
+                        score <= score + 1;
                         obstacle_2_score_incremented <= '1';
                     elsif (obstacle_2_x_pos >= to_unsigned(50, 11)) then
                         obstacle_2_score_incremented <= '0';
@@ -742,7 +743,7 @@ begin
                 win <= level_four_game_finished; -- Set win signal based on level four's output
 					 
             else
-                --While the game is disabled (on Title Screen), constantly hold the score at 0.
+                --While the game is disabled (on Title Screen), constantly hold important values at 0 
                 score <= 0;
                 mouse_down <= '0';
                 obstacle_collision_pending <= '0';
@@ -764,6 +765,7 @@ begin
         if rising_edge(clk25Mhz) then
             manual_level_change := '0';
 
+            -- Pause button logic
             if (KEY(0) = '0' and prev_paused = '0') then
                 paused <= not paused;
                 prev_paused <= '1';
@@ -823,7 +825,7 @@ begin
                         cutscene_enabled <= '0';
                 end case;
 
-                -- Manual level selection via switches
+                -- Manual level selection via switches (for testing)
                 dip_switch := SW(9) & SW(8) & SW(7) & SW(6);
                 case (dip_switch) is
                     when "0001" =>

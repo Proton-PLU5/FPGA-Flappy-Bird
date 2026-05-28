@@ -37,7 +37,7 @@ architecture Behavioral of WinRenderer is
 
     signal win_enable : std_logic := '0';
     signal tooltip_enable : std_logic := '0';
-    signal last_key_0_state : std_logic := '1';
+    signal last_key_3_state : std_logic := '1';
 
     begin
 
@@ -78,7 +78,7 @@ architecture Behavioral of WinRenderer is
                     blue <= "0000";
                 end if;
 
-				if KEY(0) = '0' and last_key_0_state = '1' then
+				if KEY(3) = '0' and last_key_3_state = '1' then
 					request_back <= '1';
 				else
 				    request_back <= '0';
@@ -89,7 +89,7 @@ architecture Behavioral of WinRenderer is
                 request_back <= '0';
             end if; 
 
-            last_key_0_state <= KEY(0);
+            last_key_3_state <= KEY(3);
 
         end if;
     end process;

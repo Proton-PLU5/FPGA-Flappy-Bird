@@ -68,6 +68,18 @@ architecture behavior of LevelFour is
         );
     end component title_display;
 
+    component TileRenderer is
+        port (
+            clk, vert_sync, mouse_left  : in std_logic;
+            pixel_row, pixel_column     : in std_logic_vector(9 downto 0);
+            red, green, blue            : out std_logic_vector(3 downto 0);
+            reset                       : in std_logic;
+            enabled                     : in std_logic;
+            tile_id                     : in integer range 0 to 255;
+			transparent : out std_logic
+        );
+    end component TileRenderer;
+
     -- BOSS SIGNALS
     signal boss_red, boss_green, boss_blue : std_logic_vector(3 downto 0);
     signal boss_enabled : std_logic;
@@ -143,6 +155,9 @@ architecture behavior of LevelFour is
     signal current_state : boss_state := IDLE;
     
     signal cycle_counter : integer range 0 to 1000 := 0; 
+
+    signal background_red, background_green, background_blue : std_logic_vector(3 downto 0);
+    signal background_transparent : std_logic;
 begin
 
     BOSS: BossRenderer
@@ -292,6 +307,21 @@ begin
         text_row => 240,
         text_col_start => 12
     );
+
+    TILE_RENDERER : TileRenderer port map (
+        clk => clk25Mhz,
+        vert_sync => vert_sync,
+        mouse_left => mouse_left,
+        pixel_row => pixel_row,
+        pixel_column => pixel_column,
+        red => background_red,
+        green => background_green,
+        blue => background_blue,
+        reset => '0',
+        enabled => enabled,
+        tile_id => 10,
+		transparent => background_transparent
+    );
     
 
     PROCESS (vert_sync)
@@ -429,28 +459,49 @@ begin
         if rising_edge(clk25Mhz) then
             if level_four_enable = '1' then
                 if show_msg_1 = '1' and msg_1_pixel = '1' then
-                    red <= (others => '1'); green <= (others => '1'); blue <= (others => '1'); -- White
+                    red <= (others => '1'); 
+                    green <= (others => '1'); 
+                    blue <= (others => '1'); -- White
                 elsif show_msg_2 = '1' and msg_2_pixel = '1' then
-                    red <= (others => '1'); green <= (others => '1'); blue <= (others => '1'); -- White
+                    red <= (others => '1'); 
+                    green <= (others => '1');
+                    blue <= (others => '1'); -- White
                 elsif show_msg_3 = '1' and msg_3_pixel = '1' then
-                    red <= (others => '1'); green <= (others => '0'); blue <= (others => '0'); -- Red
+                    red <= (others => '1'); 
+                    green <= (others => '0'); 
+                    blue <= (others => '0'); -- Red
                 elsif dead_head_enabled = '1' and dead_head_transparent = '0' then
-                    red <= dead_head_red; green <= dead_head_green; blue <= dead_head_blue;
+                    red <= dead_head_red; 
+                    green <= dead_head_green; 
+                    blue <= dead_head_blue;
                 elsif dead_jaw_enabled = '1' and dead_jaw_transparent = '0' then
-                    red <= dead_jaw_red; green <= dead_jaw_green; blue <= dead_jaw_blue;
+                    red <= dead_jaw_red; 
+                    green <= dead_jaw_green; 
+                    blue <= dead_jaw_blue;
                 elsif laser_warning_enabled = '1' and laser_warning1_transparent = '0' then
-                    red <= laser_warning1_red; green <= laser_warning1_green; blue <= laser_warning1_blue;
+                    red <= laser_warning1_red; 
+                    green <= laser_warning1_green; 
+                    blue <= laser_warning1_blue;
                 elsif laser_warning_enabled = '1' and laser_warning2_transparent = '0' then
-                    red <= laser_warning2_red; green <= laser_warning2_green; blue <= laser_warning2_blue;
+                    red <= laser_warning2_red; 
+                    green <= laser_warning2_green; 
+                    blue <= laser_warning2_blue;
                 elsif laser1_enabled = '1' and laser1_transparent = '0' then
-                    red <= laser1_red; green <= laser1_green; blue <= laser1_blue;
+                    red <= laser1_red; 
+                    green <= laser1_green; 
+                    blue <= laser1_blue;
                 elsif laser2_enabled = '1' and laser2_transparent = '0' then
-                    red <= laser2_red; green <= laser2_green; blue <= laser2_blue;
+                    red <= laser2_red; 
+                    green <= laser2_green; 
+                    blue <= laser2_blue;
                 elsif boss_enabled = '1' and current_state /= VICTORY then
-                    red <= boss_red; green <= boss_green; blue <= boss_blue;
+                    red <= boss_red; 
+                    green <= boss_green; 
+                    blue <= boss_blue;
                 else
-                    -- DRAW BACKGROUND
-                    red <= (others => '0'); green <= (others => '0'); blue <= (others => '0');
+                    red <= background_red; 
+                    green <= background_green; 
+                    blue <= background_blue;
                 end if;
             end if;
         end if;

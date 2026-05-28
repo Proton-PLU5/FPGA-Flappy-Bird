@@ -93,6 +93,9 @@ begin
                 when 9 =>
                     width := POWERUP_WIDTH;
                     height := POWERUP_HEIGHT;
+                when 10 =>
+                    width := BRICK_TILE_WIDTH;
+                    height := BRICK_TILE_HEIGHT;
                 when others =>
                     width := SKELETRON_HEAD_WIDTH;
                     height := SKELETRON_HEAD_HEIGHT;
@@ -147,6 +150,9 @@ begin
                     when 9 =>
                         palette_index := POWERUP_DATA(addr);
                         color := POWERUP_PALETTE(palette_index);
+                    when 10 =>
+                        palette_index := BRICK_TILE_DATA(addr);
+                        color := BRICK_TILE_PALETTE(palette_index);
                     when others =>
                         palette_index := SKELETRON_HEAD_DATA(addr);
                         color := SKELETRON_HEAD_PALETTE(palette_index);

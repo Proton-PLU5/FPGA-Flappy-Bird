@@ -92,7 +92,7 @@ begin
     ) else '0';
 
     render_top_body <= '1' when (
-        enabled = '1' and is_visible = '1' and part_to_render = '1'
+        is_visible = '1' and part_to_render = '1'
         and unsigned(pixel_column) >= pipe_x_pos
         and unsigned(pixel_column) <  pipe_x_pos + BONE_BODY_WIDTH
         and unsigned(pixel_row)    <  top_cap_start_y(9 downto 0)
@@ -100,7 +100,7 @@ begin
     ) else '0';
 
     render_bottom_cap <= '1' when (
-        enabled = '1' and is_visible = '1' and part_to_render = '0'
+        is_visible = '1' and part_to_render = '0'
         and unsigned(pixel_column) >= pipe_x_pos - cap_x_offset
         and unsigned(pixel_column) <  pipe_x_pos - cap_x_offset + BONE_CAP_WIDTH
         and unsigned(pixel_row)    >= pipe_bottom_y_pos
@@ -109,7 +109,7 @@ begin
     ) else '0';
 
     render_bottom_body <= '1' when (
-        enabled = '1' and is_visible = '1' and part_to_render = '0'
+        is_visible = '1' and part_to_render = '0'
         and unsigned(pixel_column) >= pipe_x_pos
         and unsigned(pixel_column) <  pipe_x_pos + BONE_BODY_WIDTH
         and unsigned(pixel_row)    >= bottom_cap_start_y(9 downto 0) + BONE_CAP_HEIGHT

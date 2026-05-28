@@ -13,7 +13,8 @@ entity Player is
             enabled : IN std_logic;
             player_y_pos : OUT unsigned(9 downto 0);
             hit_bottom : OUT std_logic;
-            invincible : IN std_logic
+            invincible : IN std_logic;
+            paused : IN std_logic
         );
 end entity Player;
 
@@ -35,14 +36,14 @@ architecture behavior of Player is
             pixel_row    : in std_logic_vector(9 downto 0);
             pixel_column : in std_logic_vector(9 downto 0);
 
-			  start_x  : in std_logic_vector(10 downto 0);
-			  start_y  : in std_logic_vector(10 downto 0);
-			  sprite_id : in integer range 0 to 64;
-              flip_y  : in std_logic := '0';
-              
-			  red   : out std_logic_vector(3 downto 0);
-			  green : out std_logic_vector(3 downto 0);
-			  blue  : out std_logic_vector(3 downto 0);
+            start_x  : in std_logic_vector(10 downto 0);
+            start_y  : in std_logic_vector(10 downto 0);
+            sprite_id : in integer range 0 to 64;
+            flip_y  : in std_logic := '0';
+            
+            red   : out std_logic_vector(3 downto 0);
+            green : out std_logic_vector(3 downto 0);
+            blue  : out std_logic_vector(3 downto 0);
 
             transparent : out std_logic
 		);
@@ -92,10 +93,8 @@ begin
         -- Move ball once every vertical sync
 	    if (rising_edge(vert_sync)) then
             if enabled = '0' then
-                if (('0' & ball_y_pos >= CONV_STD_LOGIC_VECTOR(479, 10)) and (ball_velocity >= CONV_STD_LOGIC_VECTOR(0, 10))) then -- Game reset
-                    ball_y_pos <= CONV_STD_LOGIC_VECTOR(240, 10); -- Reset to middle
-                end if;
-            elsif enabled = '1' then -- Normal movement
+                ball_y_pos <= CONV_STD_LOGIC_VECTOR(240, 10);
+            elsif enabled = '1' and paused = '0' then -- Normal movement
                 -- BOTTOM BOUNDARY: Die if at the bottom AND trying to fall
                 if (('0' & ball_y_pos >= CONV_STD_LOGIC_VECTOR(479, 10)) and (ball_velocity >= CONV_STD_LOGIC_VECTOR(0, 10))) then
                     if invincible = '0' then  

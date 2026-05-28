@@ -18,22 +18,22 @@ entity Cutscene is
 end entity Cutscene;
 
 architecture behavior of Cutscene is
-    component SpriteSheetRenderer is
+    component SpriteRenderer is
         generic (
-            SCALE_FACTOR : integer := 1;
-            FRAME_WIDTH  : integer := 32;
-            FRAME_HEIGHT : integer := 32
+            SCALE_FACTOR : integer := 1
         );
         port (
-            clk          : in std_logic;
+            clk : in std_logic;
             pixel_row    : in std_logic_vector(9 downto 0);
             pixel_column : in std_logic_vector(9 downto 0);
-            start_x      : in std_logic_vector(10 downto 0);
-            start_y      : in std_logic_vector(10 downto 0);
-            frame_index  : in integer range 0 to 15; -- Which frame in the sheet to show
-            sprite_id    : in integer range 0 to 64;
-            red, green, blue : out std_logic_vector(3 downto 0);
-            transparent  : out std_logic
+            start_x  : in std_logic_vector(10 downto 0);
+            start_y  : in std_logic_vector(10 downto 0);
+            sprite_id : in integer range 0 to 64;
+            flip_y  : in std_logic := '0';
+            red   : out std_logic_vector(3 downto 0);
+            green : out std_logic_vector(3 downto 0);
+            blue  : out std_logic_vector(3 downto 0);
+            transparent : out std_logic
         );
     end component;
 
@@ -56,9 +56,8 @@ architecture behavior of Cutscene is
     
 
     signal boss_red, boss_green, boss_blue : std_logic_vector(3 downto 0);
-    signal boss_enabled : std_logic := '1';
     signal boss_transparent : std_logic;
-    signal boss_frame_index : integer range 0 to 15 := 0;
+    signal boss_frame_index : integer range 16 to 17 := 16;
 
     -- Background signals
     signal background_red, background_green, background_blue : std_logic_vector(3 downto 0);
@@ -68,6 +67,24 @@ architecture behavior of Cutscene is
 
     signal frame_counter : integer range 0 to 101 := 0; -- Counts frames for animation timing
 begin
+
+    BOSS : SpriteRenderer
+    generic map (
+        SCALE_FACTOR => 2
+    )
+    port map (
+        clk => clk25Mhz,
+        pixel_row => pixel_row,
+        pixel_column => pixel_column,
+        start_x => CONV_STD_LOGIC_VECTOR(240, 11), -- X position of the boss sprite
+        start_y => CONV_STD_LOGIC_VECTOR(144, 11), -- Y position of the boss sprite
+        sprite_id => boss_frame_index, -- Use frame index for animation
+        flip_y => '0',
+        red => boss_red,
+        green => boss_green,
+        blue => boss_blue,
+        transparent => boss_transparent
+    );
 
     MSG_ONE : title_display
     generic map (
@@ -88,8 +105,12 @@ begin
     begin
         if rising_edge(vert_sync) then
             if (cutscene_enable = '1') then 
-                if (frame_counter >= 100) then
-                    cutscene_end <= '1';
+                if (frame_counter >= 50) then
+                    if (frame_counter >= 100) then
+                        cutscene_end <= '1';
+                    end if;
+                    
+                    boss_frame_index <= 17;
                 else
                     frame_counter <= frame_counter + 1;
                 end if;

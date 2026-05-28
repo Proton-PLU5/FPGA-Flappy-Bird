@@ -32,8 +32,9 @@ architecture behavior of GameRenderer is
             render : OUT std_logic;
             player_y_pos : OUT unsigned(9 downto 0);
             hit_bottom : OUT std_logic;
-            invincible : IN std_logic
-            );
+            invincible : IN std_logic;
+            paused : IN std_logic
+        );
     end component Player;
 
     component ScoreTextRenderer is
@@ -291,8 +292,8 @@ architecture behavior of GameRenderer is
 	signal player_enabled : std_logic;
 
 begin
-    score_out          <= score; 
-    player_enabled <= enabled and (not paused) and (not cutscene_enabled);
+    score_out <= score; 
+    player_enabled <= enabled and (not cutscene_enabled);
 
     SCORE_COMPONENT : ScoreTextRenderer
 	 generic map (
@@ -322,7 +323,8 @@ begin
         enabled => player_enabled,
         player_y_pos => player_y_pos,
         hit_bottom => hit_bottom_s,
-        invincible => invincible_s
+        invincible => invincible_s,
+        paused => paused
     );
 
     LEVEL_ONE_COMPONENT : LevelOne port map (
@@ -748,6 +750,7 @@ begin
                 lives_reset <= '1';
                 game_over_s <= '0';
                 win <= '0';
+                collision_count <= 0;
             end if;
 
             last_vert_sync <= vert_sync;

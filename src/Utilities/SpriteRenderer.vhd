@@ -112,6 +112,12 @@ begin
                 when 15 =>
                     width := BRICK_TILE_WIDTH;
                     height := BRICK_TILE_HEIGHT;
+                when 16 =>
+                    width := SKELETRON_FULL_WIDTH;
+                    height := SKELETRON_FULL_HEIGHT;
+                when 17 =>
+                    width := SKELETRON_MAD_WIDTH;
+                    height := SKELETRON_MAD_HEIGHT;
                 when others =>
                     width := SKELETRON_HEAD_WIDTH;
                     height := SKELETRON_HEAD_HEIGHT;

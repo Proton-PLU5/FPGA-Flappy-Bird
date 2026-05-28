@@ -318,7 +318,7 @@ begin
         green => background_green,
         blue => background_blue,
         reset => '0',
-        enabled => enabled,
+        enabled => level_four_enable,
         tile_id => 10,
 		transparent => background_transparent
     );

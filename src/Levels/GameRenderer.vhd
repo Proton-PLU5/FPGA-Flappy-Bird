@@ -147,7 +147,6 @@ architecture behavior of GameRenderer is
         );
     end component LivesRenderer;
 
-<<<<<<< HEAD
     component Cutscene is
     port (
         clk25Mhz : IN std_logic;
@@ -160,7 +159,6 @@ architecture behavior of GameRenderer is
         cutscene_end : OUT std_logic
     );
     end component Cutscene;
-=======
     
     component BackgroundRenderer is
         port (
@@ -168,10 +166,10 @@ architecture behavior of GameRenderer is
             vert_sync, horz_sync : IN std_logic;
             pixel_row, pixel_column	: IN std_logic_vector(9 DOWNTO 0);
             red, green, blue : OUT std_logic_vector(3 downto 0);
+            paused : IN std_logic;
             enabled : OUT std_logic
         );
     end component BackgroundRenderer;
->>>>>>> main
      
     -- Game Logic Values
     signal paused : std_logic := '0';
@@ -462,7 +460,8 @@ begin
         red => fullbackground_red,
         green => fullbackground_green,
         blue => fullbackground_blue,
-        enabled => background_enabled
+        enabled => background_enabled,
+        paused => paused
     );
     
     -- Multiplexer

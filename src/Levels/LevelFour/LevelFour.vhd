@@ -91,8 +91,8 @@ architecture behavior of LevelFour is
     
     -- X = 320 (Screen Center) - 40 (Half Boss Width) = 280
     -- Y = 240 (Screen Center) - 38 (Half Boss Height) = 202
-    signal boss_x_pos : std_logic_vector(9 downto 0) := std_logic_vector(to_unsigned(280, 10)); 
-    signal boss_y_pos : std_logic_vector(9 downto 0) := std_logic_vector(to_unsigned(202, 10)); 
+    signal boss_x_pos : std_logic_vector(9 downto 0) := std_logic_vector(to_unsigned(240, 10)); 
+    signal boss_y_pos : std_logic_vector(9 downto 0) := std_logic_vector(to_unsigned(144, 10)); 
 
     -- LASER BEAM SIGNALS
     signal laser_warning1_red, laser_warning1_green, laser_warning1_blue : std_logic_vector(3 downto 0);

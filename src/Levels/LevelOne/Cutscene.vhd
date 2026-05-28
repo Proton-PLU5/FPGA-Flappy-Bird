@@ -1,6 +1,8 @@
 library IEEE;
 use IEEE.std_logic_1164.all;
 use IEEE.numeric_std.all;
+use ieee.std_logic_unsigned.all;
+use ieee.std_logic_arith.all;
 
 entity Cutscene is
     port (
@@ -53,8 +55,8 @@ begin
         clk => clk25Mhz,
         pixel_row => pixel_row,
         pixel_column => pixel_column,
-        start_x => (others => '0'),
-        start_y => (others => '0'),
+        start_x => CONV_STD_LOGIC_VECTOR(240, 11), -- X position of the boss
+        start_y => CONV_STD_LOGIC_VECTOR(144, 11), -- Y position
         frame_index => boss_frame_index,
         sprite_id => 0, -- Your cutscene sprite
         red => boss_red,

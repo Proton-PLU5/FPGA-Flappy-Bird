@@ -128,7 +128,7 @@ begin
                 red <= "1111"; -- White text
                 green <= "1111";
                 blue <= "1111";
-            elsif (boss_enabled = '1' and boss_transparent = '0') then
+            elsif (boss_transparent = '0') then
                 red <= boss_red;
                 green <= boss_green;
                 blue <= boss_blue;

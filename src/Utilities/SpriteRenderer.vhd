@@ -25,8 +25,8 @@ end entity;
 
 architecture behavior of SpriteRenderer is
 
-    signal sprite_x : integer;
-    signal sprite_y : integer;
+    signal sprite_x : integer range -512 to 1023; -- BOUND TO REDUCE RESOURCE USAGE.
+    signal sprite_y : integer range -512 to 1023;
 
 begin
     -- use integers since we have width and height as integers and its easier to do math by
@@ -151,7 +151,7 @@ begin
                     when 0 =>
                         palette_index := SKELETRON_HEAD_DATA(addr);
                         color := SKELETRON_HEAD_PALETTE(palette_index);
-                        addr := local_y * SKELETRON_HEAD_WIDTH + local_x;
+                        addr := local_y * SKELETRON_HEAD_WIDTH + local_x; -- POSSIBLE FIX: MOVE THIS CALCULATION ABOVE THE CASE STATEMENT SINCE WIDTH AND HEIGHT ARE ALSO CALCULATED IN THE CASE STATEMENT
                     when 1 =>
                         palette_index := SKELETRON_JAW_DATA(addr);
                         color := SKELETRON_JAW_PALETTE(palette_index);

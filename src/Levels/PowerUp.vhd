@@ -47,9 +47,12 @@ architecture behaviour of PowerUp is
             start_x  : in std_logic_vector(10 downto 0);
             start_y  : in std_logic_vector(10 downto 0);
             sprite_id : in integer range 0 to 64;
-            red : out std_logic_vector(3 downto 0);
-            green : out std_logic_vector(3 downto 0);
-            blue : out std_logic_vector(3 downto 0);
+            flip_y  : in std_logic := '0';
+
+			red   : out std_logic_vector(3 downto 0);
+			green : out std_logic_vector(3 downto 0);
+			blue  : out std_logic_vector(3 downto 0);
+
             transparent : out std_logic
         );
     end component;
@@ -69,6 +72,7 @@ begin
         start_x => std_logic_vector(powerup_x_pos),
         start_y      => '0' & std_logic_vector(powerup_y_pos),
         sprite_id => 9,
+        flip_y => '0',
         red => red_s,
         blue => blue_s,
         green => green_s,

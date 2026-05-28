@@ -13,7 +13,8 @@ entity LevelFour is
         pixel_row, pixel_column : IN std_logic_vector(9 downto 0);
         red, green, blue : OUT std_logic_vector(3 downto 0);
         paused : IN std_logic;
-        game_finished : OUT std_logic
+        game_finished : OUT std_logic;
+        laser1_render, laser2_render: OUT std_logic
     );
 end entity LevelFour;
 
@@ -44,6 +45,7 @@ architecture behavior of LevelFour is
             start_x  : in std_logic_vector(10 downto 0);
             start_y  : in std_logic_vector(10 downto 0);
             sprite_id : in integer range 0 to 64;
+            flip_y  : in std_logic := '0';
             red   : out std_logic_vector(3 downto 0);
             green : out std_logic_vector(3 downto 0);
             blue  : out std_logic_vector(3 downto 0);
@@ -119,10 +121,10 @@ architecture behavior of LevelFour is
     constant Y_CENTER : integer := 240; -- 480 / 2
 
     -- Top laser bottom edge = 165 (start_y = 165 - height)
-    constant L1_TARGET_INT : integer := Y_CENTER - GAP_HALF - SPRITE_HEIGHT;
+    constant L1_TARGET_INT : integer := Y_CENTER - GAP_HALF - SPRITE_HEIGHT - 30;
     
-	-- Bottom laser top edge = 315 (start_y = 315)
-    constant L2_TARGET_INT : integer := Y_CENTER + GAP_HALF;
+	 -- Bottom laser top edge = 315 (start_y = 315)
+    constant L2_TARGET_INT : integer := Y_CENTER + GAP_HALF + 30;
 	 
 	 
     -- Keep bottom laser fully on-screen at spawn
@@ -133,12 +135,14 @@ architecture behavior of LevelFour is
     signal laser1_transparent : std_logic;
     signal laser1_enabled : std_logic;
     signal laser1_y_pos : unsigned(9 downto 0) := (others => '0');
+    signal laser1_render_out : std_logic;
 
     -- LASER 2 SIGNALS
     signal laser2_red, laser2_green, laser2_blue : std_logic_vector(3 downto 0);
     signal laser2_transparent : std_logic;
     signal laser2_enabled : std_logic;
     signal laser2_y_pos : unsigned(9 downto 0) := to_unsigned(L2_START_INT, 10);
+    signal laser2_render_out : std_logic;
 
     -- TARGET CONSTANTS
     constant laser1_target_y : unsigned(9 downto 0) := to_unsigned(L1_TARGET_INT, 10);
@@ -159,6 +163,22 @@ architecture behavior of LevelFour is
     signal background_red, background_green, background_blue : std_logic_vector(3 downto 0);
     signal background_transparent : std_logic;
 begin
+
+    laser1_render_out <= '1' when (
+        laser1_enabled = '1'
+        and unsigned(pixel_column) >= 0
+        and unsigned(pixel_column) <  to_unsigned(640, 10)
+        and unsigned(pixel_row)    >= laser1_y_pos
+        and unsigned(pixel_row)    <  laser1_y_pos + SPRITE_HEIGHT
+    ) else '0';
+
+    laser2_render_out <= '1' when (
+        laser2_enabled = '1'
+        and unsigned(pixel_column) >= 0
+        and unsigned(pixel_column) <  to_unsigned(640, 10)
+        and unsigned(pixel_row)    >= laser2_y_pos
+        and unsigned(pixel_row)    <  laser2_y_pos + SPRITE_HEIGHT
+    ) else '0';
 
     BOSS: BossRenderer
     generic map (
@@ -212,9 +232,10 @@ begin
         clk => clk25Mhz,
         pixel_row => pixel_row,
         pixel_column => pixel_column,
-        start_x => std_logic_vector(to_unsigned(0, 11)), 
-        start_y => '0' & std_logic_vector(laser1_y_pos),
+        start_x => (others => '0'),
+        start_y => std_logic_vector(resize(laser1_y_pos, 11)),
         sprite_id => 6, 
+        flip_y => '0',
         red => laser_warning1_red,
         green => laser_warning1_green,
         blue => laser_warning1_blue,
@@ -226,9 +247,10 @@ begin
         clk => clk25Mhz,
         pixel_row => pixel_row,
         pixel_column => pixel_column,
-        start_x => std_logic_vector(to_unsigned(0, 11)), 
-        start_y => '0' & std_logic_vector(laser2_y_pos),
+        start_x => (others => '0'),
+        start_y => std_logic_vector(resize(laser2_y_pos, 11)),
         sprite_id => 6, 
+        flip_y => '0',
         red => laser_warning2_red,
         green => laser_warning2_green,
         blue => laser_warning2_blue,
@@ -243,6 +265,7 @@ begin
         start_x => std_logic_vector(to_unsigned(0, 11)), 
         start_y => '0' & std_logic_vector(laser1_y_pos),
         sprite_id => 7, 
+        flip_y => '0',
         red => laser1_red,
         green => laser1_green,
         blue => laser1_blue,
@@ -257,6 +280,7 @@ begin
         start_x => std_logic_vector(to_unsigned(0, 11)), 
         start_y => '0' & std_logic_vector(laser2_y_pos),
         sprite_id => 7, 
+        flip_y => '0',
         red => laser2_red,
         green => laser2_green,
         blue => laser2_blue,
@@ -506,5 +530,8 @@ begin
             end if;
         end if;
     end process;
+
+    laser1_render <= laser1_render_out;
+    laser2_render <= laser2_render_out;
 
 end architecture behavior;

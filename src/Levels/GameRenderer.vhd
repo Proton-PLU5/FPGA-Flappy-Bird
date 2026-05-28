@@ -127,7 +127,8 @@ architecture behavior of GameRenderer is
             pixel_row, pixel_column : IN std_logic_vector(9 downto 0);
             red, green, blue : OUT std_logic_vector(3 downto 0);
             paused : IN std_logic;
-            game_finished : OUT std_logic
+            game_finished : OUT std_logic;
+            laser1_render, laser2_render: OUT std_logic
         );
     end component LevelFour;
 
@@ -220,10 +221,6 @@ architecture behavior of GameRenderer is
     signal level_two_1_x_pos, level_two_2_x_pos : unsigned(10 downto 0);
 	signal level_two_1_render, level_two_2_render : std_logic;
 
-    -- Level Four outputs
-    signal level_four_red, level_four_green, level_four_blue : std_logic_vector(3 downto 0);
-    signal level_four_game_finished : std_logic;
-
     -- Level Three outputs
     signal level_three_1_red, level_three_1_green, level_three_1_blue  : std_logic_vector(3 downto 0);
     signal level_three_2_red, level_three_2_green, level_three_2_blue : std_logic_vector(3 downto 0);
@@ -232,6 +229,11 @@ architecture behavior of GameRenderer is
     signal level_three_5_red, level_three_5_green, level_three_5_blue : std_logic_vector(3 downto 0);
     signal level_three_1_x_pos, level_three_2_x_pos, level_three_3_x_pos, level_three_4_x_pos, level_three_5_x_pos : unsigned(10 downto 0);
     signal level_three_1_render, level_three_2_render, level_three_3_render, level_three_4_render, level_three_5_render : std_logic;
+
+    -- Level Four outputs
+    signal level_four_red, level_four_green, level_four_blue : std_logic_vector(3 downto 0);
+    signal level_four_game_finished : std_logic;
+    signal level_four_1_render, level_four_2_render : std_logic;
 
     -- Power Up outputs
     signal level_two_powerup_render : std_logic := '0';
@@ -360,22 +362,6 @@ begin
         player_y_pos => player_y_pos
     );
 
-    LEVEL_FOUR_COMPONENT : LevelFour port map (
-        clk25Mhz => clk25Mhz,
-        mouse_left => mouse_left,
-        vert_sync => vert_sync,
-        SW => SW,
-        KEY => KEY,
-        level_four_enable => level_four_enabled,
-        pixel_row => pixel_row,
-        pixel_column => pixel_column,
-        red => level_four_red,
-        green => level_four_green,
-        blue => level_four_blue,
-        paused => paused,
-        game_finished => level_four_game_finished
-    );
-
     LEVEL_THREE_COMPONENT : LevelThree port map (
         clk25Mhz => clk25Mhz,
         mouse_left => mouse_left,
@@ -433,6 +419,24 @@ begin
         cutscene_end => cutscene_end
     );
 
+    LEVEL_FOUR_COMPONENT : LevelFour port map (
+        clk25Mhz => clk25Mhz,
+        mouse_left => mouse_left,
+        vert_sync => vert_sync,
+        SW => SW,
+        KEY => KEY,
+        level_four_enable => level_four_enabled,
+        pixel_row => pixel_row,
+        pixel_column => pixel_column,
+        red => level_four_red,
+        green => level_four_green,
+        blue => level_four_blue,
+        paused => paused,
+        game_finished => level_four_game_finished,
+        laser1_render => level_four_1_render,
+        laser2_render => level_four_2_render
+    );
+    
     -- Multiplexer
     obstacle_1_red      <= level_one_1_red when level_state = 1 else
                            level_two_1_red when level_state = 2 else 
@@ -448,7 +452,8 @@ begin
                            level_three_1_x_pos when level_state = 3 else (others => '0');
     obstacle_1_render   <= level_one_1_render when level_state = 1 else
                            level_two_1_render when level_state = 2 else 
-                           level_three_1_render when level_state = 3 else '0';
+                           level_three_1_render when level_state = 3 else
+                           level_four_1_render when level_state = 4 else '0';
 
     obstacle_2_red      <= level_one_2_red when level_state = 1 else
                            level_two_2_red when level_state = 2 else
@@ -464,7 +469,8 @@ begin
                            level_three_2_x_pos when level_state = 3 else (others => '0');
     obstacle_2_render   <= level_one_2_render when level_state = 1 else
                            level_two_2_render when level_state = 2 else 
-                           level_three_2_render when level_state = 3 else '0';
+                           level_three_2_render when level_state = 3 else
+                           level_four_2_render when level_state = 4 else '0';
 
     obstacle_3_red      <= level_three_3_red when level_state = 3 else "0000";
     obstacle_3_green    <= level_three_3_green when level_state = 3 else "0000";

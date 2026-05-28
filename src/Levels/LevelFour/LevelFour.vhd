@@ -13,7 +13,8 @@ entity LevelFour is
         pixel_row, pixel_column : IN std_logic_vector(9 downto 0);
         red, green, blue : OUT std_logic_vector(3 downto 0);
         paused : IN std_logic;
-        game_finished : OUT std_logic
+        game_finished : OUT std_logic;
+        laser1_render, laser2_render: OUT std_logic
     );
 end entity LevelFour;
 
@@ -85,12 +86,14 @@ architecture behavior of LevelFour is
     signal laser1_transparent : std_logic;
     signal laser1_enabled : std_logic;
     signal laser1_y_pos : unsigned(9 downto 0) := (others => '0');
+    signal laser1_render_out : std_logic;
 
     -- LASER 2 SIGNALS
     signal laser2_red, laser2_green, laser2_blue : std_logic_vector(3 downto 0);
     signal laser2_transparent : std_logic;
     signal laser2_enabled : std_logic;
     signal laser2_y_pos : unsigned(9 downto 0) := to_unsigned(L2_START_INT, 10);
+    signal laser2_render_out : std_logic;
 
     -- TARGET CONSTANTS
     constant laser1_target_y : unsigned(9 downto 0) := to_unsigned(L1_TARGET_INT, 10);
@@ -101,6 +104,22 @@ architecture behavior of LevelFour is
     
     signal cycle_counter : integer range 0 to 1000 := 0; 
 begin
+    laser1_render_out <= '1' when (
+        laser1_enabled = '1'
+        and unsigned(pixel_column) >= 0
+        and unsigned(pixel_column) <  to_unsigned(640, 10)
+        and unsigned(pixel_row)    >= laser1_y_pos
+        and unsigned(pixel_row)    <  laser1_y_pos + SPRITE_HEIGHT
+    ) else '0';
+
+    laser2_render_out <= '1' when (
+        laser2_enabled = '1'
+        and unsigned(pixel_column) >= 0
+        and unsigned(pixel_column) <  to_unsigned(640, 10)
+        and unsigned(pixel_row)    >= laser2_y_pos
+        and unsigned(pixel_row)    <  laser2_y_pos + SPRITE_HEIGHT
+    ) else '0';
+
     Boss: BossRenderer port map (
         clk25Mhz => clk25Mhz,
         pixel_row => pixel_row,
@@ -285,5 +304,8 @@ begin
             end if;
         end if;
     end process;
+
+    laser1_render <= laser1_render_out;
+    laser2_render <= laser2_render_out;
 
 end architecture behavior;

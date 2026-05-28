@@ -208,66 +208,60 @@ begin
         transparent => bot_body_t
     );
 
-    -----------------------------------------------------------------
-    -- CONTROLLER (SAFE + CLAMPED)
-    -----------------------------------------------------------------
     PIPE_CONTROLLER : process(vert_sync)
-        variable gap_center : unsigned(10 downto 0);
+        variable gap_center   : unsigned(10 downto 0);
+        constant GROWTH_SPEED : unsigned(9 downto 0) := to_unsigned(5, 10);
     begin
         if rising_edge(vert_sync) then
 
             if reset = '1' then
-                pipe_x_pos <= to_unsigned(640 + START_OFFSET, 11);
-                pipe_top_y_pos <= to_unsigned(height/2 - gap/2, 10);
-                pipe_bottom_y_pos <= to_unsigned(height/2 + gap/2, 10);
+                pipe_x_pos     <= to_unsigned(640 + START_OFFSET, 11);
                 player_latched <= '0';
                 growth_enabled <= '0';
-                is_visible <= '1';
-                end_reached <= '0';
+                is_visible     <= '1';
+                end_reached    <= '0';
+                pipe_top_y_pos    <= to_unsigned(height, 10) - to_unsigned(gap/2, 10);
+                pipe_bottom_y_pos <= to_unsigned(height, 10) + to_unsigned(gap/2, 10);
 
             elsif enabled = '1' then
-
-                -- move pipe
+                -- move pipe leftward
                 if pipe_x_pos > to_unsigned(SPEED, 11) then
                     pipe_x_pos <= pipe_x_pos - to_unsigned(SPEED, 11);
                 else
                     end_reached <= '1';
-                    is_visible <= '0';
+                    is_visible  <= '0';
                 end if;
 
                 -- latch player
                 if (pipe_x_pos <= to_unsigned(300, 11)) and player_latched = '0' then
-                    player_latched <= '1';
+                    player_latched       <= '1';
                     player_latched_y_pos <= player_y_pos;
-                    growth_enabled <= '1';
+                    growth_enabled       <= '1';
                 end if;
 
                 -- safe center calc (no DSP inference)
                 gap_center := resize(pipe_top_y_pos, 11) + resize(pipe_bottom_y_pos, 11);
                 gap_center := '0' & gap_center(10 downto 1);
 
-                -- growth (CLAMPED)
-                if growth_enabled = '1' then
-
+                -- accelerated growth
+                if growth_enabled = '1' and is_visible = '1' then
                     if part_to_render = '1' then
                         if gap_center < resize(player_latched_y_pos, 11) - 4 then
+                            -- Use your custom speed constant here
                             if pipe_top_y_pos < to_unsigned(SCREEN_H - 10, 10) then
-                                pipe_top_y_pos <= pipe_top_y_pos + 1;
-                                pipe_bottom_y_pos <= pipe_bottom_y_pos + 1;
+                                pipe_top_y_pos    <= pipe_top_y_pos + GROWTH_SPEED;
+                                pipe_bottom_y_pos <= pipe_bottom_y_pos + GROWTH_SPEED;
                             end if;
                         end if;
-
                     else
                         if gap_center > resize(player_latched_y_pos, 11) + 4 then
                             if pipe_top_y_pos > to_unsigned(10, 10) then
-                                pipe_top_y_pos <= pipe_top_y_pos - 1;
-                                pipe_bottom_y_pos <= pipe_bottom_y_pos - 1;
+                                pipe_top_y_pos    <= pipe_top_y_pos - GROWTH_SPEED;
+                                pipe_bottom_y_pos <= pipe_bottom_y_pos - GROWTH_SPEED;
                             end if;
                         end if;
                     end if;
-
                 end if;
-
             end if;
         end if;
     end process;

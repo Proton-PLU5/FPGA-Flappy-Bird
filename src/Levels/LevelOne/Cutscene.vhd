@@ -54,6 +54,23 @@ architecture behavior of Cutscene is
             transparent : out std_logic
         );
     end component;
+
+    component title_display is
+        generic (
+            text_string : string := "FLAPPY BOSS";
+            text_size : integer := 11;
+            SIZE : integer := 4
+        );
+
+        port (
+            clk          : in  std_logic;
+            pixel_row    : in  std_logic_vector(9 downto 0);
+            pixel_column : in  std_logic_vector(9 downto 0);
+            pixel_on     : out std_logic;
+				text_row : in integer;
+				text_col_start : in integer
+        );
+    end component title_display;
     
 
     signal boss_red, boss_green, boss_blue : std_logic_vector(3 downto 0);
@@ -64,6 +81,8 @@ architecture behavior of Cutscene is
     -- Background signals
     signal background_red, background_green, background_blue : std_logic_vector(3 downto 0);
     signal background_transparent : std_logic;
+
+    signal text_enabled : std_logic := '0';
 
     signal frame_counter : integer := 0; -- Counts frames for animation timing
 begin
@@ -105,6 +124,21 @@ begin
         transparent => background_transparent
     );
 
+    MSG_ONE : title_display
+    generic map (
+        text_string => "SKELETRON HAS AWAKENED!",
+        text_size => 23,
+        SIZE => 4
+    )
+    port map (
+        clk => clk25Mhz,
+        pixel_row => pixel_row,
+        pixel_column => pixel_column,
+        pixel_on => text_enabled,
+        text_row => 300,
+        text_col_start => 30
+    );
+
     LOGIC_PROCESS : process (vert_sync)
     begin
         if rising_edge(vert_sync) then
@@ -134,6 +168,10 @@ begin
                 red <= boss_red;
                 green <= boss_green;
                 blue <= boss_blue;
+            elsif (text_enabled = '1') then
+                red <= "1111"; -- White text
+                green <= "1111";
+                blue <= "1111";
             else
                 red <= background_red;
                 green <= background_green;

@@ -12,7 +12,6 @@ entity LevelThree is
         level_three_enable : IN std_logic := '0';
         pixel_row, pixel_column	: IN std_logic_vector(9 DOWNTO 0);
         paused : IN std_logic;
-        skull_1_enabled, skull_2_enabled, skull_3_enabled, skull_4_enabled, skull_5_enabled : OUT std_logic;
         skull_1_red, skull_1_green, skull_1_blue : OUT std_logic_vector(3 downto 0);
         skull_2_red, skull_2_green, skull_2_blue : OUT std_logic_vector(3 downto 0);
         skull_3_red, skull_3_green, skull_3_blue : OUT std_logic_vector(3 downto 0);
@@ -66,63 +65,57 @@ architecture behavior of LevelThree is
         );
     end component LFSR;
 
-    constant SKULL_HEIGHT  : integer := 56;
-
-    constant LANE_0 : integer := 40;
-    constant LANE_1 : integer := 120;
-    constant LANE_2 : integer := 200;
-    constant LANE_3 : integer := 280;
-    constant LANE_4 : integer := 360;
+    constant LANE_0 : integer := 50;
+    constant LANE_1 : integer := 126;
+    constant LANE_2 : integer := 202;
+    constant LANE_3 : integer := 278;
+    constant LANE_4 : integer := 354;
 
     signal skull_1_render_s : std_logic := '0';
     signal skull_1_enabled_s : std_logic := '0';
     signal skull_1_end_reached : std_logic;
     signal skull_1_x_pos_s : unsigned(10 downto 0);
-    signal skull_1_y_pos_s : integer range 0 to 480;
+    signal skull_1_y_pos_s : integer range 0 to 480 := LANE_0;
     signal skull_1_red_s, skull_1_green_s, skull_1_blue_s : std_logic_vector(3 downto 0);
     signal skull_1_reset : std_logic := '0';
-    signal skull_1_height : integer range 0 to 480 := 240; -- Default height is 240
 
     signal skull_2_render_s : std_logic := '0';
     signal skull_2_enabled_s : std_logic := '0';
     signal skull_2_end_reached : std_logic;
     signal skull_2_x_pos_s : unsigned(10 downto 0);
-    signal skull_2_y_pos_s : integer range 0 to 480;
+    signal skull_2_y_pos_s : integer range 0 to 480 := LANE_1;
     signal skull_2_red_s, skull_2_green_s, skull_2_blue_s : std_logic_vector(3 downto 0);
     signal skull_2_reset : std_logic := '0';
-    signal skull_2_height : integer range 0 to 480 := 240; -- Default height is 240
     signal skull_2_waiting : std_logic := '0';
 
     signal skull_3_render_s : std_logic := '0';
     signal skull_3_enabled_s : std_logic := '0';
     signal skull_3_end_reached : std_logic;
     signal skull_3_x_pos_s : unsigned(10 downto 0);
-    signal skull_3_y_pos_s : integer range 0 to 480;
+    signal skull_3_y_pos_s : integer range 0 to 480 := LANE_2;
     signal skull_3_red_s, skull_3_green_s, skull_3_blue_s : std_logic_vector(3 downto 0);
     signal skull_3_reset : std_logic := '0';
-    signal skull_3_height : integer range 0 to 480 := 240; -- Default height is 240
     signal skull_3_waiting : std_logic := '0';
 
     signal skull_4_render_s : std_logic := '0';
     signal skull_4_enabled_s : std_logic := '0';
     signal skull_4_end_reached : std_logic;
     signal skull_4_x_pos_s : unsigned(10 downto 0);
-    signal skull_4_y_pos_s : integer range 0 to 480;
+    signal skull_4_y_pos_s : integer range 0 to 480 := LANE_3;
     signal skull_4_red_s, skull_4_green_s, skull_4_blue_s : std_logic_vector(3 downto 0);
     signal skull_4_reset : std_logic := '0';
-    signal skull_4_height : integer range 0 to 480 := 240; -- Default height is 240
     signal skull_4_waiting : std_logic := '0';
 
     signal skull_5_render_s : std_logic := '0';
     signal skull_5_enabled_s : std_logic := '0';
     signal skull_5_end_reached : std_logic;
     signal skull_5_x_pos_s : unsigned(10 downto 0);
-    signal skull_5_y_pos_s : integer range 0 to 480;
+    signal skull_5_y_pos_s : integer range 0 to 480 := LANE_4;
     signal skull_5_red_s, skull_5_green_s, skull_5_blue_s : std_logic_vector(3 downto 0);
     signal skull_5_reset : std_logic := '0';
-    signal skull_5_height : integer range 0 to 480 := 240; -- Default height is 240
     signal skull_5_waiting : std_logic := '0';
 
+    signal powerup_enabled_s : std_logic := '0';
     signal powerup_render_s : std_logic := '0';
     signal powerup_red_s, powerup_green_s, powerup_blue_s : std_logic_vector(3 downto 0);
     signal powerup_reset : std_logic := '0';
@@ -136,6 +129,7 @@ begin
     skull_3_enabled_s <= level_three_enable and not paused;
     skull_4_enabled_s <= level_three_enable and not paused;
     skull_5_enabled_s <= level_three_enable and not paused;
+    powerup_enabled_s <= level_three_enable and not paused;
 
     SKULL_1_COMPONENT : Skull port map (
         clk => clk25Mhz,
@@ -232,7 +226,7 @@ begin
         render => powerup_render_s,
         x_pos => powerup_x_pos_s,
         y_pos => powerup_y_pos_s,
-        enable => level_three_enable
+        enable => powerup_enabled_s
     );
 
     LFSR_COMPONENT : LFSR port map (
@@ -298,6 +292,7 @@ begin
                 end if;
             elsif (level_three_enable = '0') then
                 skull_2_reset <= '1'; -- Reset the skull when the level is not enabled
+                skull_2_waiting <= '0';
             end if;
         end if;
     end process SKULL_2_RANDOMISER;
@@ -328,6 +323,7 @@ begin
                 end if;
             elsif (level_three_enable = '0') then
                 skull_3_reset <= '1'; -- Reset the skull when the level is not enabled
+                skull_3_waiting <= '0';
             end if;
         end if;
     end process SKULL_3_RANDOMISER;
@@ -358,6 +354,7 @@ begin
                 end if;
             elsif (level_three_enable = '0') then
                 skull_4_reset <= '1'; -- Reset the skull when the level is not enabled
+                skull_4_waiting <= '0';
             end if;
         end if;
     end process SKULL_4_RANDOMISER;
@@ -388,39 +385,35 @@ begin
                 end if;
             elsif (level_three_enable = '0') then
                 skull_5_reset <= '1'; -- Reset the skull when the level is not enabled
+                skull_5_waiting <= '0';
             end if;
         end if;
     end process SKULL_5_RANDOMISER;
 
-    skull_1_enabled <= skull_1_enabled_s;
     skull_1_red <= skull_1_red_s;
     skull_1_green <= skull_1_green_s;
     skull_1_blue <= skull_1_blue_s;
     skull_1_x_pos <= skull_1_x_pos_s;
     skull_1_render <= skull_1_render_s;
 
-    skull_2_enabled <= skull_2_enabled_s;
     skull_2_red <= skull_2_red_s;
     skull_2_green <= skull_2_green_s;
     skull_2_blue <= skull_2_blue_s;
     skull_2_x_pos <= skull_2_x_pos_s;
     skull_2_render <= skull_2_render_s;
 
-    skull_3_enabled <= skull_3_enabled_s;
     skull_3_red <= skull_3_red_s;
     skull_3_green <= skull_3_green_s;
     skull_3_blue <= skull_3_blue_s;
     skull_3_x_pos <= skull_3_x_pos_s;
     skull_3_render <= skull_3_render_s;
 
-    skull_4_enabled <= skull_4_enabled_s;
     skull_4_red <= skull_4_red_s;
     skull_4_green <= skull_4_green_s;
     skull_4_blue <= skull_4_blue_s;
     skull_4_x_pos <= skull_4_x_pos_s;
     skull_4_render <= skull_4_render_s;
 
-    skull_5_enabled <= skull_5_enabled_s;
     skull_5_red <= skull_5_red_s;
     skull_5_green <= skull_5_green_s;
     skull_5_blue <= skull_5_blue_s;

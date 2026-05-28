@@ -13,7 +13,6 @@ entity LevelTwo is
         level_two_enable : IN std_logic := '0';
         pixel_row, pixel_column	: IN std_logic_vector(9 DOWNTO 0);
         paused : IN std_logic;
-        pipe_1_enabled, pipe_2_enabled : OUT std_logic;
         pipe_1_red, pipe_1_green, pipe_1_blue : OUT std_logic_vector(3 downto 0);
         pipe_2_red, pipe_2_green, pipe_2_blue : OUT std_logic_vector(3 downto 0);
         pipe_1_x_pos : OUT unsigned(10 downto 0);
@@ -91,6 +90,7 @@ architecture behavior of LevelTwo is
     signal pipe_2_part_to_render : std_logic := '0'; 
     signal pipe_2_waiting : std_logic := '0';
 
+    signal powerup_enabled_s : std_logic := '0';
     signal powerup_render_s : std_logic := '0';
     signal powerup_red_s, powerup_green_s, powerup_blue_s : std_logic_vector(3 downto 0);
     signal powerup_reset : std_logic := '0';
@@ -109,6 +109,7 @@ architecture behavior of LevelTwo is
 begin
     pipe_1_enabled_s <= level_two_enable and not paused;
     pipe_2_enabled_s <= level_two_enable and not paused and start_rendering_pipe_2;
+    powerup_enabled_s <= level_two_enable and not paused;
 
     PIPE_COMPONENT : OffsetPipe
         generic map ( START_OFFSET => 0 )
@@ -176,7 +177,7 @@ begin
         render => powerup_render_s,
         x_pos => powerup_x_pos_s,
         y_pos => powerup_y_pos_s,
-        enable => level_two_enable
+        enable => powerup_enabled_s
     );
 
     CLOCK_PROCESS : process(clk25Mhz)
@@ -217,8 +218,6 @@ begin
         end if;
     end process;
 
-    pipe_1_enabled <= pipe_1_enabled_s;
-    pipe_2_enabled <= pipe_2_enabled_s;
     pipe_1_red <= pipe_1_red_s;
     pipe_1_green <= pipe_1_green_s;
     pipe_1_blue <= pipe_1_blue_s;

@@ -463,8 +463,12 @@ set_location_assignment PIN_B10 -to VGA_R[1]
 set_location_assignment PIN_C9 -to VGA_R[2]
 set_location_assignment PIN_A5 -to VGA_R[3]
 set_location_assignment PIN_G8 -to VGA_VS
+<<<<<<< HEAD
 set_global_assignment -name VHDL_FILE src/Levels/LevelOne/Cutscene.vhd
 set_global_assignment -name VHDL_FILE src/Utilities/SpriteSheetRenderer.vhd
+=======
+set_global_assignment -name VHDL_FILE src/Levels/WinRenderer.vhd
+>>>>>>> main
 set_global_assignment -name VHDL_FILE src/Levels/LevelFour/LevelFour.vhd
 set_global_assignment -name VHDL_FILE src/Levels/LevelThree/Skull.vhd
 set_global_assignment -name VHDL_FILE src/Levels/LevelThree/LevelThree.vhd

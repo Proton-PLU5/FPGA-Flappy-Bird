@@ -12,7 +12,6 @@ entity LevelOne is
         level_one_enable : IN std_logic;
         pixel_row, pixel_column	: IN std_logic_vector(9 DOWNTO 0);
         paused : IN std_logic;
-        pipe_1_enabled, pipe_2_enabled : OUT std_logic;
         pipe_1_red, pipe_1_green, pipe_1_blue : OUT std_logic_vector(3 downto 0);
         pipe_2_red, pipe_2_green, pipe_2_blue : OUT std_logic_vector(3 downto 0);
         pipe_1_x_pos : OUT unsigned(10 downto 0);
@@ -162,8 +161,6 @@ begin
         end if;
     end process;
 
-    pipe_1_enabled <= pipe_1_enabled_s;
-    pipe_2_enabled <= pipe_2_enabled_s;
     pipe_1_red <= pipe_1_red_s;
     pipe_1_green <= pipe_1_green_s;
     pipe_1_blue <= pipe_1_blue_s;

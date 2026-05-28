@@ -12,6 +12,7 @@ entity SpriteRenderer is
         start_x  : in std_logic_vector(10 downto 0);
         start_y  : in std_logic_vector(10 downto 0);
         sprite_id : in integer range 0 to 64;
+        flip_y  : in std_logic := '0';
         red   : out std_logic_vector(3 downto 0);
         green : out std_logic_vector(3 downto 0);
         blue  : out std_logic_vector(3 downto 0);
@@ -36,15 +37,15 @@ begin
     sprite_y <= to_integer(unsigned(start_y));
 
     process(clk)
-        variable screen_x : integer;
-        variable screen_y : integer;
-        variable local_x : integer;
-        variable local_y : integer;
-        variable addr : integer;
-        variable palette_index : integer;
+        variable screen_x : integer range 0 to 640;
+        variable screen_y : integer range 0 to 480;
+        variable local_x : integer range 0 to 640;
+        variable local_y : integer range 0 to 480;
+        variable addr : integer range 0 to 307199;
+        variable palette_index : integer range 0 to 255;
         variable color : std_logic_vector(11 downto 0);
-        variable width : integer;
-        variable height : integer;
+        variable width : integer range 0 to 640;
+        variable height : integer range 0 to 480;
     begin
 
         if rising_edge(clk) then
@@ -90,6 +91,18 @@ begin
                 when 9 =>
                     width := POWERUP_WIDTH;
                     height := POWERUP_HEIGHT;
+                when 10 =>
+                    width := BONE_BODY_WIDTH;
+                    height := BONE_BODY_HEIGHT;
+                when 11 =>
+                    width := BONE_CAP_WIDTH;
+                    height := BONE_CAP_HEIGHT;
+                when 12 =>
+                    width := BONE_BODY_2_WIDTH;
+                    height := BONE_BODY_2_HEIGHT;
+                when 13 =>
+                    width := BONE_CAP_2_WIDTH;
+                    height := BONE_CAP_2_HEIGHT;
                 when others =>
                     width := SKELETRON_HEAD_WIDTH;
                     height := SKELETRON_HEAD_HEIGHT;
@@ -104,48 +117,79 @@ begin
 
                 -- Calculate the local pixel coordinates within the sprite
                 local_x := screen_x - sprite_x;
-                local_y := screen_y - sprite_y;
 
-                -- used to search thru the 1d array to find the pixel pallete data.
-                -- cuz the data is actually 1d array and not a 2d array.
-                -- so we do some math to emulate 2d indexing.
-                addr := local_y * width + local_x;
+                -- flip_y reverses the row lookup so the sprite renders upside-down
+                if flip_y = '1' then
+                    local_y := (height - 1) - (screen_y - sprite_y);
+                else
+                    local_y := screen_y - sprite_y;
+                end if;
 
                 -- Select the colors using the sprite we are rendering
+                -- Addr is used to search thru the 1d array to find the pixel pallete data.
+                -- cuz the data is actually 1d array and not a 2d array.
+                -- so we do some math to emulate 2d indexing.
                 case sprite_id is
                     when 0 =>
                         palette_index := SKELETRON_HEAD_DATA(addr);
                         color := SKELETRON_HEAD_PALETTE(palette_index);
+                        addr := local_y * SKELETRON_HEAD_WIDTH + local_x;
                     when 1 =>
                         palette_index := SKELETRON_JAW_DATA(addr);
                         color := SKELETRON_JAW_PALETTE(palette_index);
+                        addr := local_y * SKELETRON_JAW_WIDTH + local_x;
                     when 2 =>
                         palette_index := FLAPPY_BIRD_DATA(addr);
                         color := FLAPPY_BIRD_PALETTE(palette_index);
+                        addr := local_y * FLAPPY_BIRD_WIDTH + local_x;
                     when 3 =>
                         palette_index := FULL_HEART_DATA(addr);
                         color := FULL_HEART_PALETTE(palette_index);
+                        addr := local_y * FULL_HEART_WIDTH + local_x;
                     when 4 =>
                         palette_index := EMPTY_HEART_DATA(addr);
                         color := EMPTY_HEART_PALETTE(palette_index);
+                        addr := local_y * EMPTY_HEART_WIDTH + local_x;
                     when 5 =>
                         palette_index := BLUE_BRICK_TILE_DATA(addr);
                         color := BLUE_BRICK_TILE_PALETTE(palette_index);
+                        addr := local_y * BLUE_BRICK_TILE_WIDTH + local_x;
                     when 6 =>
                         palette_index := LASER_BEAM_WARNING_DATA(addr);
                         color := LASER_BEAM_WARNING_PALETTE(palette_index);
+                        addr := local_y * LASER_BEAM_WARNING_WIDTH + local_x;
                     when 7 =>
                         palette_index := LASER_BEAM_DATA(addr);
                         color := LASER_BEAM_PALETTE(palette_index);
+                        addr := local_y * LASER_BEAM_WIDTH + local_x;
                     when 8 =>
                         palette_index := L3SKULL_DATA(addr);
                         color := L3SKULL_PALETTE(palette_index);
+                        addr := local_y * L3SKULL_WIDTH + local_x;
                     when 9 =>
                         palette_index := POWERUP_DATA(addr);
                         color := POWERUP_PALETTE(palette_index);
+                        addr := local_y * POWERUP_WIDTH + local_x;
+                    when 10 =>
+                        palette_index := BONE_BODY_DATA(addr);
+                        color := BONE_BODY_PALETTE(palette_index);
+                        addr := local_y * BONE_BODY_WIDTH + local_x;
+                    when 11 =>
+                        palette_index := BONE_CAP_DATA(addr);
+                        color := BONE_CAP_PALETTE(palette_index);
+                        addr := local_y * BONE_CAP_WIDTH + local_x;
+                    when 12 =>
+                        palette_index := BONE_BODY_2_DATA(addr);
+                        color := BONE_BODY_2_PALETTE(palette_index);
+                        addr := local_y * BONE_BODY_2_WIDTH + local_x;
+                    when 13 =>
+                        palette_index := BONE_CAP_2_DATA(addr);
+                        color := BONE_CAP_2_PALETTE(palette_index);
+                        addr := local_y * BONE_CAP_2_WIDTH + local_x;
                     when others =>
                         palette_index := SKELETRON_HEAD_DATA(addr);
                         color := SKELETRON_HEAD_PALETTE(palette_index);
+                        addr := 0;
                 end case;
 
                 -- Check for transparency (palette index 0 is transparent)

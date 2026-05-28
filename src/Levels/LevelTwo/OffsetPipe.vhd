@@ -78,16 +78,8 @@ architecture behaviour of OffsetPipe is
     end component;
 
 begin
-
-    -----------------------------------------------------------------
-    -- GEOMETRY
-    -----------------------------------------------------------------
     top_cap_start_y    <= ('0' & pipe_top_y_pos) - to_unsigned(BONE_CAP_HEIGHT, 11);
     bottom_cap_start_y <= '0' & pipe_bottom_y_pos;
-
-    -----------------------------------------------------------------
-    -- RENDER MASKS
-    -----------------------------------------------------------------
 
     render_top_cap <= '1' when (
         enabled = '1' and is_visible = '1' and part_to_render = '1'
@@ -125,9 +117,6 @@ begin
 
     render <= render_top_cap or render_top_body or render_bottom_cap or render_bottom_body;
 
-    -----------------------------------------------------------------
-    -- RGB MUX
-    -----------------------------------------------------------------
     red <=
         top_cap_r when render_top_cap = '1' else
         bot_cap_r when render_bottom_cap = '1' else
@@ -147,10 +136,6 @@ begin
         bot_body_b;
 
     x_pos <= pipe_x_pos;
-
-    -----------------------------------------------------------------
-    -- SPRITE INSTANCES (FIXED SIGNALS)
-    -----------------------------------------------------------------
 
     TOP_CAP : SpriteRenderer port map (
         clk => clk,
@@ -245,20 +230,17 @@ begin
 
                 -- accelerated growth
                 if growth_enabled = '1' and is_visible = '1' then
-                    if part_to_render = '1' then
-                        if gap_center < resize(player_latched_y_pos, 11) - 4 then
-                            -- Use your custom speed constant here
-                            if pipe_top_y_pos < to_unsigned(SCREEN_H - 10, 10) then
-                                pipe_top_y_pos    <= pipe_top_y_pos + GROWTH_SPEED;
-                                pipe_bottom_y_pos <= pipe_bottom_y_pos + GROWTH_SPEED;
-                            end if;
+                    if gap_center < resize(player_latched_y_pos, 11) - 4 then
+                        -- move gap down: check bottom edge
+                        if pipe_bottom_y_pos < to_unsigned(SCREEN_H - 10, 10) then
+                            pipe_top_y_pos    <= pipe_top_y_pos + GROWTH_SPEED;
+                            pipe_bottom_y_pos <= pipe_bottom_y_pos + GROWTH_SPEED;
                         end if;
-                    else
-                        if gap_center > resize(player_latched_y_pos, 11) + 4 then
-                            if pipe_top_y_pos > to_unsigned(10, 10) then
-                                pipe_top_y_pos    <= pipe_top_y_pos - GROWTH_SPEED;
-                                pipe_bottom_y_pos <= pipe_bottom_y_pos - GROWTH_SPEED;
-                            end if;
+                    elsif gap_center > resize(player_latched_y_pos, 11) + 4 then
+                        -- move gap up: check top edge
+                        if pipe_top_y_pos > to_unsigned(10, 10) then
+                            pipe_top_y_pos    <= pipe_top_y_pos - GROWTH_SPEED;
+                            pipe_bottom_y_pos <= pipe_bottom_y_pos - GROWTH_SPEED;
                         end if;
                     end if;
                 end if;

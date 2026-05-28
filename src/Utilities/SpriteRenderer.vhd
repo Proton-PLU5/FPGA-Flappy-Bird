@@ -45,15 +45,10 @@ begin
         variable addr : integer range 0 to 307199;
         variable palette_index : integer range 0 to 255;
         variable color : std_logic_vector(11 downto 0);
-<<<<<<< HEAD
-        variable width : integer;
-        variable height : integer;
-        variable scaled_width : integer;
-        variable scaled_height : integer;
-=======
         variable width : integer range 0 to 640;
         variable height : integer range 0 to 480;
->>>>>>> main
+        variable scaled_width : integer range 0 to 640;
+        variable scaled_height : integer range 0 to 480;
     begin
 
         if rising_edge(clk) then
@@ -100,10 +95,6 @@ begin
                     width := POWERUP_WIDTH;
                     height := POWERUP_HEIGHT;
                 when 10 =>
-<<<<<<< HEAD
-                    width := BRICK_TILE_WIDTH;
-                    height := BRICK_TILE_HEIGHT;
-=======
                     width := BONE_BODY_WIDTH;
                     height := BONE_BODY_HEIGHT;
                 when 11 =>
@@ -115,7 +106,9 @@ begin
                 when 13 =>
                     width := BONE_CAP_2_WIDTH;
                     height := BONE_CAP_2_HEIGHT;
->>>>>>> main
+                when 14 =>
+                    width := BRICK_TILE_WIDTH;
+                    height := BRICK_TILE_HEIGHT;
                 when others =>
                     width := SKELETRON_HEAD_WIDTH;
                     height := SKELETRON_HEAD_HEIGHT;
@@ -131,24 +124,15 @@ begin
                screen_y >= sprite_y and
                screen_y < sprite_y + scaled_height then
 
-<<<<<<< HEAD
                 -- Calculate the local pixel coordinates, scaling down to match the original array size
                 local_x := (screen_x - sprite_x) / SCALE_FACTOR;
-                local_y := (screen_y - sprite_y) / SCALE_FACTOR;
-
-                -- Calculate address using original unscaled width
-                addr := local_y * width + local_x;
-=======
-                -- Calculate the local pixel coordinates within the sprite
-                local_x := screen_x - sprite_x;
 
                 -- flip_y reverses the row lookup so the sprite renders upside-down
                 if flip_y = '1' then
-                    local_y := (height - 1) - (screen_y - sprite_y);
+                    local_y := ((height - 1) - (screen_y - sprite_y)) / SCALE_FACTOR;
                 else
-                    local_y := screen_y - sprite_y;
+                    local_y := (screen_y - sprite_y) / SCALE_FACTOR;
                 end if;
->>>>>>> main
 
                 -- Select the colors using the sprite we are rendering
                 -- Addr is used to search thru the 1d array to find the pixel pallete data.
@@ -194,11 +178,6 @@ begin
                     when 9 =>
                         palette_index := POWERUP_DATA(addr);
                         color := POWERUP_PALETTE(palette_index);
-<<<<<<< HEAD
-                    when 10 =>
-                        palette_index := BRICK_TILE_DATA(addr);
-                        color := BRICK_TILE_PALETTE(palette_index);
-=======
                         addr := local_y * POWERUP_WIDTH + local_x;
                     when 10 =>
                         palette_index := BONE_BODY_DATA(addr);
@@ -216,7 +195,9 @@ begin
                         palette_index := BONE_CAP_2_DATA(addr);
                         color := BONE_CAP_2_PALETTE(palette_index);
                         addr := local_y * BONE_CAP_2_WIDTH + local_x;
->>>>>>> main
+                    when 14 =>
+                        palette_index := BRICK_TILE_DATA(addr);
+                        color := BRICK_TILE_PALETTE(palette_index);
                     when others =>
                         palette_index := SKELETRON_HEAD_DATA(addr);
                         color := SKELETRON_HEAD_PALETTE(palette_index);

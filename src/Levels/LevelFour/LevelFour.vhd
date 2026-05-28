@@ -51,6 +51,23 @@ architecture behavior of LevelFour is
         );
     end component SpriteRenderer;
 
+    component title_display is
+        generic (
+            text_string : string := "FLAPPY BOSS";
+            text_size : integer := 11;
+            SIZE : integer := 4
+        );
+
+        port (
+            clk          : in  std_logic;
+            pixel_row    : in  std_logic_vector(9 downto 0);
+            pixel_column : in  std_logic_vector(9 downto 0);
+            pixel_on     : out std_logic;
+				text_row : in integer;
+				text_col_start : in integer
+        );
+    end component title_display;
+
     -- BOSS SIGNALS
     signal boss_red, boss_green, boss_blue : std_logic_vector(3 downto 0);
     signal boss_enabled : std_logic;
@@ -65,7 +82,8 @@ architecture behavior of LevelFour is
 
     -- Starting Y for Head = 202
     signal dead_head_y : unsigned(9 downto 0) := to_unsigned(202, 10);
-    
+    signal dead_head_x : unsigned(9 downto 0) := to_unsigned(280, 10);
+
     -- Starting X for Jaw = 280 + (13 base offset * 2 scale) = 306
     -- Starting Y for Jaw = 202 + (57 base offset * 2 scale) = 316
     signal dead_jaw_x : unsigned(9 downto 0) := to_unsigned(306, 10);
@@ -117,6 +135,13 @@ architecture behavior of LevelFour is
     constant laser1_target_y : unsigned(9 downto 0) := to_unsigned(L1_TARGET_INT, 10);
     constant laser2_target_y : unsigned(9 downto 0) := to_unsigned(L2_TARGET_INT, 10);
 
+    -- TEXT COMPONENT OUTPUTS (Hardware pixels)
+    signal msg_1_pixel, msg_2_pixel, msg_3_pixel : std_logic;
+    
+    -- TEXT STATE ENABLE SIGNALS (State machine logic)
+    signal show_msg_1, show_msg_2, show_msg_3 : std_logic := '0';
+    signal text_counter : integer range 0 to 400 := 0;
+
     type boss_state is (IDLE, WARNING, MOVING, HOLD, VICTORY);
     signal current_state : boss_state := IDLE;
     
@@ -146,7 +171,7 @@ begin
         clk => clk25Mhz,
         pixel_row => pixel_row,
         pixel_column => pixel_column,
-        start_x => '0' & boss_x_pos,
+        start_x => '0' & std_logic_vector(dead_head_x),
         start_y => '0' & std_logic_vector(dead_head_y),
         sprite_id => 0,
         red => dead_head_red,
@@ -225,6 +250,51 @@ begin
         blue => laser2_blue,
         transparent => laser2_transparent
     );
+
+    MSG_1 : title_display 
+    generic map (
+        text_string => "YOU SURVIVED...",
+        text_size => 15,
+        size => 3
+    )
+    port map (
+        clk => clk25Mhz,
+        pixel_row => pixel_row,
+        pixel_column => pixel_column,
+        pixel_on => msg_1_pixel, 
+        text_row => 100,
+        text_col_start => 25
+    );
+
+    MSG_2 : title_display 
+    generic map (
+        text_string => "UNEXPECTED.....",
+        text_size => 15,
+        size => 3
+    )
+    port map (
+        clk => clk25Mhz,
+        pixel_row => pixel_row,
+        pixel_column => pixel_column,
+        pixel_on => msg_2_pixel, 
+        text_row => 100,
+        text_col_start => 25
+    );
+
+    MSG_3 : title_display 
+    generic map (
+        text_string => "HOWEVER, YOU WON'T SURVIVE THIS!",
+        text_size => 32,
+        size => 3
+    )
+    port map (
+        clk => clk25Mhz,
+        pixel_row => pixel_row,
+        pixel_column => pixel_column,
+        pixel_on => msg_3_pixel, 
+        text_row => 300,
+        text_col_start => 8
+    );
     
 
     PROCESS (vert_sync)
@@ -238,49 +308,62 @@ begin
                 laser1_y_pos <= (others => '0');
                 laser2_y_pos <= to_unsigned(L2_START_INT, 10);
                 dead_head_y <= to_unsigned(202, 10);
+                dead_head_x <= to_unsigned(280, 10);
                 dead_jaw_x  <= to_unsigned(306, 10);
                 dead_jaw_y  <= to_unsigned(316, 10);
+
+                show_msg_1 <= '0';
+                show_msg_2 <= '0';
+                show_msg_3 <= '0';
+                text_counter <= 0;
 
                 dead_head_enabled <= '0';
                 dead_jaw_enabled <= '0';
             elsif paused = '0' then
                 case current_state is
-                    
                     when IDLE =>
                         laser_warning_enabled <= '0';
                         laser1_enabled <= '0';
                         laser2_enabled <= '0';
-                        -- Start attack after a short delay (1 second)
-                        if cycle_counter > 60 then 
+                        dead_head_enabled <= '0';
+                        dead_jaw_enabled <= '0';
+
+                        -- Text Timing Sequence
+                        if text_counter < 120 then
+                            show_msg_1 <= '1'; show_msg_2 <= '0'; show_msg_3 <= '0';
+                            text_counter <= text_counter + 1;
+                        elsif text_counter < 240 then
+                            show_msg_1 <= '0'; show_msg_2 <= '1'; show_msg_3 <= '0';
+                            text_counter <= text_counter + 1;
+                        elsif text_counter < 360 then
+                            show_msg_1 <= '0'; show_msg_2 <= '0'; show_msg_3 <= '1';
+                            text_counter <= text_counter + 1;
+                        else
+                            -- All messages done, clear text and begin attack
+                            show_msg_1 <= '0'; show_msg_2 <= '0'; show_msg_3 <= '0';
                             current_state <= WARNING;
                             cycle_counter <= 0;
-                        else
-                            cycle_counter <= cycle_counter + 1;
                         end if;
 
                         dead_head_y <= to_unsigned(202, 10);
+                        dead_head_x <= to_unsigned(280, 10); 
                         dead_jaw_x  <= to_unsigned(306, 10);
                         dead_jaw_y  <= to_unsigned(316, 10);
-
-                        dead_head_enabled <= '0';
-                        dead_jaw_enabled <= '0';
+                                                
                     when WARNING =>
-                        -- 5 second warning (300 frames at 60Hz)
                         if cycle_counter >= 300 then 
                             current_state <= MOVING;
                             cycle_counter <= 0;
-                            laser_warning_counter <= 0; -- reset for next time
+                            laser_warning_counter <= 0; 
                         else
                             cycle_counter <= cycle_counter + 1;
                             
-                            -- Slow Flash Logic (30 frames on, 30 frames off)
                             if laser_warning_counter < 30 then
                                 laser_warning_enabled <= '1';
                             else
                                 laser_warning_enabled <= '0';
                             end if;
                             
-                            -- Loop the flash counter
                             if laser_warning_counter = 59 then
                                 laser_warning_counter <= 0;
                             else
@@ -293,7 +376,6 @@ begin
                         laser1_enabled <= '1';
                         laser2_enabled <= '1';
                         
-                        -- Move lasers toward targets slowly (1 px per frame)
                         if laser1_y_pos < laser1_target_y then 
                             laser1_y_pos <= laser1_y_pos + 1; 
                         end if;
@@ -301,36 +383,39 @@ begin
                             laser2_y_pos <= laser2_y_pos - 1; 
                         end if;
 
-                        -- Transition when both reach center
                         if laser1_y_pos >= laser1_target_y and laser2_y_pos <= laser2_target_y then
                             current_state <= HOLD;
                             cycle_counter <= 0;
                         end if;
 
+                        dead_head_enabled <= '0';
+                        dead_jaw_enabled <= '0';
+                        
                     when HOLD =>
-                        -- Keep them visible and stationary
-                        if cycle_counter >= 300 then -- Stay for 5 seconds (60Hz * 5)
+                        if cycle_counter >= 300 then 
                             current_state <= VICTORY;
                             cycle_counter <= 0;
                         else
                             cycle_counter <= cycle_counter + 1;
                         end if;
 
+                        dead_head_enabled <= '0';
+                        dead_jaw_enabled <= '0';
+                        
                     when VICTORY =>
                         laser1_enabled <= '0';
                         laser2_enabled <= '0';
                         laser_warning_enabled <= '0';
-                        game_finished <= '1'; -- Trigger the win state
+                        game_finished <= '1'; 
                         
                         dead_head_enabled <= '1';
                         dead_jaw_enabled <= '1';
                         
-                        -- Head falls slowly straight down
                         if dead_head_y < 480 then
-                            dead_head_y <= dead_head_y + 1; 
+                            dead_head_y <= dead_head_y + 3;
+                            dead_head_x <= dead_head_x - 1; 
                         end if;
 
-                        -- Jaw falls fast and drifts to the right
                         if dead_jaw_y < 480 then
                             dead_jaw_y <= dead_jaw_y + 3; 
                             dead_jaw_x <= dead_jaw_x + 1; 
@@ -345,8 +430,13 @@ begin
     begin
         if rising_edge(clk25Mhz) then
             if level_four_enable = '1' then
-
-                if dead_head_enabled = '1' and dead_head_transparent = '0' then
+                if show_msg_1 = '1' and msg_1_pixel = '1' then
+                    red <= (others => '1'); green <= (others => '1'); blue <= (others => '1'); -- White
+                elsif show_msg_2 = '1' and msg_2_pixel = '1' then
+                    red <= (others => '1'); green <= (others => '1'); blue <= (others => '1'); -- White
+                elsif show_msg_3 = '1' and msg_3_pixel = '1' then
+                    red <= (others => '1'); green <= (others => '0'); blue <= (others => '0'); -- Red
+                elsif dead_head_enabled = '1' and dead_head_transparent = '0' then
                     red <= dead_head_red; green <= dead_head_green; blue <= dead_head_blue;
                 elsif dead_jaw_enabled = '1' and dead_jaw_transparent = '0' then
                     red <= dead_jaw_red; green <= dead_jaw_green; blue <= dead_jaw_blue;
@@ -361,6 +451,7 @@ begin
                 elsif boss_enabled = '1' and current_state /= VICTORY then
                     red <= boss_red; green <= boss_green; blue <= boss_blue;
                 else
+                    -- DRAW BACKGROUND
                     red <= (others => '0'); green <= (others => '0'); blue <= (others => '0');
                 end if;
             end if;

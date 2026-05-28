@@ -146,6 +146,19 @@ architecture behavior of GameRenderer is
             no_lives_left : out std_logic
         );
     end component LivesRenderer;
+
+    component Cutscene is
+    port (
+        clk25Mhz : IN std_logic;
+        vert_sync : IN std_logic;
+        SW : IN std_logic_vector(9 downto 0);
+        KEY : IN std_logic_vector(3 DOWNTO 0);
+        cutscene_enable : IN std_logic;
+        pixel_row, pixel_column	: IN std_logic_vector(9 DOWNTO 0);
+        red, green, blue : OUT std_logic_vector(3 downto 0);
+        cutscene_end : OUT std_logic
+    );
+    end component Cutscene;
      
     -- Game Logic Values
     signal paused : std_logic := '0';
@@ -249,8 +262,8 @@ architecture behavior of GameRenderer is
     signal last_vert_sync : std_logic := '0';
 
     -- Level Enables (Internal driving signals)
-    signal level_state : integer range 1 to 4 := 1;
-    signal level_one_enabled, level_two_enabled, level_three_enabled, level_four_enabled : std_logic := '0';
+    signal level_state : integer range 1 to 5 := 1;
+    signal level_one_enabled, level_two_enabled, level_three_enabled, level_four_enabled, cutscene_enabled : std_logic := '0';
 
     -- Background Values (Black)
     signal background_red, background_green, background_blue : std_logic_vector(3 downto 0) := "0000";
@@ -258,6 +271,11 @@ architecture behavior of GameRenderer is
     -- Score Values
     signal score_enable : std_logic := '0';
     signal score : integer range 0 to 999 := 0;
+
+    -- Cutscene values
+    signal cutscene_red, cutscene_green, cutscene_blue : std_logic_vector(3 downto 0);
+    signal cutscene_end : std_logic;
+    signal cutscene_has_played : std_logic := '0';
     
     -- TEMPORARY: For score changing
     signal mouse_down : std_logic := '0';
@@ -417,6 +435,20 @@ begin
         paused => paused
     );
 
+    CUTSCENE_COMPONENT : Cutscene port map (
+        clk25Mhz => clk25Mhz,
+        vert_sync => vert_sync,
+        SW => SW,
+        KEY => KEY,
+        cutscene_enable => cutscene_enabled,
+        pixel_row => pixel_row,
+        pixel_column => pixel_column,
+        red => cutscene_red,
+        green => cutscene_green,
+        blue => cutscene_blue,
+        cutscene_end => cutscene_end
+    );
+
     -- Multiplexer
     obstacle_1_enabled  <= level_one_1_enabled when level_state = 1 else
                            level_two_1_enabled when level_state = 2 else
@@ -540,7 +572,11 @@ begin
                 if (SW(2) = '1') then background_blue <= "1111"; else background_blue <= "0000"; end if;
                 
                 -- Render priority: Ball > Score > Pipes > Background
-                if (player_render = '1' and invincibility_flash = '0') then
+                if (cutscene_enabled = '1') then
+                    red <= cutscene_red;
+                    green <= cutscene_green;
+                    blue <= cutscene_blue;
+                elsif (player_render = '1' and invincibility_flash = '0') then
                     red <= ball_red;
 					green <= ball_green;
 					blue <= ball_blue;
@@ -619,7 +655,7 @@ begin
                         if invincibility mod 5 = 0 then
                             invincibility_flash <= not invincibility_flash;
                         end if;
-                    elsif (SW(6) = '0') then
+                    elsif (SW(5) = '0') then
                         invincibility <= 200;
                     else
                         -- reset flash when invincibility runs out
@@ -711,64 +747,98 @@ begin
                 level_two_enabled <= '0';
                 level_three_enabled <= '0';
                 level_four_enabled <= '0';
+                cutscene_enabled <= '0';
+                cutscene_has_played <= '0';
             else
+
+                if cutscene_end = '1' then
+                    cutscene_has_played <= '1';
+                end if;
+
                 case (level_state) is
                     when 1 =>
                         level_one_enabled <= '1';
                         level_two_enabled <= '0';
                         level_three_enabled <= '0';
                         level_four_enabled <= '0';
+                        cutscene_enabled <= '0';
                     when 2 =>
                         level_one_enabled <= '0';
                         level_two_enabled <= '1';
                         level_three_enabled <= '0';
                         level_four_enabled <= '0';
+                        cutscene_enabled <= '0';
                     when 3 =>
                         level_one_enabled <= '0';
                         level_two_enabled <= '0';
                         level_three_enabled <= '1';
                         level_four_enabled <= '0';
-                    when others =>
+                        cutscene_enabled <= '0';
+                    when 4 =>
                         level_one_enabled <= '0';
                         level_two_enabled <= '0';
                         level_three_enabled <= '0';
                         level_four_enabled <= '1';
+                        cutscene_enabled <= '0';
+                    when 5 => -- CUTSCENE STATE
+                        level_one_enabled <= '0';
+                        level_two_enabled <= '0';
+                        level_three_enabled <= '0';
+                        level_four_enabled <= '0';
+                        cutscene_enabled <= '1';
+                    when others =>
+                        level_one_enabled <= '0';
+                        level_two_enabled <= '0';
+                        level_three_enabled <= '0';
+                        level_four_enabled <= '0';
+                        cutscene_enabled <= '0';
                 end case;
 
                 -- Manual level selection via switches
-                dip_switch := SW(9) & SW(8) & SW(7);
+                dip_switch := SW(9) & SW(8) & SW(7) & SW(6);
                 case (dip_switch) is
-                    when "001" =>
+                    when "0001" =>
                         level_state <= 1;
                         manual_level_change := '1';
-                    when "011" =>
+                    when "0011" =>
                         level_state <= 2;
                         manual_level_change := '1';
-                    when "101" =>
+                    when "0101" =>
                         level_state <= 3;
                         manual_level_change := '1';
-                    when "111" =>
+                    when "0110" =>
                         level_state <= 4;
+                        manual_level_change := '1';
+                    when "0111" => 
+                        -- Added a debug switch combo for testing the cutscene
+                        level_state <= 5;
                         manual_level_change := '1';
                     when others =>
                         manual_level_change := '0';
-                end case; 
+                end case;
 
                 -- Automated level progression based on score
                 if manual_level_change = '0' then
-                    case (score) is
-                        when 0 to 10 =>
-                            level_state <= 1; -- Level One
-                        when 11 to 160 =>
-                            level_state <= 2; -- Level Two
-                        when 161 to 310 =>
-                            level_state <= 3; -- Level Three
-                        when others =>
-                            level_state <= 4; -- Level Four
-                    end case;
-                elsif training_mode = '1' then
-                  -- In training mode, override to only level one for consistent testing conditions
-                  level_state <= 1;
+                    if training_mode = '1' then
+                        -- In training mode, override to only level one
+                        level_state <= 1;
+                    else
+                        case (score) is
+                            when 0 to 10 =>
+                                level_state <= 1; -- Level One
+                            when 11 to 160 =>
+                                -- Intercept Level 2 to play the cutscene first
+                                if cutscene_has_played = '0' then
+                                    level_state <= 5; -- Play Cutscene
+                                else
+                                    level_state <= 2; -- Proceed to Level Two
+                                end if;
+                            when 161 to 310 =>
+                                level_state <= 3; -- Level Three
+                            when others =>
+                                level_state <= 4; -- Level Four
+                        end case;
+                    end if;
                 end if;
             end if;
         end if;

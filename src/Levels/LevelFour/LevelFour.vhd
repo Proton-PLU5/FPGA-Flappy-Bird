@@ -263,7 +263,7 @@ begin
         pixel_column => pixel_column,
         pixel_on => msg_1_pixel, 
         text_row => 240,
-        text_col_start => 25
+        text_col_start => 100
     );
 
     MSG_2 : title_display 
@@ -278,13 +278,13 @@ begin
         pixel_column => pixel_column,
         pixel_on => msg_2_pixel, 
         text_row => 240,
-        text_col_start => 25
+        text_col_start => 100
     );
 
     MSG_3 : title_display 
     generic map (
-        text_string => "HOWEVER, YOU WON'T SURVIVE THIS!",
-        text_size => 32,
+        text_string => "HOWEVER, YOU WONT SURVIVE THIS!",
+        text_size => 31,
         size => 3
     )
     port map (
@@ -293,7 +293,7 @@ begin
         pixel_column => pixel_column,
         pixel_on => msg_3_pixel, 
         text_row => 240,
-        text_col_start => 8
+        text_col_start => 12
     );
     
 

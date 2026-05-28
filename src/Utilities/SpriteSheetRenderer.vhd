@@ -51,10 +51,10 @@ begin
             -- 1. Determine Sheet Properties
             -- NOTE: sheet_total_width is the width of the ENTIRE sprite sheet image
             case sprite_id is
-                when 10 => -- Example: Your Growing Sprite Sheet
-                    sheet_total_width := GROWING_SPRITE_SHEET_WIDTH;
+                when 0 => -- Example: Your Growing Sprite Sheet
+                    sheet_total_width := SKELETRON_FULL_SHEET_WIDTH;
                 when others =>
-                    sheet_total_width := FRAME_WIDTH; -- Default to single frame
+                    sheet_total_width := SKELETRON_FULL_SHEET_WIDTH; -- Default to single frame
             end case;
 
             scaled_w := FRAME_WIDTH * SCALE_FACTOR;
@@ -74,9 +74,9 @@ begin
 
                 -- 5. Fetch Palette Data
                 case sprite_id is
-                    when 10 =>
-                        palette_index := GROWING_SPRITE_DATA(addr);
-                        color := GROWING_SPRITE_PALETTE(palette_index);
+                    when 0 =>
+                        palette_index := SKELETRON_FULL_SPRITE_DATA(addr);
+                        color := SKELETRON_FULL_SPRITE_PALETTE(palette_index);
                     when others =>
                         palette_index := 0;
                         color := x"000";

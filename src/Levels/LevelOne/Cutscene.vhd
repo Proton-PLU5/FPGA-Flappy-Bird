@@ -91,8 +91,8 @@ begin
 
     MSG_ONE : title_display
     generic map (
-        text_string => "SKELETRON HAS AWAKENED!",
-        text_size => 23,
+        text_string => "SKELEKING HAS AWAKENED",
+        text_size => 22,
         SIZE => 3
     )
     port map (
@@ -101,7 +101,7 @@ begin
         pixel_column => pixel_column,
         pixel_on => text_enabled,
         text_row => 300,
-        text_col_start => 30
+        text_col_start => 144
     );
 
     LOGIC_PROCESS : process (vert_sync)

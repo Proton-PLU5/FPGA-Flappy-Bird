@@ -228,21 +228,43 @@ begin
                 gap_center := resize(pipe_top_y_pos, 11) + resize(pipe_bottom_y_pos, 11);
                 gap_center := '0' & gap_center(10 downto 1);
 
-                -- accelerated growth
+                -- accelerated growth with safe directional limits
                 if growth_enabled = '1' and is_visible = '1' then
-                    if gap_center < resize(player_latched_y_pos, 11) - 4 then
-                        -- move gap down: check bottom edge
-                        if pipe_bottom_y_pos < to_unsigned(SCREEN_H - 10, 10) then
-                            pipe_top_y_pos    <= pipe_top_y_pos + GROWTH_SPEED;
-                            pipe_bottom_y_pos <= pipe_bottom_y_pos + GROWTH_SPEED;
+
+                    -------------------------------------------------
+                    -- TOP PIPE ONLY (grows downward)
+                    -------------------------------------------------
+                    if part_to_render = '1' then
+
+                        if gap_center < resize(player_latched_y_pos, 11) - 4 then
+
+                            if to_integer(pipe_top_y_pos) + to_integer(GROWTH_SPEED) < SCREEN_H - 100 then
+
+                                pipe_top_y_pos <= pipe_top_y_pos + GROWTH_SPEED;
+                                pipe_bottom_y_pos <= pipe_bottom_y_pos + GROWTH_SPEED;
+
+                            end if;
+
                         end if;
-                    elsif gap_center > resize(player_latched_y_pos, 11) + 4 then
-                        -- move gap up: check top edge
-                        if pipe_top_y_pos > to_unsigned(10, 10) then
-                            pipe_top_y_pos    <= pipe_top_y_pos - GROWTH_SPEED;
-                            pipe_bottom_y_pos <= pipe_bottom_y_pos - GROWTH_SPEED;
+
+                    -------------------------------------------------
+                    -- BOTTOM PIPE ONLY (grows upward)
+                    -------------------------------------------------
+                    else
+
+                        if gap_center > resize(player_latched_y_pos, 11) + 4 then
+
+                            if to_integer(pipe_top_y_pos) > to_integer(GROWTH_SPEED) + 100 then
+
+                                pipe_top_y_pos <= pipe_top_y_pos - GROWTH_SPEED;
+                                pipe_bottom_y_pos <= pipe_bottom_y_pos - GROWTH_SPEED;
+
+                            end if;
+
                         end if;
+
                     end if;
+
                 end if;
             end if;
         end if;

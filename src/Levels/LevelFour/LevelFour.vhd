@@ -275,7 +275,7 @@ begin
         pixel_column => pixel_column,
         pixel_on => msg_1_pixel, 
         text_row => 240,
-        text_col_start => 100
+        text_col_start => 200
     );
 
     MSG_2 : title_display 
@@ -290,7 +290,7 @@ begin
         pixel_column => pixel_column,
         pixel_on => msg_2_pixel, 
         text_row => 240,
-        text_col_start => 100
+        text_col_start => 200
     );
 
     MSG_3 : title_display 
@@ -305,7 +305,7 @@ begin
         pixel_column => pixel_column,
         pixel_on => msg_3_pixel, 
         text_row => 240,
-        text_col_start => 12
+        text_col_start => 50
     );
 
     TILE_RENDERER : TileRenderer port map (

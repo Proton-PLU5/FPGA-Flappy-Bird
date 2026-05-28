@@ -254,7 +254,7 @@ begin
 
                         if gap_center > resize(player_latched_y_pos, 11) + 4 then
 
-                            if to_integer(pipe_top_y_pos) > to_integer(GROWTH_SPEED) + 100 then
+                            if to_integer(pipe_bottom_y_pos) > to_integer(GROWTH_SPEED) + 100 then
 
                                 pipe_top_y_pos <= pipe_top_y_pos - GROWTH_SPEED;
                                 pipe_bottom_y_pos <= pipe_bottom_y_pos - GROWTH_SPEED;

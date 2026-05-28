@@ -106,6 +106,11 @@ architecture behavior of LevelTwo is
     signal lfsr_out      : std_logic_vector(7 downto 0);
 
     signal start_rendering_pipe_2 : std_logic := '0';
+
+    -- Clock domain crossing edge trackers
+    signal pipe_1_end_q : std_logic := '0';
+    signal pipe_2_end_q : std_logic := '0';
+
 begin
     pipe_1_enabled_s <= level_two_enable and not paused;
     pipe_2_enabled_s <= level_two_enable and not paused and start_rendering_pipe_2;
@@ -183,34 +188,53 @@ begin
     CLOCK_PROCESS : process(clk25Mhz)
     begin
         if rising_edge(clk25Mhz) then
-            -- Default: Release resets (Level One style)
             if (level_two_enable = '1') then
-                pipe_1_reset <= '0';
-                pipe_2_reset <= '0';
+                
+                -- Update history tracking filters every cycle
+                pipe_1_end_q <= pipe_1_end_reached;
+                pipe_2_end_q <= pipe_2_end_reached;
                 
                 -- STAGGER TRIGGER: Same as Level One
                 if (pipe_1_x_pos_s < to_unsigned(320, 11)) then
                     start_rendering_pipe_2 <= '1';
                 end if;
 
-                -- PIPE 1 HANDSHAKE
+                -------------------------------------------------
+                -- PIPE 1 HANDSHAKE (CDC PROTECTED)
+                -------------------------------------------------
                 if pipe_1_end_reached = '1' then
-                    pipe_1_reset <= '1'; 
-                    pipe_1_height <= to_integer(unsigned('0' & lfsr_out(7 downto 1))) + 160;
-                    pipe_1_part_to_render <= lfsr_out(7); 
+                    pipe_1_reset <= '1'; -- Hold reset high so slow vert_sync domain catches it
+                    
+                    -- ONLY sample the LFSR on the very first 25MHz cycle it hits the wall!
+                    if pipe_1_end_q = '0' then 
+                        pipe_1_height <= to_integer(unsigned('0' & lfsr_out(7 downto 1))) + 160;
+                        pipe_1_part_to_render <= lfsr_out(7); 
+                    end if;
+                else
+                    pipe_1_reset <= '0';
                 end if;
 
-                -- PIPE 2 HANDSHAKE
+                -------------------------------------------------
+                -- PIPE 2 HANDSHAKE (CDC PROTECTED)
+                -------------------------------------------------
                 if pipe_2_end_reached = '1' then
-                    pipe_2_reset <= '1'; 
-                    pipe_2_height <= to_integer(unsigned('0' & lfsr_out(7 downto 1))) + 160;
-                    pipe_2_part_to_render <= not lfsr_out(7); 
+                    pipe_2_reset <= '1'; -- Hold reset high so slow vert_sync domain catches it
+                    
+                    -- ONLY sample the LFSR on the very first 25MHz cycle it hits the wall!
+                    if pipe_2_end_q = '0' then 
+                        pipe_2_height <= to_integer(unsigned('0' & lfsr_out(7 downto 1))) + 160;
+                        pipe_2_part_to_render <= not lfsr_out(7); 
+                    end if;
+                else
+                    pipe_2_reset <= '0';
                 end if;
 
             else
                 -- SYSTEM RESET (Level disabled or Title Screen)
                 pipe_1_reset <= '1'; 
                 pipe_2_reset <= '1';
+                pipe_1_end_q <= '0';
+                pipe_2_end_q <= '0';
                 start_rendering_pipe_2 <= '0';
             end if;
         end if;

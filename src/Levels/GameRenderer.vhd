@@ -596,7 +596,7 @@ begin
                         invincibility <= invincibility - 1;
 
                         -- Invincibility flash effect
-                        if invincibility mod 5 = 0 then
+                        if invincibility mod 2 = 0 then
                             invincibility_flash <= not invincibility_flash;
                         end if;
                     elsif (SW(6) = '1') then

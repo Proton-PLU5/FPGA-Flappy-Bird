@@ -105,7 +105,10 @@ begin
             -- Check if the current pixel is within the sprite's bounding box
             -- very simple rectangle bb check.
             if screen_x >= sprite_x and
-               screen_x < sprite_x + width then
+               screen_x < sprite_x + width and
+               screen_y >= sprite_y and
+               screen_y < sprite_y + height then
+
                 -- Calculate the local pixel coordinates within the sprite
                 local_x := screen_x - sprite_x;
 

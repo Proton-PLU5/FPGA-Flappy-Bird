@@ -6,6 +6,7 @@ entity WinRenderer is
     port (
         clk25Mhz : IN std_logic;
         mouse_left : IN std_logic;
+        KEY : IN std_logic_vector(3 DOWNTO 0);
         vert_sync, horz_sync : IN std_logic;
         pixel_row, pixel_column : IN std_logic_vector(9 DOWNTO 0);
         red, green, blue : OUT std_logic_vector(3 downto 0);
@@ -36,7 +37,7 @@ architecture Behavioral of WinRenderer is
 
     signal win_enable : std_logic := '0';
     signal tooltip_enable : std_logic := '0';
-    signal last_mouse_left : std_logic := '0';
+    signal last_key_0_state : std_logic := '1';
 
     begin
 
@@ -49,7 +50,7 @@ architecture Behavioral of WinRenderer is
         text_col_start => 208
     );
 
-    TOOL_TIP : title_display generic map (text_string => "CLICK TO RETURN", text_size => 15, SIZE => 2) port map (
+    TOOL_TIP : title_display generic map (text_string => "KEY 0 TO RETURN", text_size => 15, SIZE => 2) port map (
         clk => clk25Mhz,
         pixel_row => pixel_row,
         pixel_column => pixel_column,
@@ -77,7 +78,7 @@ architecture Behavioral of WinRenderer is
                     blue <= "0000";
                 end if;
 
-				if mouse_left = '1' and last_mouse_left = '0' then
+				if KEY(0) = '0' and last_key_0_state = '1' then
 					request_back <= '1';
 				else
 				    request_back <= '0';
@@ -88,7 +89,7 @@ architecture Behavioral of WinRenderer is
                 request_back <= '0';
             end if; 
 
-            last_mouse_left <= mouse_left;
+            last_key_0_state <= KEY(0);
 
         end if;
     end process;

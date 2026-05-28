@@ -29,8 +29,8 @@ architecture behavior of LevelOne is
             clk, vert_sync, mouse_left  : in std_logic;
             pixel_row, pixel_column     : in std_logic_vector(9 downto 0);
             red, green, blue            : out std_logic_vector(3 downto 0);
-            height                      : in integer range 0 to 480; -- Height of the centre of the gap in the pipe
-            gap                         : in integer range 0 to 480; -- This is the size of the gap in the pipe
+            height                      : in integer range 0 to 480; 
+            gap                         : in integer range 0 to 480; 
             reset                       : in std_logic;
             end_reached                 : out std_logic;
             x_pos                       : out unsigned(10 downto 0);
@@ -80,6 +80,8 @@ architecture behavior of LevelOne is
     signal start_rendering_pipe_2 : std_logic := '0';
 
 begin
+
+    -- Pause logic: If paused, disable both pipes
     pipe_1_enabled_s <= level_one_enable;
     pipe_2_enabled_s <= level_one_enable and start_rendering_pipe_2;
 
@@ -107,7 +109,7 @@ begin
     );
 
     PIPE2_COMPONENT : Pipe
-        generic map ( START_OFFSET => 0 ) -- FIX: Changed from PIPE_GAP_X to 0
+        generic map ( START_OFFSET => 0 ) 
         port map (
         clk => clk25Mhz,
         vert_sync => vert_sync,
@@ -139,14 +141,16 @@ begin
     CLOCK_PROCESS : process(clk25Mhz)
     begin
         if rising_edge(clk25Mhz) then
+
             if level_one_enable = '1' then
                 pipe_1_reset <= '0';
                 pipe_2_reset <= '0';
                 
+                -- At midpoint render second pipe
                 if (pipe_1_x_pos_s < to_unsigned(320, 11)) then
                     start_rendering_pipe_2 <= '1';
                 end if;
-
+                
                 if pipe_1_end_reached = '1' then
                     pipe_1_height <= to_integer(unsigned(lfsr_out)) * 280 / 256 + 100;
                     pipe_1_reset <= '1';

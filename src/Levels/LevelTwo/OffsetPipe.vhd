@@ -244,7 +244,7 @@ begin
 
                 -- safe center calc (no DSP inference)
                 gap_center := resize(pipe_top_y_pos, 11) + resize(pipe_bottom_y_pos, 11);
-                gap_center := gap_center(10 downto 1);
+                gap_center := '0' & gap_center(10 downto 1);
 
                 -- growth (CLAMPED)
                 if growth_enabled = '1' then

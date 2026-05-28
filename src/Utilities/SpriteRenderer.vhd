@@ -38,15 +38,15 @@ begin
     sprite_y <= to_integer(unsigned(start_y));
 
     process(clk)
-        variable screen_x : integer range 0 to 639;
-        variable screen_y : integer range 0 to 479;
-        variable local_x : integer range 0 to 639;
-        variable local_y : integer range 0 to 479;
+        variable screen_x : integer range 0 to 640;
+        variable screen_y : integer range 0 to 480;
+        variable local_x : integer range 0 to 640;
+        variable local_y : integer range 0 to 480;
         variable addr : integer;
         variable palette_index : integer;
         variable color : std_logic_vector(11 downto 0);
-        variable width : integer range 0 to 639;
-        variable height : integer range 0 to 479;
+        variable width : integer range 0 to 640;
+        variable height : integer range 0 to 480;
     begin
 
         if rising_edge(clk) then

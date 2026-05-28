@@ -44,7 +44,8 @@ architecture behaviour of TitleRenderer is
             reset                       : in std_logic;
             enabled                     : in std_logic;
             tile_id                     : in integer range 0 to 255;
-				transparent : out std_logic
+            offset                      : in  UNSIGNED(5 downto 0);
+			transparent : out std_logic
         );
     end component TileRenderer;
 
@@ -136,7 +137,8 @@ begin
         reset => '0',
         enabled => enabled,
         tile_id => 5,
-		  transparent => open
+        offset => to_unsigned(0, 6),
+        transparent => open
     );
 			
 

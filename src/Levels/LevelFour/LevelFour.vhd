@@ -78,6 +78,7 @@ architecture behavior of LevelFour is
             reset                       : in std_logic;
             enabled                     : in std_logic;
             tile_id                     : in integer range 0 to 255;
+            offset                      : in  UNSIGNED(5 downto 0);
 			transparent : out std_logic
         );
     end component TileRenderer;
@@ -345,6 +346,7 @@ begin
         enabled => level_four_enable,
         tile_id => 10,
 		transparent => background_transparent
+        offset => to_unsigned(0, 6)
     );
     
 

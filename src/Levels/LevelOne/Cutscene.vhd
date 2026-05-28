@@ -64,30 +64,10 @@ architecture behavior of Cutscene is
     signal background_red, background_green, background_blue : std_logic_vector(3 downto 0);
     signal background_transparent : std_logic;
 
-    signal text_enabled : std_logic := '0';
+    signal text_enabled : std_logic := '1';
 
-    signal frame_counter : integer range 0 to 100 := 0; -- Counts frames for animation timing
+    signal frame_counter : integer range 0 to 101 := 0; -- Counts frames for animation timing
 begin
-
-    CUTSCENE_SPRITE : SpriteSheetRenderer 
-    generic map (
-        SCALE_FACTOR => 2, -- Adjust as needed
-        FRAME_WIDTH => 80, -- Adjust based on your sprite sheet
-        FRAME_HEIGHT => 96
-    )
-    port map (
-        clk => clk25Mhz,
-        pixel_row => pixel_row,
-        pixel_column => pixel_column,
-        start_x => CONV_STD_LOGIC_VECTOR(240, 11), -- X position of the boss
-        start_y => CONV_STD_LOGIC_VECTOR(144, 11), -- Y position
-        frame_index => boss_frame_index,
-        sprite_id => 0, -- Your cutscene sprite
-        red => boss_red,
-        green => boss_green,
-        blue => boss_blue,
-        transparent => boss_transparent
-    );
 
     MSG_ONE : title_display
     generic map (
@@ -108,25 +88,14 @@ begin
     begin
         if rising_edge(vert_sync) then
             if (cutscene_enable = '1') then 
-                frame_counter <= frame_counter + 2;
-                if frame_counter >= 10 then -- Adjust timing as needed
-                    if (boss_frame_index >= 15) then
-                        if frame_counter >= 50 then -- Hold on last frame for a bit
-                            cutscene_end <= '1';
-                        else
-                            frame_counter <= frame_counter + 1; -- Increment to create a pause before ending cutscene
-                            cutscene_end <= '0';
-                        end if;
-                    else 
-                        cutscene_end <= '0';
-                        frame_counter <= 0;
-                        boss_frame_index <= boss_frame_index + 1;
-                    end if;    
+                if (frame_counter >= 100) then
+                    cutscene_end <= '1';
+                else
+                    frame_counter <= frame_counter + 1;
                 end if;
             else
                 cutscene_end <= '0';
                 frame_counter <= 0;
-                boss_frame_index <= 0; -- Reset animation
             end if;
         end if;
     end process;

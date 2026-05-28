@@ -55,7 +55,24 @@ architecture behavior of BossRenderer is
         CONV_STD_LOGIC_VECTOR(lower_jaw_y_offset_base * SCALE_FACTOR, 10);
 
     constant lower_jaw_anim_threshold : integer := 12; -- Number of clock cycles for lower jaw animation
+
+    signal upper_x_clocked : std_logic_vector(10 downto 0) := (others => '0');
+    signal upper_y_clocked : std_logic_vector(10 downto 0) := (others => '0');
+    signal lower_x_clocked : std_logic_vector(10 downto 0) := (others => '0');
+    signal lower_y_clocked : std_logic_vector(10 downto 0) := (others => '0');
 begin
+
+    PIPELINE_COORDS : process(clk25Mhz)
+    begin
+        if rising_edge(clk25Mhz) then
+            upper_x_clocked <= '0' & x_pos;
+            upper_y_clocked <= '0' & y_pos;
+            
+            lower_x_clocked <= ('0' & x_pos) + lower_jaw_x_offset;
+            lower_y_clocked <= ('0' & y_pos) + lower_jaw_y_offset;
+        end if;
+    end process PIPELINE_COORDS;
+
     BOSS_UPPER_JAW : SpriteRenderer 
     generic map (
         SCALE_FACTOR => SCALE_FACTOR
@@ -64,9 +81,9 @@ begin
         clk => clk25Mhz,
         pixel_row => pixel_row,
         pixel_column => pixel_column,
-        start_x => '0' & x_pos,
-        start_y => '0' & y_pos,
-        sprite_id => 0, -- Assuming 0 is the ID for the boss sprite
+        start_x => upper_x_clocked,
+        start_y => upper_y_clocked,
+        sprite_id => 0, 
         flip_y => '0',
         red => red_upper_jaw,
         green => green_upper_jaw,
@@ -82,9 +99,9 @@ begin
         clk => clk25Mhz,
         pixel_row => pixel_row,
         pixel_column => pixel_column,
-        start_x => '0' & x_pos + lower_jaw_x_offset, -- Adjust x position for lower jaw
-        start_y => '0' & y_pos + lower_jaw_y_offset, -- Adjust y position for lower jaw
-        sprite_id => 1, -- Assuming 1 is the ID for the boss lower jaw sprite
+        start_x => lower_x_clocked,
+        start_y => lower_y_clocked,
+        sprite_id => 1, 
         flip_y => '0',
         red => red_lower_jaw,
         green => green_lower_jaw,

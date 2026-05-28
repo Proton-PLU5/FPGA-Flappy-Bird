@@ -119,52 +119,63 @@ begin
                     local_y := screen_y - sprite_y;
                 end if;
 
-                -- used to search thru the 1d array to find the pixel pallete data.
+                -- Select the colors using the sprite we are rendering
+                -- Addr is used to search thru the 1d array to find the pixel pallete data.
                 -- cuz the data is actually 1d array and not a 2d array.
                 -- so we do some math to emulate 2d indexing.
-                addr := local_y * width + local_x;
-
-                -- Select the colors using the sprite we are rendering
                 case sprite_id is
                     when 0 =>
                         palette_index := SKELETRON_HEAD_DATA(addr);
                         color := SKELETRON_HEAD_PALETTE(palette_index);
+                        addr := local_y * SKELETRON_HEAD_WIDTH + local_x;
                     when 1 =>
                         palette_index := SKELETRON_JAW_DATA(addr);
                         color := SKELETRON_JAW_PALETTE(palette_index);
+                        addr := local_y * SKELETRON_JAW_WIDTH + local_x;
                     when 2 =>
                         palette_index := FLAPPY_BIRD_DATA(addr);
                         color := FLAPPY_BIRD_PALETTE(palette_index);
+                        addr := local_y * FLAPPY_BIRD_WIDTH + local_x;
                     when 3 =>
                         palette_index := FULL_HEART_DATA(addr);
                         color := FULL_HEART_PALETTE(palette_index);
+                        addr := local_y * FULL_HEART_WIDTH + local_x;
                     when 4 =>
                         palette_index := EMPTY_HEART_DATA(addr);
                         color := EMPTY_HEART_PALETTE(palette_index);
+                        addr := local_y * EMPTY_HEART_WIDTH + local_x;
                     when 5 =>
                         palette_index := BLUE_BRICK_TILE_DATA(addr);
                         color := BLUE_BRICK_TILE_PALETTE(palette_index);
+                        addr := local_y * BLUE_BRICK_TILE_WIDTH + local_x;
                     when 6 =>
                         palette_index := LASER_BEAM_WARNING_DATA(addr);
                         color := LASER_BEAM_WARNING_PALETTE(palette_index);
+                        addr := local_y * LASER_BEAM_WARNING_WIDTH + local_x;
                     when 7 =>
                         palette_index := LASER_BEAM_DATA(addr);
                         color := LASER_BEAM_PALETTE(palette_index);
+                        addr := local_y * LASER_BEAM_WIDTH + local_x;
                     when 8 =>
                         palette_index := L3SKULL_DATA(addr);
                         color := L3SKULL_PALETTE(palette_index);
+                        addr := local_y * L3SKULL_WIDTH + local_x;
                     when 9 =>
                         palette_index := POWERUP_DATA(addr);
                         color := POWERUP_PALETTE(palette_index);
+                        addr := local_y * POWERUP_WIDTH + local_x;
                     when 10 =>
                         palette_index := BONE_BODY_DATA(addr);
                         color := BONE_BODY_PALETTE(palette_index);
+                        addr := local_y * BONE_BODY_WIDTH + local_x;
                     when 11 =>
                         palette_index := BONE_CAP_DATA(addr);
                         color := BONE_CAP_PALETTE(palette_index);
+                        addr := local_y * BONE_CAP_WIDTH + local_x;
                     when others =>
                         palette_index := SKELETRON_HEAD_DATA(addr);
                         color := SKELETRON_HEAD_PALETTE(palette_index);
+                        addr := 0;
                 end case;
 
                 -- Check for transparency (palette index 0 is transparent)

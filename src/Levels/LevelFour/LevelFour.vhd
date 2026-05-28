@@ -262,7 +262,7 @@ begin
         pixel_row => pixel_row,
         pixel_column => pixel_column,
         pixel_on => msg_1_pixel, 
-        text_row => 100,
+        text_row => 240,
         text_col_start => 25
     );
 
@@ -277,7 +277,7 @@ begin
         pixel_row => pixel_row,
         pixel_column => pixel_column,
         pixel_on => msg_2_pixel, 
-        text_row => 100,
+        text_row => 240,
         text_col_start => 25
     );
 
@@ -292,7 +292,7 @@ begin
         pixel_row => pixel_row,
         pixel_column => pixel_column,
         pixel_on => msg_3_pixel, 
-        text_row => 300,
+        text_row => 240,
         text_col_start => 8
     );
     

@@ -80,14 +80,11 @@ architecture behavior of LevelFour is
     signal dead_jaw_red, dead_jaw_green, dead_jaw_blue : std_logic_vector(3 downto 0);
     signal dead_jaw_transparent : std_logic;
 
-    -- Starting Y for Head = 202
-    signal dead_head_y : unsigned(9 downto 0) := to_unsigned(202, 10);
-    signal dead_head_x : unsigned(9 downto 0) := to_unsigned(280, 10);
+    signal dead_head_y : unsigned(9 downto 0) := to_unsigned(144, 10);
+    signal dead_head_x : unsigned(9 downto 0) := to_unsigned(240, 10);
 
-    -- Starting X for Jaw = 280 + (13 base offset * 2 scale) = 306
-    -- Starting Y for Jaw = 202 + (57 base offset * 2 scale) = 316
-    signal dead_jaw_x : unsigned(9 downto 0) := to_unsigned(306, 10);
-    signal dead_jaw_y : unsigned(9 downto 0) := to_unsigned(316, 10);
+    signal dead_jaw_x : unsigned(9 downto 0) := to_unsigned(266, 10);
+    signal dead_jaw_y : unsigned(9 downto 0) := to_unsigned(258, 10);
     
     -- X = 320 (Screen Center) - 40 (Half Boss Width) = 280
     -- Y = 240 (Screen Center) - 38 (Half Boss Height) = 202
@@ -307,10 +304,11 @@ begin
                 game_finished <= '0';
                 laser1_y_pos <= (others => '0');
                 laser2_y_pos <= to_unsigned(L2_START_INT, 10);
-                dead_head_y <= to_unsigned(202, 10);
-                dead_head_x <= to_unsigned(280, 10);
-                dead_jaw_x  <= to_unsigned(306, 10);
-                dead_jaw_y  <= to_unsigned(316, 10);
+
+                dead_head_y <= to_unsigned(144, 10);
+                dead_head_x <= to_unsigned(240, 10);
+                dead_jaw_x  <= to_unsigned(266, 10);
+                dead_jaw_y  <= to_unsigned(258, 10);
 
                 show_msg_1 <= '0';
                 show_msg_2 <= '0';
@@ -345,10 +343,10 @@ begin
                             cycle_counter <= 0;
                         end if;
 
-                        dead_head_y <= to_unsigned(202, 10);
-                        dead_head_x <= to_unsigned(280, 10); 
-                        dead_jaw_x  <= to_unsigned(306, 10);
-                        dead_jaw_y  <= to_unsigned(316, 10);
+                        dead_head_y <= to_unsigned(144, 10);
+                        dead_head_x <= to_unsigned(240, 10); 
+                        dead_jaw_x  <= to_unsigned(266, 10);
+                        dead_jaw_y  <= to_unsigned(258, 10);
                                                 
                     when WARNING =>
                         if cycle_counter >= 300 then 

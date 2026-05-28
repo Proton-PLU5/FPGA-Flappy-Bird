@@ -106,23 +106,6 @@ begin
         blue => boss_blue,
         transparent => boss_transparent
     );
-    
-    BACKGROUND_SPRITE : SpriteRenderer
-    generic map (
-        SCALE_FACTOR => 1
-    )
-    port map (
-        clk => clk25Mhz,
-        pixel_row => pixel_row,
-        pixel_column => pixel_column,
-        start_x => (others => '0'), -- Background starts at (0,0)
-        start_y => (others => '0'),
-        sprite_id => 10, -- Your background sprite
-        red => background_red,
-        green => background_green,
-        blue => background_blue,
-        transparent => background_transparent
-    );
 
     MSG_ONE : title_display
     generic map (
@@ -173,9 +156,9 @@ begin
                 green <= "1111";
                 blue <= "1111";
             else
-                red <= background_red;
-                green <= background_green;
-                blue <= background_blue;
+                red <= "0000"; -- Black background
+                green <= "0000";
+                blue <= "0000";
             end if;
         end if;
     end process;

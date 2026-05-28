@@ -75,7 +75,7 @@ architecture behavior of LevelFour is
     constant L1_TARGET_INT : integer := Y_CENTER - GAP_HALF - SPRITE_HEIGHT - 30;
     
 	 -- Bottom laser top edge = 315 (start_y = 315)
-    constant L2_TARGET_INT : integer := Y_CENTER + GAP_HALF - 30;
+    constant L2_TARGET_INT : integer := Y_CENTER + GAP_HALF + 30;
 	 
 	 
     -- Keep bottom laser fully on-screen at spawn

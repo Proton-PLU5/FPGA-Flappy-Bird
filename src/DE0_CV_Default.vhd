@@ -61,8 +61,15 @@ architecture behavior of DE0_CV_Default is
                SevenSeg_out : out std_logic_vector(6 downto 0));
     end component;
 
-  signal Clk25Mhz : std_logic;
-  signal text_on : std_logic;
+    component BCD_Counter is
+        port (
+            Clk, Reset, Enable, Direction : in std_logic;
+            Q_Out : out std_logic_vector(3 downto 0)
+        );
+    end component;
+
+    signal Clk25Mhz : std_logic;
+    signal text_on : std_logic;
 
     signal red_out, blue_out, green_out : std_logic_vector(3 downto 0) := (others => '0');
     signal pixel_row, pixel_column : std_logic_vector(9 downto 0);
@@ -75,7 +82,6 @@ architecture behavior of DE0_CV_Default is
     signal vert_sync_out : std_logic;
     signal horz_sync_out : std_logic;
         
-    signal count : integer range 0 to 999 := 0;
     signal ones : std_logic_vector(3 downto 0);
     signal tens : std_logic_vector(3 downto 0);
     signal hundreds : std_logic_vector(3 downto 0);
@@ -85,7 +91,15 @@ architecture behavior of DE0_CV_Default is
 
     signal pll_locked : std_logic;
 
+    signal ones_enable     : std_logic;
+    signal tens_enable     : std_logic;
+    signal hundreds_enable : std_logic;
+    signal ones_rollover   : std_logic;
+    signal tens_rollover   : std_logic;
+
 begin
+    ones_rollover <= '1' when ones = "1001" else '0';
+    tens_rollover <= '1' when tens = "1001" else '0';
   
     PLL_COMPONENT : PLL port map (
         refclk => CLOCK_50,
@@ -145,22 +159,54 @@ begin
         green => green,
         blue => blue
     );
+
+    ONES_COUNTER : BCD_Counter
+    port map (
+        Clk       => CLOCK_50,
+        Reset     => '0',
+        Enable    => ones_enable,
+        Direction => '0',
+        Q_Out     => ones
+    );
+
+    TENS_COUNTER : BCD_Counter
+    port map (
+        Clk       => CLOCK_50,
+        Reset     => '0',
+        Enable    => tens_enable,
+        Direction => '0',
+        Q_Out     => tens
+    );
+
+    HUNDREDS_COUNTER : BCD_Counter
+    port map (
+        Clk       => CLOCK_50,
+        Reset     => '0',
+        Enable    => hundreds_enable,
+        Direction => '0',
+        Q_Out     => hundreds
+    );
   
     -- Debounced click process to step score tracking manually on your 7-Segments
     process (CLOCK_50)
     begin
-         if rising_edge(CLOCK_50) then
+        if rising_edge(CLOCK_50) then
+            ones_enable <= '0';
+            tens_enable <= '0';
+            hundreds_enable <= '0';
             if (left_button = '1' and mouse_down = '0') then
-                if count = 999 then
-                    count <= 0;
-                else
-                    count <= count + 1;
+                ones_enable <= '1';
+                if ones_rollover = '1' then
+                    tens_enable <= '1';
+                    if tens_rollover = '1' then
+                        hundreds_enable <= '1';
+                    end if;
                 end if;
                 mouse_down <= '1';
             elsif (left_button = '0') then
                 mouse_down <= '0';
             end if;
-         end if;
+        end if;
     end process;
 
     VGA_R <= red_out;
@@ -168,7 +214,4 @@ begin
     VGA_B <= blue_out;
     VGA_VS <= vert_sync_out;
     VGA_HS <= horz_sync_out;
-    ones <= CONV_STD_LOGIC_VECTOR(count mod 10, 4);
-    tens <= CONV_STD_LOGIC_VECTOR((count / 10) mod 10, 4);
-    hundreds <= CONV_STD_LOGIC_VECTOR(count / 100, 4);
 end architecture behavior;

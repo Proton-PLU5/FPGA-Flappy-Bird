@@ -94,6 +94,7 @@ begin
 	    if (rising_edge(vert_sync)) then
             if enabled = '0' then
                 ball_y_pos <= CONV_STD_LOGIC_VECTOR(240, 10);
+                hit_bottom_s <= '0';
             elsif enabled = '1' and paused = '0' then -- Normal movement
                 -- BOTTOM BOUNDARY: Die if at the bottom AND trying to fall
                 if (('0' & ball_y_pos >= CONV_STD_LOGIC_VECTOR(479, 10)) and (ball_velocity >= CONV_STD_LOGIC_VECTOR(0, 10))) then

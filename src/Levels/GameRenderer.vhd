@@ -754,8 +754,7 @@ begin
             end if;
 
             last_vert_sync <= vert_sync;
-        end if;
-        game_over <= game_over_s; 
+        end if; 
     end process GAME_LOGIC;
 
     LEVEL_SELECT : process (clk25Mhz)
@@ -873,5 +872,7 @@ begin
             end if;
         end if;
     end process LEVEL_SELECT;
+
+    game_over <= game_over_s;
     
 end architecture behavior;

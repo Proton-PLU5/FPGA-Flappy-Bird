@@ -21,6 +21,9 @@ end entity LivesRenderer;
 architecture behavior of LivesRenderer is
 
     component SpriteRenderer is
+        generic (
+            SCALE_FACTOR : integer := 1
+        );
         port (
             clk : in std_logic;
             pixel_row    : in std_logic_vector(9 downto 0);

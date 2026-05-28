@@ -83,8 +83,3 @@ begin
     pixel_on <= rom_out when in_text_zone = '1' else '0';
 
 end architecture behaviour;
-
-
-
-
-end architecture behaviour;

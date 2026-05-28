@@ -37,7 +37,8 @@ architecture behavior of LevelOne is
             enabled                     : in std_logic;
             follow_enable               : in std_logic;
             follow_x_pos                : in unsigned(10 downto 0);
-            render                      : out std_logic
+            render                      : out std_logic;
+            paused                      : in std_logic
         );
     end component Pipe;
 
@@ -79,8 +80,8 @@ architecture behavior of LevelOne is
     signal start_rendering_pipe_2 : std_logic := '0';
 
 begin
-    pipe_1_enabled_s <= level_one_enable and not paused;
-    pipe_2_enabled_s <= level_one_enable and not paused and start_rendering_pipe_2;
+    pipe_1_enabled_s <= level_one_enable;
+    pipe_2_enabled_s <= level_one_enable and start_rendering_pipe_2;
 
     PIPE_COMPONENT : Pipe
         generic map ( START_OFFSET => 0 )
@@ -101,7 +102,8 @@ begin
         follow_enable => '0',
         follow_x_pos => (others => '0'),
         x_pos => pipe_1_x_pos_s,
-        render => pipe_1_render_s
+        render => pipe_1_render_s,
+        paused => paused
     );
 
     PIPE2_COMPONENT : Pipe
@@ -123,7 +125,8 @@ begin
         follow_enable => '0',
         follow_x_pos => (others => '0'),
         x_pos => pipe_2_x_pos_s,
-        render => pipe_2_render_s
+        render => pipe_2_render_s,
+        paused => paused
     );
     
     LFSR_COMPONENT : LFSR port map (

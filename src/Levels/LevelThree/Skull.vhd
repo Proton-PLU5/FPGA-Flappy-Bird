@@ -36,6 +36,9 @@ architecture behaviour of Skull is
     signal transparent : std_logic;
 
 	component SpriteRenderer is
+        generic (
+            SCALE_FACTOR : integer := 1
+        );
 		port (
 			clk : in std_logic;
 			pixel_row    : in std_logic_vector(9 downto 0);
@@ -48,8 +51,9 @@ architecture behaviour of Skull is
 			green : out std_logic_vector(3 downto 0);
 			blue  : out std_logic_vector(3 downto 0);
             transparent : out std_logic
-		 );
-	end component;
+        );
+    end component;
+
 
 begin
     render_s <= '1' when (

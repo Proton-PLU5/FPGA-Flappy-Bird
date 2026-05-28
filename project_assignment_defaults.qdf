@@ -129,14 +129,22 @@ set_global_assignment -name MUX_RESTRUCTURE Auto
 set_global_assignment -name MLAB_ADD_TIMING_CONSTRAINTS_FOR_MIXED_PORT_FEED_THROUGH_MODE_SETTING_DONT_CARE Off
 set_global_assignment -name ENABLE_IP_DEBUG Off
 set_global_assignment -name SAVE_DISK_SPACE On
+<<<<<<< HEAD
+set_global_assignment -name OCP_HW_EVAL Enable
+=======
 set_global_assignment -name OCP_HW_EVAL -value OFF
+>>>>>>> main
 set_global_assignment -name DEVICE_FILTER_PACKAGE Any
 set_global_assignment -name DEVICE_FILTER_PIN_COUNT Any
 set_global_assignment -name DEVICE_FILTER_SPEED_GRADE Any
 set_global_assignment -name EDA_DESIGN_ENTRY_SYNTHESIS_TOOL "<None>"
 set_global_assignment -name VERILOG_INPUT_VERSION Verilog_2001
 set_global_assignment -name VHDL_INPUT_VERSION VHDL_1993
+<<<<<<< HEAD
+set_global_assignment -name FAMILY "Cyclone V"
+=======
 set_global_assignment -name FAMILY -value "Cyclone V"
+>>>>>>> main
 set_global_assignment -name TRUE_WYSIWYG_FLOW Off
 set_global_assignment -name SMART_COMPILE_IGNORES_TDC_FOR_STRATIX_PLL_CHANGES Off
 set_global_assignment -name STATE_MACHINE_PROCESSING Auto
@@ -207,8 +215,11 @@ set_global_assignment -name FORCE_SYNCH_CLEAR Off
 set_global_assignment -name AUTO_RAM_BLOCK_BALANCING On
 set_global_assignment -name AUTO_RAM_TO_LCELL_CONVERSION Off
 set_global_assignment -name AUTO_RESOURCE_SHARING Off
+<<<<<<< HEAD
+=======
 set_global_assignment -name ALLOW_ANY_RAM_SIZE_FOR_RECOGNITION Off
 set_global_assignment -name ALLOW_ANY_ROM_SIZE_FOR_RECOGNITION Off
+>>>>>>> main
 set_global_assignment -name ALLOW_ANY_SHIFT_REGISTER_SIZE_FOR_RECOGNITION Off
 set_global_assignment -name MAX7000_FANIN_PER_CELL 100
 set_global_assignment -name USE_LOGICLOCK_CONSTRAINTS_IN_BALANCING On
@@ -764,7 +775,11 @@ set_global_assignment -name EDA_GENERATE_POWER_INPUT_FILE Off -section_id ?
 set_global_assignment -name EDA_TEST_BENCH_ENABLE_STATUS NOT_USED -section_id ?
 set_global_assignment -name EDA_RTL_SIM_MODE NOT_USED -section_id ?
 set_global_assignment -name EDA_MAINTAIN_DESIGN_HIERARCHY OFF -section_id ?
+<<<<<<< HEAD
+set_global_assignment -name EDA_GENERATE_FUNCTIONAL_NETLIST On -section_id ?
+=======
 set_global_assignment -name EDA_GENERATE_FUNCTIONAL_NETLIST Off -section_id ?
+>>>>>>> main
 set_global_assignment -name EDA_WRITE_DEVICE_CONTROL_PORTS Off -section_id ?
 set_global_assignment -name EDA_SIMULATION_VCD_OUTPUT_TCL_FILE Off -section_id ?
 set_global_assignment -name EDA_SIMULATION_VCD_OUTPUT_SIGNALS_TO_TCL_FILE "All Except Combinational Logic Element Outputs" -section_id ?

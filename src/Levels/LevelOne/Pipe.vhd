@@ -16,6 +16,7 @@ entity Pipe is
         end_reached                 : out std_logic;
         x_pos                       : out unsigned(10 downto 0);
         enabled                     : in std_logic;
+        paused                      : in std_logic;
         follow_enable               : in std_logic;
         follow_x_pos                : in unsigned(10 downto 0);
         render                      : out std_logic
@@ -94,7 +95,7 @@ begin
     bottom_cap_start_y <= '0' & pipe_bottom_y_pos;
 
     render_top_cap <= '1' when (
-        is_visible = '1' and enabled = '1'
+        is_visible = '1'
         and unsigned(pixel_column) >= pipe_x_pos_effective - cap_x_offset
         and unsigned(pixel_column) <  pipe_x_pos_effective - cap_x_offset + BONE_CAP_WIDTH
         and unsigned(pixel_row)    >= top_cap_start_y(9 downto 0)
@@ -103,7 +104,7 @@ begin
     ) else '0';
 
     render_top_body <= '1' when (
-        is_visible = '1' and enabled = '1'
+        is_visible = '1'
         and unsigned(pixel_column) >= pipe_x_pos_effective
         and unsigned(pixel_column) <  pipe_x_pos_effective + BONE_BODY_WIDTH
         and unsigned(pixel_row)    <  top_cap_start_y(9 downto 0)  -- above the cap
@@ -111,7 +112,7 @@ begin
     ) else '0';
 
     render_bottom_cap <= '1' when (
-        is_visible = '1' and enabled = '1'
+        is_visible = '1'
         and unsigned(pixel_column) >= pipe_x_pos_effective - cap_x_offset
         and unsigned(pixel_column) <  pipe_x_pos_effective - cap_x_offset + BONE_CAP_WIDTH
         and unsigned(pixel_row)    >= pipe_bottom_y_pos
@@ -120,7 +121,7 @@ begin
     ) else '0';
 
     render_bottom_body <= '1' when (
-        is_visible = '1' and enabled = '1'
+        is_visible = '1'
         and unsigned(pixel_column) >= pipe_x_pos_effective
         and unsigned(pixel_column) <  pipe_x_pos_effective + BONE_BODY_WIDTH
         and unsigned(pixel_row)    >= bottom_cap_start_y(9 downto 0) + BONE_CAP_HEIGHT  -- below the cap
@@ -211,8 +212,7 @@ begin
                 end if;
                 end_reached <= '0';
                 is_visible  <= '1';
-
-            elsif enabled = '1' then
+            elsif enabled = '1' and paused = '0' then
                 if follow_enable = '0' then
                     if (pipe_x_pos_effective + BONE_CAP_WIDTH) <= to_unsigned(SPEED, 11) then
                         end_reached <= '1';

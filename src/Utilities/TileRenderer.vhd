@@ -10,12 +10,16 @@ entity TileRenderer is
         reset                       : in std_logic;
         enabled                     : in std_logic;
         tile_id                     : in integer range 0 to 255;
+        offset                      : in  UNSIGNED(5 downto 0);
 		transparent : out std_logic
     );
 end entity TileRenderer;
 
 architecture behaviour of TileRenderer is
     component SpriteRenderer is
+        generic (
+            SCALE_FACTOR : integer := 1
+        );
         port (
             clk : in std_logic;
             pixel_row    : in std_logic_vector(9 downto 0);
@@ -38,15 +42,19 @@ architecture behaviour of TileRenderer is
     constant TILE_W : integer := 64;
     constant TILE_H : integer := 64;
 
-
     signal tile_start_x : std_logic_vector(9 downto 0);
     signal tile_start_y : std_logic_vector(9 downto 0);
 
+    signal shifted_column : unsigned(9 downto 0);
+
 begin
+
+    shifted_column <= unsigned(pixel_column) + resize(offset, 10);
+
     -- Compute the tile origin (top-left corner) in screen coordinates so
     -- SpriteRenderer can use it as the sprite's screen position.
     tile_start_x <= std_logic_vector(
-                        to_unsigned( (to_integer(unsigned(pixel_column)) / TILE_W) * TILE_W, 10)
+                        to_unsigned( (to_integer(shifted_column) / TILE_W) * TILE_W, 10)
                     );
 
     tile_start_y <= std_logic_vector(
@@ -56,7 +64,7 @@ begin
     SPRITE_RENDERER : SpriteRenderer port map (
         clk => clk,
         pixel_row => pixel_row,
-        pixel_column => pixel_column,
+        pixel_column => std_logic_vector(shifted_column),
         start_x => '0' & tile_start_x,
         start_y => '0' & tile_start_y,
         sprite_id => tile_id,  -- Use the provided tile_id

@@ -11,6 +11,7 @@ entity BackgroundRenderer is
         vert_sync, horz_sync : IN std_logic;
         pixel_row, pixel_column	: IN std_logic_vector(9 DOWNTO 0);
         red, green, blue : OUT std_logic_vector(3 downto 0);
+        paused : IN std_logic;
         enabled : OUT std_logic
     );
 end entity BackgroundRenderer;
@@ -25,6 +26,7 @@ architecture Behavioral of BackgroundRenderer is
             reset                       : in std_logic;
             enabled                     : in std_logic;
             tile_id                     : in integer range 0 to 255;
+            offset                      : in  UNSIGNED(5 downto 0);
 			transparent : out std_logic
         );
     end component TileRenderer;
@@ -43,7 +45,7 @@ architecture Behavioral of BackgroundRenderer is
 
     signal start_y3 : std_logic_vector(9 downto 0) := CONV_STD_LOGIC_VECTOR(416, 10);
 
-
+    signal offset : unsigned(5 downto 0) := (others => '0');
 
     -- Background size
     constant SPRITE_WIDTH  : integer := 1138;
@@ -63,56 +65,67 @@ begin
         ('0' & pixel_row    <  '0' & CONV_STD_LOGIC_VECTOR(480,10)) 
     ) else '0';
 
-        TOP_BAR : TileRenderer
-            port map (
-                clk => clk25Mhz,
-                vert_sync => vert_sync,
-                mouse_left => '0',
-                pixel_row => pixel_row,
-                pixel_column => pixel_column,
-                red => top_red,
-                green => top_green,
-                blue => top_blue,
-                reset => '0',
-                enabled => render1,
-                tile_id => 5, 
-                transparent => top_transparent
-            );
-        
-        MIDDLE : TileRenderer
-            port map (
-                clk => clk25Mhz,
-                vert_sync => vert_sync,
-                mouse_left => '0',
-                pixel_row => pixel_row,
-                pixel_column => pixel_column,
-                red => middle_red,
-                green => middle_green,
-                blue => middle_blue,
-                reset => '0',
-                enabled => render2,
-                tile_id => 14, 
-                transparent => middle_transparent
-            );
-        
-        BOTTOM_BAR : TileRenderer
-            port map (
-                clk => clk25Mhz,
-                vert_sync => vert_sync,
-                mouse_left => '0',
-                pixel_row => pixel_row,
-                pixel_column => pixel_column,
-                red => down_red,
-                green => down_green,
-                blue => down_blue,
-                reset => '0',
-                enabled => render3,
-                tile_id => 5, 
-                transparent => down_transparent
-            );
+    TOP_BAR : TileRenderer
+    port map (
+        clk => clk25Mhz,
+        vert_sync => vert_sync,
+        mouse_left => '0',
+        pixel_row => pixel_row,
+        pixel_column => pixel_column,
+        red => top_red,
+        green => top_green,
+        blue => top_blue,
+        reset => '0',
+        enabled => render1,
+        tile_id => 5, 
+        transparent => top_transparent,
+		  offset => offset
+	 );
+    
+    MIDDLE : TileRenderer
+    port map (
+        clk => clk25Mhz,
+        vert_sync => vert_sync,
+        mouse_left => '0',
+        pixel_row => pixel_row,
+        pixel_column => pixel_column,
+        red => middle_red,
+        green => middle_green,
+        blue => middle_blue,
+        reset => '0',
+        enabled => render2,
+        tile_id => 14, 
+        transparent => middle_transparent,
+		  offset => offset
+    );
+    
+    BOTTOM_BAR : TileRenderer
+    port map (
+        clk => clk25Mhz,
+        vert_sync => vert_sync,
+        mouse_left => '0',
+        pixel_row => pixel_row,
+        pixel_column => pixel_column,
+        red => down_red,
+        green => down_green,
+        blue => down_blue,
+        reset => '0',
+        enabled => render3,
+        tile_id => 5, 
+        transparent => down_transparent,
+		  offset => offset
+    );
 
+    process (vert_sync)
+    begin
+        if rising_edge(vert_sync) then
+            if (paused = '0') then
+                offset <= offset + 1;
+            end if;
+        end if;
+    end process;
 
-   red <= top_red when render1 = '1' else
+    red <= top_red when render1 = '1' else
            middle_red when render2 = '1' else
            down_red when render3 = '1' else
            (others => '0');
@@ -125,7 +138,7 @@ begin
             down_blue when render3 = '1' else
             (others => '0');
     
-    enabled <= render1 or render2  or render3;
+    enabled <= render1 or render2 or render3;
 
 end architecture Behavioral;
 

@@ -13,7 +13,8 @@ entity PowerUp is
         render                      : out std_logic;
         x_pos                       : out unsigned(10 downto 0);
         y_pos                       : out unsigned(9 downto 0);
-        enable                      : in std_logic
+        enable                      : in std_logic;
+        paused                      : in std_logic
     );
 end entity PowerUp;
 
@@ -37,14 +38,15 @@ architecture behaviour of PowerUp is
     signal transparent : std_logic;
 
 	component SpriteRenderer is
-		port (
-			clk : in std_logic;
-
-			pixel_row    : in std_logic_vector(9 downto 0);
-			pixel_column : in std_logic_vector(9 downto 0);
-
-			start_x  : in std_logic_vector(10 downto 0);
-			start_y  : in std_logic_vector(10 downto 0);
+        generic (
+            SCALE_FACTOR : integer := 1
+        );
+        port (
+            clk : in std_logic;
+            pixel_row : in std_logic_vector(9 downto 0);
+            pixel_column : in std_logic_vector(9 downto 0);
+            start_x  : in std_logic_vector(10 downto 0);
+            start_y  : in std_logic_vector(10 downto 0);
             sprite_id : in integer range 0 to 64;
             flip_y  : in std_logic := '0';
 
@@ -53,8 +55,8 @@ architecture behaviour of PowerUp is
 			blue  : out std_logic_vector(3 downto 0);
 
             transparent : out std_logic
-		 );
-	end component;
+        );
+    end component;
 begin
     render_s <= '1' when (
         active = '1' and
@@ -102,7 +104,7 @@ begin
                 active <= '0';
                 powerup_x_pos <= to_unsigned(SCREEN_WIDTH, 11);
                 cooldown <= COOLDOWN_MAX;
-            elsif active = '1' then
+            elsif active = '1' and paused = '0' then
                 if (powerup_x_pos + to_unsigned(POWERUP_WIDTH, 11)) <= to_unsigned(SPEED, 11) then
                     active <= '0';
                     powerup_x_pos <= to_unsigned(SCREEN_WIDTH, 11);
@@ -110,9 +112,9 @@ begin
                 else
                     powerup_x_pos <= powerup_x_pos - to_unsigned(SPEED, 11);
                 end if;
-            elsif cooldown = 0 then
+            elsif cooldown = 0 and paused = '0' then
                 spawn_y := to_integer(unsigned(lfsr)) * (SCREEN_HEIGHT - POWERUP_HEIGHT);
-                spawn_y := spawn_y / 255;
+                spawn_y := spawn_y / 256;
                 if spawn_y > SCREEN_HEIGHT - POWERUP_HEIGHT then
                     spawn_y := SCREEN_HEIGHT - POWERUP_HEIGHT - 50;
                 end if;
@@ -122,7 +124,7 @@ begin
                 powerup_y_pos <= to_unsigned(spawn_y, 10);
                 powerup_x_pos <= to_unsigned(SCREEN_WIDTH, 11);
                 active <= '1';
-            else
+            elsif active = '0' and paused = '0' then
                 cooldown <= cooldown - 1;
             end if;
         end if;

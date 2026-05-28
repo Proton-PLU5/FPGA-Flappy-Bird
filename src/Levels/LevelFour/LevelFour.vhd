@@ -345,7 +345,7 @@ begin
         reset => '0',
         enabled => level_four_enable,
         tile_id => 15,
-		transparent => background_transparent
+		transparent => background_transparent,
         offset => to_unsigned(0, 6)
     );
     

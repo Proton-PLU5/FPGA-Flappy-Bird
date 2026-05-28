@@ -704,7 +704,6 @@ begin
                 obstacle_collision_pending <= '0';
                 powerup_collision_pending <= '0';
                 game_over_s <= '0';
-                cutscene_has_played <= '0'; -- Reset cutscene play state on game disable to allow replaying after death
             end if;
 
             last_vert_sync <= vert_sync;

@@ -37,10 +37,33 @@ architecture behavior of Cutscene is
         );
     end component;
 
+    component SpriteRenderer is
+        generic (
+            SCALE_FACTOR : integer := 1
+        );
+        port (
+            clk : in std_logic;
+            pixel_row : in std_logic_vector(9 downto 0);
+            pixel_column : in std_logic_vector(9 downto 0);
+			start_x  : in std_logic_vector(10 downto 0);
+			start_y  : in std_logic_vector(10 downto 0);
+			sprite_id : in integer range 0 to 64;
+            red : out std_logic_vector(3 downto 0);
+            green : out std_logic_vector(3 downto 0);
+            blue : out std_logic_vector(3 downto 0);
+            transparent : out std_logic
+        );
+    end component;
+    
+
     signal boss_red, boss_green, boss_blue : std_logic_vector(3 downto 0);
     signal boss_enabled : std_logic := '1';
     signal boss_transparent : std_logic;
     signal boss_frame_index : integer range 0 to 31 := 0;
+
+    -- Background signals
+    signal background_red, background_green, background_blue : std_logic_vector(3 downto 0);
+    signal background_transparent : std_logic;
 
     signal frame_counter : integer := 0; -- Counts frames for animation timing
 begin
@@ -64,8 +87,25 @@ begin
         blue => boss_blue,
         transparent => boss_transparent
     );
+    
+    BACKGROUND_SPRITE : SpriteRenderer
+    generic map (
+        SCALE_FACTOR => 1
+    )
+    port map (
+        clk => clk25Mhz,
+        pixel_row => pixel_row,
+        pixel_column => pixel_column,
+        start_x => (others => '0'), -- Background starts at (0,0)
+        start_y => (others => '0'),
+        sprite_id => 10, -- Your background sprite
+        red => background_red,
+        green => background_green,
+        blue => background_blue,
+        transparent => background_transparent
+    );
 
-    process (vert_sync)
+    LOGIC_PROCESS : process (vert_sync)
     begin
         if rising_edge(vert_sync) then
             if (cutscene_enable = '1') then 
@@ -87,7 +127,18 @@ begin
         end if;
     end process;
 
-    red   <= boss_red   when boss_enabled = '1' and boss_transparent = '0' else (others => '0');
-	green <= boss_green when boss_enabled = '1' and boss_transparent = '0' else (others => '0');
-	blue  <= boss_blue  when boss_enabled = '1' and boss_transparent = '0' else (others => '0');
+    RENDER_PROCESS : process (clk25Mhz)
+    begin
+        if rising_edge(clk25Mhz) then
+            if (boss_enabled = '1' and boss_transparent = '0') then
+                red <= boss_red;
+                green <= boss_green;
+                blue <= boss_blue;
+            else
+                red <= background_red;
+                green <= background_green;
+                blue <= background_blue;
+            end if;
+        end if;
+    end process;
 end architecture;

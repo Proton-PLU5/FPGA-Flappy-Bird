@@ -635,11 +635,8 @@ begin
                         if invincibility mod 5 = 0 then
                             invincibility_flash <= not invincibility_flash;
                         end if;
-<<<<<<< HEAD
-                    elsif (SW(5) = '0') then
-=======
+
                     elsif (SW(6) = '1') then
->>>>>>> main
                         invincibility <= 200;
                         invincible_s <= '1';
                     else

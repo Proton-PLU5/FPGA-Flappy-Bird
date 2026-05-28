@@ -468,7 +468,6 @@ set_global_assignment -name SOURCE_FILE src/Utilities/PLL.cmp
 set_global_assignment -name VHDL_FILE src/Levels/LevelOne/Cutscene.vhd
 set_global_assignment -name VHDL_FILE src/Utilities/SpriteSheetRenderer.vhd
 set_global_assignment -name VHDL_FILE src/Levels/BackgroundRenderer.vhd
-set_global_assignment -name VHDL_FILE src/Levels/WinRenderer.vhd
 set_global_assignment -name VHDL_FILE src/Levels/LevelFour/LevelFour.vhd
 set_global_assignment -name VHDL_FILE src/Levels/LevelThree/Skull.vhd
 set_global_assignment -name VHDL_FILE src/Levels/LevelThree/LevelThree.vhd

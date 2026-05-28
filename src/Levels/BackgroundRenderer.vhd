@@ -78,8 +78,9 @@ begin
         reset => '0',
         enabled => render1,
         tile_id => 5, 
-        transparent => top_transparent
-);
+        transparent => top_transparent,
+		  offset => offset
+	 );
     
     MIDDLE : TileRenderer
     port map (
@@ -94,7 +95,8 @@ begin
         reset => '0',
         enabled => render2,
         tile_id => 14, 
-        transparent => middle_transparent
+        transparent => middle_transparent,
+		  offset => offset
     );
     
     BOTTOM_BAR : TileRenderer
@@ -110,7 +112,8 @@ begin
         reset => '0',
         enabled => render3,
         tile_id => 5, 
-        transparent => down_transparent
+        transparent => down_transparent,
+		  offset => offset
     );
 
     process (vert_sync)

@@ -198,15 +198,14 @@ begin
                         palette_index := BONE_CAP_2_DATA(addr);
                         color := BONE_CAP_2_PALETTE(palette_index);
                         addr := local_y * BONE_CAP_2_WIDTH + local_x;
-                    when 14 =>
-<<<<<<< HEAD
-                        palette_index := BRICK_TILE_DATA(addr);
-                        color := BRICK_TILE_PALETTE(palette_index);
-=======
+					when 14 =>
                         palette_index := DARK_BRICK_TILE_DATA(addr);
                         color := DARK_BRICK_TILE_PALETTE(palette_index);
                         addr := local_y * DARK_BRICK_TILE_WIDTH + local_x;
->>>>>>> main
+					when 15 =>
+                        palette_index := BRICK_TILE_DATA(addr);
+                        color := BRICK_TILE_PALETTE(palette_index);
+						addr := local_y * BRICK_TILE_WIDTH + local_x;
                     when others =>
                         palette_index := SKELETRON_HEAD_DATA(addr);
                         color := SKELETRON_HEAD_PALETTE(palette_index);

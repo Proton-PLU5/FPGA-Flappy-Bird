@@ -58,7 +58,8 @@ architecture behavior of LevelTwo is
             render : out std_logic;
             x_pos : out unsigned(10 downto 0);
             y_pos : out unsigned(9 downto 0);
-            enable : in std_logic
+            enable : in std_logic;
+            paused : in std_logic
         );
     end component PowerUp;
 
@@ -114,7 +115,7 @@ architecture behavior of LevelTwo is
 begin
     pipe_1_enabled_s <= level_two_enable and not paused;
     pipe_2_enabled_s <= level_two_enable and not paused and start_rendering_pipe_2;
-    powerup_enabled_s <= level_two_enable and not paused;
+    powerup_enabled_s <= level_two_enable;
 
     PIPE_COMPONENT : OffsetPipe
         generic map ( START_OFFSET => 0 )
@@ -182,7 +183,8 @@ begin
         render => powerup_render_s,
         x_pos => powerup_x_pos_s,
         y_pos => powerup_y_pos_s,
-        enable => powerup_enabled_s
+        enable => powerup_enabled_s,
+        paused => paused
     );
 
     CLOCK_PROCESS : process(clk25Mhz)

@@ -16,6 +16,7 @@ entity Pipe is
         end_reached                 : out std_logic;
         x_pos                       : out unsigned(10 downto 0);
         enabled                     : in std_logic;
+        paused                      : in std_logic;
         follow_enable               : in std_logic;
         follow_x_pos                : in unsigned(10 downto 0);
         render                      : out std_logic
@@ -211,8 +212,7 @@ begin
                 end if;
                 end_reached <= '0';
                 is_visible  <= '1';
-
-            elsif enabled = '1' then
+            elsif enabled = '1' and paused = '0' then
                 if follow_enable = '0' then
                     if (pipe_x_pos_effective + BONE_CAP_WIDTH) <= to_unsigned(SPEED, 11) then
                         end_reached <= '1';

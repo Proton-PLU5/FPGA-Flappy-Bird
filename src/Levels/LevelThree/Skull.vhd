@@ -38,18 +38,16 @@ architecture behaviour of Skull is
 	component SpriteRenderer is
 		port (
 			clk : in std_logic;
-
 			pixel_row    : in std_logic_vector(9 downto 0);
 			pixel_column : in std_logic_vector(9 downto 0);
-
 			start_x  : in std_logic_vector(10 downto 0);
 			start_y  : in std_logic_vector(10 downto 0);
-         sprite_id : in integer range 0 to 64;
-
+            sprite_id : in integer range 0 to 64;
+            flip_y  : in std_logic := '0';
+            tile_y  : in std_logic := '0';
 			red   : out std_logic_vector(3 downto 0);
 			green : out std_logic_vector(3 downto 0);
 			blue  : out std_logic_vector(3 downto 0);
-
             transparent : out std_logic
 		 );
 	end component;
@@ -81,6 +79,8 @@ begin
         start_x => std_logic_vector(skull_x_pos),
         start_y      => '0' & std_logic_vector(to_unsigned(skull_y_pos, 10)),
         sprite_id => 8,
+        flip_y => '0',
+        tile_y => '0',
         red => red_s,
         blue => blue_s,
         green => green_s,

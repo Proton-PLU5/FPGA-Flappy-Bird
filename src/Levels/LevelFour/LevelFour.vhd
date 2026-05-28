@@ -38,6 +38,8 @@ architecture behavior of LevelFour is
             start_x  : in std_logic_vector(10 downto 0);
             start_y  : in std_logic_vector(10 downto 0);
             sprite_id : in integer range 0 to 64;
+            flip_y  : in std_logic := '0';
+            tile_y  : in std_logic := '0';
             red   : out std_logic_vector(3 downto 0);
             green : out std_logic_vector(3 downto 0);
             blue  : out std_logic_vector(3 downto 0);
@@ -121,6 +123,8 @@ begin
         start_x => std_logic_vector(to_unsigned(0, 11)), 
         start_y => '0' & std_logic_vector(laser1_y_pos),
         sprite_id => 6, 
+        flip_y => '0',
+        tile_y => '0',
         red => laser_warning1_red,
         green => laser_warning1_green,
         blue => laser_warning1_blue,
@@ -135,6 +139,8 @@ begin
         start_x => std_logic_vector(to_unsigned(0, 11)), 
         start_y => '0' & std_logic_vector(laser2_y_pos),
         sprite_id => 6, 
+        flip_y => '0',
+        tile_y => '0',
         red => laser_warning2_red,
         green => laser_warning2_green,
         blue => laser_warning2_blue,
@@ -149,6 +155,8 @@ begin
         start_x => std_logic_vector(to_unsigned(0, 11)), 
         start_y => '0' & std_logic_vector(laser1_y_pos),
         sprite_id => 7, 
+        flip_y => '0',
+        tile_y => '0',
         red => laser1_red,
         green => laser1_green,
         blue => laser1_blue,
@@ -163,6 +171,8 @@ begin
         start_x => std_logic_vector(to_unsigned(0, 11)), 
         start_y => '0' & std_logic_vector(laser2_y_pos),
         sprite_id => 7, 
+        flip_y => '0',
+        tile_y => '0',
         red => laser2_red,
         green => laser2_green,
         blue => laser2_blue,

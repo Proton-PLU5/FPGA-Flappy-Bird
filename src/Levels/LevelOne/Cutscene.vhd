@@ -37,21 +37,15 @@ architecture behavior of Cutscene is
         );
     end component;
 
-    component SpriteRenderer is
-        generic (
-            SCALE_FACTOR : integer := 1
-        );
+    component BackgroundRenderer is
         port (
-            clk : in std_logic;
-            pixel_row : in std_logic_vector(9 downto 0);
+            clk          : in std_logic;
+            pixel_row    : in std_logic_vector(9 downto 0);
             pixel_column : in std_logic_vector(9 downto 0);
-			start_x  : in std_logic_vector(10 downto 0);
-			start_y  : in std_logic_vector(10 downto 0);
-			sprite_id : in integer range 0 to 64;
-            red : out std_logic_vector(3 downto 0);
-            green : out std_logic_vector(3 downto 0);
-            blue : out std_logic_vector(3 downto 0);
-            transparent : out std_logic
+            bg_id        : in integer range 0 to 3; -- Switch between up to 4 backgrounds
+            red          : out std_logic_vector(3 downto 0);
+            green        : out std_logic_vector(3 downto 0);
+            blue         : out std_logic_vector(3 downto 0)
         );
     end component;
 
@@ -105,6 +99,17 @@ begin
         green => boss_green,
         blue => boss_blue,
         transparent => boss_transparent
+    );
+
+    CUTSCENE_BACKGROUND : BackgroundRenderer
+    port map (
+        clk => clk25Mhz,
+        pixel_row => pixel_row,
+        pixel_column => pixel_column,
+        bg_id => 0, -- Assuming 0 is the cutscene background
+        red => background_red,
+        green => background_green,
+        blue => background_blue
     );
 
     MSG_ONE : title_display

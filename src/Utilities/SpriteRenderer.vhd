@@ -240,6 +240,14 @@ begin
                         addr := local_y * BRICK_TILE_WIDTH + local_x;
                         palette_index := BRICK_TILE_DATA(addr);
                         color := BRICK_TILE_PALETTE(palette_index);
+                    when 16 => 
+                        addr := local_y * SKELETRON_FULL_WIDTH + local_x;
+                        palette_index := SKELETRON_FULL_DATA(addr);
+                        color := SKELETRON_FULL_PALETTE(palette_index);                        
+                    when 17 => 
+                        addr := local_y * SKELETRON_MAD_WIDTH + local_x;
+                        palette_index := SKELETRON_MAD_DATA(addr);
+                        color := SKELETRON_MAD_PALETTE(palette_index);
                     when others =>
                         addr := local_y * SKELETRON_HEAD_WIDTH + local_x;
                         palette_index := SKELETRON_HEAD_DATA(addr);

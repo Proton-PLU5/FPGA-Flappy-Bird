@@ -114,7 +114,7 @@ begin
                 end if;
             elsif cooldown = 0 and paused = '0' then
                 spawn_y := to_integer(unsigned(lfsr)) * (SCREEN_HEIGHT - POWERUP_HEIGHT);
-                spawn_y := spawn_y / 255;
+                spawn_y := spawn_y / 256;
                 if spawn_y > SCREEN_HEIGHT - POWERUP_HEIGHT then
                     spawn_y := SCREEN_HEIGHT - POWERUP_HEIGHT - 50;
                 end if;

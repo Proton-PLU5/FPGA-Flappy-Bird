@@ -108,10 +108,13 @@ begin
                 if (frame_counter >= 50) then
                     if (frame_counter >= 100) then
                         cutscene_end <= '1';
+                        boss_frame_index <= 17;
+                    else
+                        boss_frame_index <= 17;
+                        frame_counter <= frame_counter + 1;
                     end if;
-                    
-                    boss_frame_index <= 17;
                 else
+                    boss_frame_index <= 16;
                     frame_counter <= frame_counter + 1;
                 end if;
             else

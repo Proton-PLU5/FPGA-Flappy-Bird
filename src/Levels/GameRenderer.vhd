@@ -730,7 +730,7 @@ begin
 
     LEVEL_SELECT : process (clk25Mhz)
         variable manual_level_change : std_logic;
-		  variable dip_switch : std_logic_vector(2 downto 0);
+		  variable dip_switch : std_logic_vector(3 downto 0);
     begin
         if rising_edge(clk25Mhz) then
             manual_level_change := '0';

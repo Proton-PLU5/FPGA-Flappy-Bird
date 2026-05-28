@@ -75,8 +75,8 @@ begin
                 -- 5. Fetch Palette Data
                 case sprite_id is
                     when 0 =>
-                        palette_index := SKELETRON_FULL_SPRITE_DATA(addr);
-                        color := SKELETRON_FULL_SPRITE_PALETTE(palette_index);
+                        palette_index := SKELETRON_FULL_SHEET_DATA(addr);
+                        color := SKELETRON_FULL_SHEET_PALETTE(palette_index);
                     when others =>
                         palette_index := 0;
                         color := x"000";

@@ -79,7 +79,7 @@ begin
         end if;
     end process;
 
-    red <= when boss_enabled = '1' and boss_transparent = '0' then boss_red else (others => '0');
-    green <= when boss_enabled = '1' and boss_transparent = '0' then boss_green else (others => '0');
-    blue <= when boss_enabled = '1' and boss_transparent = '0' then boss_blue else (others => '0');
+    red   <= boss_red   when boss_enabled = '1' and boss_transparent = '0' else (others => '0');
+	 green <= boss_green when boss_enabled = '1' and boss_transparent = '0' else (others => '0');
+	 blue  <= boss_blue  when boss_enabled = '1' and boss_transparent = '0' else (others => '0');
 end architecture;

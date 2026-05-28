@@ -275,7 +275,7 @@ begin
         pixel_column => pixel_column,
         pixel_on => msg_1_pixel, 
         text_row => 240,
-        text_col_start => 240
+        text_col_start => 248
     );
 
     MSG_2 : title_display 
@@ -290,7 +290,7 @@ begin
         pixel_column => pixel_column,
         pixel_on => msg_2_pixel, 
         text_row => 240,
-        text_col_start => 240
+        text_col_start => 248
     );
 
     MSG_3 : title_display 

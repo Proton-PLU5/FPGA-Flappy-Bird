@@ -38,7 +38,7 @@ architecture behaviour of OffsetPipe is
 begin
     -- Updated render_out: Now checks "enabled" so Pipe 2 stays hidden at start
     render_out <= '1' when (
-        (enabled = '1') and (is_visible = '1') 
+        (is_visible = '1') 
         and (pipe_x_pos <= unsigned(pixel_column) + pipe_width) 
         and (unsigned(pixel_column) <= pipe_x_pos + pipe_width)
         and (

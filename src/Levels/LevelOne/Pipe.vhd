@@ -42,7 +42,7 @@ begin
 
     -- render_out logic
     render_out <= '1' when (
-        (is_visible = '1') and (enabled = '1') 
+        (is_visible = '1')
         and (pipe_x_pos_effective <= unsigned(pixel_column) + pipe_width) 
         and (unsigned(pixel_column) <= pipe_x_pos_effective + pipe_width)
         and ( (unsigned(pixel_row) <= pipe_top_y_pos) or (unsigned(pixel_row) >= pipe_bottom_y_pos) )

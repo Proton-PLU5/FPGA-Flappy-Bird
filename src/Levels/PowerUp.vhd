@@ -39,7 +39,8 @@ architecture behaviour of PowerUp is
 
 	component SpriteRenderer is
         generic (
-            SCALE_FACTOR : integer := 1
+            SCALE_FACTOR : integer := 1;
+            SPRITE_ID : integer range 0 to 64 := 0
         );
         port (
             clk : in std_logic;
@@ -47,7 +48,6 @@ architecture behaviour of PowerUp is
             pixel_column : in std_logic_vector(9 downto 0);
             start_x  : in std_logic_vector(10 downto 0);
             start_y  : in std_logic_vector(10 downto 0);
-            sprite_id : in integer range 0 to 64;
             flip_y  : in std_logic := '0';
 
 			red   : out std_logic_vector(3 downto 0);
@@ -66,13 +66,17 @@ begin
         unsigned(pixel_row) < powerup_y_pos + to_unsigned(POWERUP_HEIGHT, 10)
     ) else '0';
 
-    SPRITE_RENDERER : SpriteRenderer port map (
+    SPRITE_RENDERER : SpriteRenderer
+    generic map (
+        SCALE_FACTOR => 1,
+        SPRITE_ID => 9
+    )
+    port map (
         clk => clk,
         pixel_row => pixel_row,
         pixel_column => pixel_column,
         start_x => std_logic_vector(powerup_x_pos),
         start_y      => '0' & std_logic_vector(powerup_y_pos),
-        sprite_id => 9,
         flip_y => '0',
         red => red_s,
         blue => blue_s,

@@ -37,13 +37,15 @@ architecture behaviour of TitleRenderer is
     end component title_display;
 
     component TileRenderer is
+        generic (
+            TILE_ID : integer range 0 to 255 := 0
+        );
         port (
             clk, vert_sync, mouse_left  : in std_logic;
             pixel_row, pixel_column     : in std_logic_vector(9 downto 0);
             red, green, blue            : out std_logic_vector(3 downto 0);
             reset                       : in std_logic;
             enabled                     : in std_logic;
-            tile_id                     : in integer range 0 to 255;
             offset                      : in  UNSIGNED(5 downto 0);
 			transparent : out std_logic
         );
@@ -117,7 +119,11 @@ begin
         text_col_start => 252
     );
 
-    TILE_RENDERER : TileRenderer port map (
+    TILE_RENDERER : TileRenderer
+    generic map (
+        TILE_ID => 5
+    )
+    port map (
         clk => clk25Mhz,
         vert_sync => vert_sync,
         mouse_left => mouse_left,
@@ -128,7 +134,6 @@ begin
         blue => background_blue,
         reset => '0',
         enabled => enabled,
-        tile_id => 5,
         offset => to_unsigned(0, 6),
         transparent => open
     );

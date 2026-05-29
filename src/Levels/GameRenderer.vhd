@@ -41,7 +41,6 @@ architecture behavior of GameRenderer is
         generic (
             SIZE : integer := 4
         );
-
         port (
             clk : in std_logic;
             score : in integer;
@@ -663,6 +662,7 @@ begin
                         collision_count <= 0;
                         game_over_s <= '1';
                     end if;
+                    
                     if obstacle_collision_pending = '1' and invincibility = 0 then
                         invincibility <= 200; -- gives 5 seconds of invincibility at 60fps
 								if no_lives_left = '0' then

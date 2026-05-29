@@ -6,7 +6,8 @@ use work.sprite_data_pkg.all;
 
 entity SpriteRenderer is
     generic (
-        SCALE_FACTOR : integer := 1
+        SCALE_FACTOR : integer range 1 to 2 := 1;
+        SPRITE_ID : integer range 0 to 64 := 0
     );
     port (
         clk : in std_logic;
@@ -14,7 +15,6 @@ entity SpriteRenderer is
         pixel_column : in std_logic_vector(9 downto 0);
         start_x  : in std_logic_vector(10 downto 0);
         start_y  : in std_logic_vector(10 downto 0);
-        sprite_id : in integer range 0 to 64;
         flip_y  : in std_logic := '0';
         red   : out std_logic_vector(3 downto 0);
         green : out std_logic_vector(3 downto 0);
@@ -28,6 +28,85 @@ architecture behavior of SpriteRenderer is
     signal sprite_x : integer range -512 to 1023; -- BOUND TO REDUCE RESOURCE USAGE.
     signal sprite_y : integer range -512 to 1023;
 
+    type dimensions is record
+        width : integer range 0 to 1024;
+        height : integer range 0 to 1024;
+    end record;
+
+    function GET_DIMENSIONS return dimensions is
+        variable width : integer range 0 to 1024;
+        variable height : integer range 0 to 1024;
+        variable return_value : dimensions;
+    begin
+        case (SPRITE_ID) is
+            when 0 =>
+                width := SKELETRON_HEAD_WIDTH;
+                height := SKELETRON_HEAD_HEIGHT;
+            when 1 =>
+                width := SKELETRON_JAW_WIDTH;
+                height := SKELETRON_JAW_HEIGHT;
+            when 2 =>
+                width := FLAPPY_BIRD_WIDTH;
+                height := FLAPPY_BIRD_HEIGHT;
+            when 3 =>
+                width := FULL_HEART_WIDTH;
+                height := FULL_HEART_HEIGHT;
+            when 4 =>
+                width := EMPTY_HEART_WIDTH;
+                height := EMPTY_HEART_HEIGHT;
+            when 5 =>
+                width := BLUE_BRICK_TILE_WIDTH;
+                height := BLUE_BRICK_TILE_HEIGHT;
+            when 6 =>
+                width := LASER_BEAM_WARNING_WIDTH;
+                height := LASER_BEAM_WARNING_HEIGHT;
+            when 7 =>
+                width := LASER_BEAM_WIDTH;
+                height := LASER_BEAM_HEIGHT;
+            when 8 =>
+                width := L3SKULL_WIDTH;
+                height := L3SKULL_HEIGHT;
+            when 9 =>
+                width := POWERUP_WIDTH;
+                height := POWERUP_HEIGHT;
+            when 10 =>
+                width := BONE_BODY_WIDTH;
+                height := BONE_BODY_HEIGHT;
+            when 11 =>
+                width := BONE_CAP_WIDTH;
+                height := BONE_CAP_HEIGHT;
+            when 12 =>
+                width := BONE_BODY_2_WIDTH;
+                height := BONE_BODY_2_HEIGHT;
+            when 13 =>
+                width := BONE_CAP_2_WIDTH;
+                height := BONE_CAP_2_HEIGHT;
+            when 14 => 
+                width := DARK_BRICK_TILE_WIDTH;
+                height := DARK_BRICK_TILE_HEIGHT;
+            when 15 =>
+                width := BRICK_TILE_WIDTH;
+                height := BRICK_TILE_HEIGHT;
+            when 16 =>
+                width := SKELETRON_FULL_WIDTH;
+                height := SKELETRON_FULL_HEIGHT;
+            when 17 =>
+                width := SKELETRON_MAD_WIDTH;
+                height := SKELETRON_MAD_HEIGHT;
+            when others =>
+                width := SKELETRON_HEAD_WIDTH;
+                height := SKELETRON_HEAD_HEIGHT;
+        end case;
+
+        return_value.width := width;
+        return_value.height := height;
+
+        return return_value;
+    end function;
+
+    constant sprite_dimensions : dimensions := GET_DIMENSIONS;
+    constant scaled_width : integer range 0 to 2048 := sprite_dimensions.width * SCALE_FACTOR;
+    constant scaled_height : integer range 0 to 2048 := sprite_dimensions.height * SCALE_FACTOR;
 begin
     -- use integers since we have width and height as integers and its easier to do math by
     -- just turning them all into integers than having convert them each time.
@@ -37,6 +116,10 @@ begin
     sprite_x <= to_integer(unsigned(start_x));
     sprite_y <= to_integer(unsigned(start_y));
 
+    -- Stage 1 get width and height of the sprite based on the sprite id
+    -- Only need to do this at initialization per sprite.
+
+
     process(clk)
         variable screen_x : integer range 0 to 640;
         variable screen_y : integer range 0 to 480;
@@ -45,10 +128,6 @@ begin
         variable addr : integer range 0 to 307199;
         variable palette_index : integer range 0 to 255;
         variable color : std_logic_vector(11 downto 0);
-        variable width : integer range 0 to 640;
-        variable height : integer range 0 to 480;
-        variable scaled_width : integer range 0 to 640;
-        variable scaled_height : integer range 0 to 480;
     begin
 
         if rising_edge(clk) then
@@ -61,79 +140,6 @@ begin
             green <= "0000";
             blue  <= "0000";
             transparent <= '1';
-
-            -- Get the sprite dimensions (original unscaled size)
-            case sprite_id is
-                when 0 =>
-                    width := SKELETRON_HEAD_WIDTH;
-                    height := SKELETRON_HEAD_HEIGHT;
-                when 1 =>
-                    width := SKELETRON_JAW_WIDTH;
-                    height := SKELETRON_JAW_HEIGHT;
-                when 2 =>
-                    width := FLAPPY_BIRD_WIDTH;
-                    height := FLAPPY_BIRD_HEIGHT;
-                when 3 =>
-                    width := FULL_HEART_WIDTH;
-                    height := FULL_HEART_HEIGHT;
-                when 4 =>
-                    width := EMPTY_HEART_WIDTH;
-                    height := EMPTY_HEART_HEIGHT;
-                when 5 =>
-                    width := BLUE_BRICK_TILE_WIDTH;
-                    height := BLUE_BRICK_TILE_HEIGHT;
-                when 6 =>
-                    width := LASER_BEAM_WARNING_WIDTH;
-                    height := LASER_BEAM_WARNING_HEIGHT;
-                when 7 =>
-                    width := LASER_BEAM_WIDTH;
-                    height := LASER_BEAM_HEIGHT;
-                when 8 =>
-                    width := L3SKULL_WIDTH;
-                    height := L3SKULL_HEIGHT;
-                when 9 =>
-                    width := POWERUP_WIDTH;
-                    height := POWERUP_HEIGHT;
-                when 10 =>
-                    width := BONE_BODY_WIDTH;
-                    height := BONE_BODY_HEIGHT;
-                when 11 =>
-                    width := BONE_CAP_WIDTH;
-                    height := BONE_CAP_HEIGHT;
-                when 12 =>
-                    width := BONE_BODY_2_WIDTH;
-                    height := BONE_BODY_2_HEIGHT;
-                when 13 =>
-                    width := BONE_CAP_2_WIDTH;
-                    height := BONE_CAP_2_HEIGHT;
-                when 14 => 
-                    width := DARK_BRICK_TILE_WIDTH;
-                    height := DARK_BRICK_TILE_HEIGHT;
-                when 15 =>
-                    width := BRICK_TILE_WIDTH;
-                    height := BRICK_TILE_HEIGHT;
-                when 16 =>
-                    width := SKELETRON_FULL_WIDTH;
-                    height := SKELETRON_FULL_HEIGHT;
-                when 17 =>
-                    width := SKELETRON_MAD_WIDTH;
-                    height := SKELETRON_MAD_HEIGHT;
-                when others =>
-                    width := SKELETRON_HEAD_WIDTH;
-                    height := SKELETRON_HEAD_HEIGHT;
-            end case;
-
-            -- Calculate scaled widths and heights
-            if SCALE_FACTOR = 1 then
-                scaled_width  := width;
-                scaled_height := height;
-            elsif SCALE_FACTOR = 2 then
-                scaled_width  := width * 2;   -- Shifts left 1
-                scaled_height := height * 2;
-            else
-                scaled_width  := width * 4;   -- Shifts left 2
-                scaled_height := height * 4;
-            end if;
 
             -- Check if the current pixel is within the scaled sprite's bounding box
             if screen_x >= sprite_x and
@@ -151,21 +157,21 @@ begin
                 if SCALE_FACTOR = 1 then
                     local_x := screen_x - sprite_x;
                     if flip_y = '1' then
-                        local_y := (height - 1) - (screen_y - sprite_y);
+                        local_y := (sprite_dimensions.height - 1) - (screen_y - sprite_y);
                     else
                         local_y := screen_y - sprite_y;
                     end if;
                 elsif SCALE_FACTOR = 2 then
                     local_x := (screen_x - sprite_x) / 2;
                     if flip_y = '1' then
-                        local_y := ((height - 1) - (screen_y - sprite_y)) / 2;
+                        local_y := ((sprite_dimensions.height - 1) - (screen_y - sprite_y)) / 2;
                     else
                         local_y := (screen_y - sprite_y) / 2;
                     end if;
                 else
                     local_x := (screen_x - sprite_x) / 4;
                     if flip_y = '1' then
-                        local_y := ((height - 1) - (screen_y - sprite_y)) / 4;
+                        local_y := ((sprite_dimensions.height - 1) - (screen_y - sprite_y)) / 4;
                     else
                         local_y := (screen_y - sprite_y) / 4;
                     end if;
@@ -175,7 +181,7 @@ begin
                 -- Addr is used to search thru the 1d array to find the pixel pallete data.
                 -- cuz the data is actually 1d array and not a 2d array.
                 -- so we do some math to emulate 2d indexing.
-                case sprite_id is
+                case SPRITE_ID is
                     when 0 =>
                         addr := local_y * SKELETRON_HEAD_WIDTH + local_x;
                         palette_index := SKELETRON_HEAD_DATA(addr);

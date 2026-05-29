@@ -19,13 +19,15 @@ end entity BackgroundRenderer;
 architecture Behavioral of BackgroundRenderer is
 
     component TileRenderer is
+        generic (
+            TILE_ID : integer range 0 to 255 := 0
+        );
         port (
             clk, vert_sync, mouse_left  : in std_logic;
             pixel_row, pixel_column     : in std_logic_vector(9 downto 0);
             red, green, blue            : out std_logic_vector(3 downto 0);
             reset                       : in std_logic;
             enabled                     : in std_logic;
-            tile_id                     : in integer range 0 to 255;
             offset                      : in  UNSIGNED(5 downto 0);
 			transparent : out std_logic
         );
@@ -61,6 +63,9 @@ begin
     ) else '0';
 
     TOP_BAR : TileRenderer
+    generic map (
+        TILE_ID => 5
+    )
     port map (
         clk => clk25Mhz,
         vert_sync => vert_sync,
@@ -72,12 +77,14 @@ begin
         blue => top_blue,
         reset => '0',
         enabled => render1,
-        tile_id => 5, 
         transparent => top_transparent,
 		offset => offset
 	 );
     
     MIDDLE : TileRenderer
+    generic map (
+        TILE_ID => 14
+    )
     port map (
         clk => clk25Mhz,
         vert_sync => vert_sync,
@@ -89,12 +96,14 @@ begin
         blue => middle_blue,
         reset => '0',
         enabled => render2,
-        tile_id => 14, 
         transparent => middle_transparent,
 		  offset => offset
     );
     
     BOTTOM_BAR : TileRenderer
+    generic map (
+        TILE_ID => 5
+    )
     port map (
         clk => clk25Mhz,
         vert_sync => vert_sync,
@@ -106,7 +115,6 @@ begin
         blue => down_blue,
         reset => '0',
         enabled => render3,
-        tile_id => 5, 
         transparent => down_transparent,
 		  offset => offset
     );

@@ -22,7 +22,8 @@ end BossRenderer;
 architecture behavior of BossRenderer is
     component SpriteRenderer is
         generic (
-            SCALE_FACTOR : integer := 1
+            SCALE_FACTOR : integer := 1;
+            SPRITE_ID : integer range 0 to 64 := 0
         );
         port (
             clk : in std_logic;
@@ -30,7 +31,6 @@ architecture behavior of BossRenderer is
             pixel_column : in std_logic_vector(9 downto 0);
 			start_x  : in std_logic_vector(10 downto 0);
 			start_y  : in std_logic_vector(10 downto 0);
-			sprite_id : in integer range 0 to 64;
             flip_y  : in std_logic := '0';
             red : out std_logic_vector(3 downto 0);
             green : out std_logic_vector(3 downto 0);
@@ -76,7 +76,8 @@ begin
 
     BOSS_UPPER_JAW : SpriteRenderer 
     generic map (
-        SCALE_FACTOR => SCALE_FACTOR
+        SCALE_FACTOR => SCALE_FACTOR,
+        SPRITE_ID => 0
     )
     port map (
         clk => clk25Mhz,
@@ -84,7 +85,6 @@ begin
         pixel_column => pixel_column,
         start_x => upper_x_clocked,
         start_y => upper_y_clocked,
-        sprite_id => 0, 
         flip_y => '0',
         red => red_upper_jaw,
         green => green_upper_jaw,
@@ -94,7 +94,8 @@ begin
 
     BOSS_LOWER_JAW : SpriteRenderer 
     generic map (
-        SCALE_FACTOR => SCALE_FACTOR
+        SCALE_FACTOR => SCALE_FACTOR,
+        SPRITE_ID => 1
     )
     port map (
         clk => clk25Mhz,
@@ -102,7 +103,6 @@ begin
         pixel_column => pixel_column,
         start_x => lower_x_clocked,
         start_y => lower_y_clocked,
-        sprite_id => 1, 
         flip_y => '0',
         red => red_lower_jaw,
         green => green_lower_jaw,

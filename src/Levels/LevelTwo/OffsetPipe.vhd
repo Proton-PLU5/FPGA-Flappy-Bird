@@ -62,13 +62,16 @@ architecture behaviour of OffsetPipe is
     signal render_top_cap, render_top_body, render_bottom_cap, render_bottom_body : std_logic;
 
     component SpriteRenderer is
+        generic (
+            SCALE_FACTOR : integer := 1;
+            SPRITE_ID : integer range 0 to 64 := 0
+        );
         port (
             clk          : in  std_logic;
             pixel_row    : in  std_logic_vector(9 downto 0);
             pixel_column : in  std_logic_vector(9 downto 0);
             start_x      : in  std_logic_vector(10 downto 0);
             start_y      : in  std_logic_vector(10 downto 0);
-            sprite_id    : in  integer range 0 to 64;
             flip_y       : in  std_logic := '0';
             red          : out std_logic_vector(3 downto 0);
             green        : out std_logic_vector(3 downto 0);
@@ -138,13 +141,16 @@ begin
 
     x_pos <= pipe_x_pos;
 
-    TOP_CAP : SpriteRenderer port map (
+    TOP_CAP : SpriteRenderer
+    generic map (
+        SPRITE_ID => BONE_CAP_SPRITE_ID
+    )
+    port map (
         clk => clk,
         pixel_row => pixel_row,
         pixel_column => pixel_column,
         start_x => std_logic_vector(pipe_x_pos - cap_x_offset),
         start_y => std_logic_vector(top_cap_start_y),
-        sprite_id => BONE_CAP_SPRITE_ID,
         flip_y => '1',
         red => top_cap_r,
         green => top_cap_g,
@@ -152,13 +158,16 @@ begin
         transparent => top_cap_t
     );
 
-    TOP_BODY : SpriteRenderer port map (
+    TOP_BODY : SpriteRenderer
+    generic map (
+        SPRITE_ID => BONE_BODY_SPRITE_ID
+    )
+    port map (
         clk => clk,
         pixel_row => pixel_row,
         pixel_column => pixel_column,
         start_x => std_logic_vector(pipe_x_pos),
         start_y => (others => '0'),
-        sprite_id => BONE_BODY_SPRITE_ID,
         flip_y => '0',
         red => top_body_r,
         green => top_body_g,
@@ -166,13 +175,16 @@ begin
         transparent => top_body_t
     );
 
-    BOTTOM_CAP : SpriteRenderer port map (
+    BOTTOM_CAP : SpriteRenderer
+    generic map (
+        SPRITE_ID => BONE_CAP_SPRITE_ID
+    )
+    port map (
         clk => clk,
         pixel_row => pixel_row,
         pixel_column => pixel_column,
         start_x => std_logic_vector(pipe_x_pos - cap_x_offset),
         start_y => std_logic_vector(bottom_cap_start_y),
-        sprite_id => BONE_CAP_SPRITE_ID,
         flip_y => '0',
         red => bot_cap_r,
         green => bot_cap_g,
@@ -180,13 +192,16 @@ begin
         transparent => bot_cap_t
     );
 
-    BOTTOM_BODY : SpriteRenderer port map (
+    BOTTOM_BODY : SpriteRenderer
+    generic map (
+        SPRITE_ID => BONE_BODY_SPRITE_ID
+    )
+    port map (
         clk => clk,
         pixel_row => pixel_row,
         pixel_column => pixel_column,
         start_x => std_logic_vector(pipe_x_pos),
         start_y => (others => '0'),
-        sprite_id => BONE_BODY_SPRITE_ID,
         flip_y => '0',
         red => bot_body_r,
         green => bot_body_g,

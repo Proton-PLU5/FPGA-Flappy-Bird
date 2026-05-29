@@ -38,7 +38,7 @@ architecture behaviour of TileRenderer is
     signal sprite_red, sprite_green, sprite_blue : std_logic_vector(3 downto 0);
     signal sprite_transparent : std_logic;
 
-    -- Tile metadata
+    -- Tile dimensions are always 64x64
     constant TILE_W : integer := 64;
     constant TILE_H : integer := 64;
 
@@ -67,7 +67,7 @@ begin
         pixel_column => std_logic_vector(shifted_column),
         start_x => '0' & tile_start_x,
         start_y => '0' & tile_start_y,
-        sprite_id => tile_id,  -- Use the provided tile_id
+        sprite_id => tile_id,  -- Use the provided tile_id for the sprite
         flip_y => '0',
         red => sprite_red,
         green => sprite_green,
@@ -75,9 +75,9 @@ begin
         transparent => sprite_transparent
     );
 
-    -- Output if enabled and not transparent
     red <= sprite_red;
     green <= sprite_green;
     blue <= sprite_blue;
     transparent <= sprite_transparent;
+
 end architecture behaviour;

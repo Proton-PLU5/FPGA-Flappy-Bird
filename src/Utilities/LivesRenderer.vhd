@@ -128,6 +128,7 @@ begin
         ('0' & pixel_row    <  '0' & start_y3 + CONV_STD_LOGIC_VECTOR(32,10)) -- LIFE3 render bounds
     ) else '0';
     
+    -- Pass colour values only within the bounds
     red <= red1 when render1 = '1' else
            red2 when render2 = '1' else
            red3 when render3 = '1' else
@@ -162,6 +163,7 @@ begin
         end if;
     end process;
 
+    -- Turn off the component when a transparent pixel is being rendered  
     enabled <= (render1 and not transparent1) or (render2 and not transparent2) or (render3 and not transparent3);
 
 end architecture;

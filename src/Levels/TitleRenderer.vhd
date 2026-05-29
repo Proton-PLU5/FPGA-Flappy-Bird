@@ -101,14 +101,6 @@ begin
         text_col_start => 284
 	);
 
-    SETTINGS_MODE_TEXT : title_display generic map (text_string => "SETTINGS MODE", text_size => 13, size => 2) port map (
-        clk => clk25Mhz,
-        pixel_row => pixel_row,
-        pixel_column => pixel_column,
-        pixel_on => settings_text_enable,
-        text_row => 340,
-        text_col_start => 268
-	);
 
     SELECTED_TEXT : title_display
     generic map (
@@ -153,9 +145,6 @@ begin
                         when 0 =>
                             selected_option <= 1;
                             selected_text_row <= 300;
-                        when 1 =>
-                            selected_option <= 2;
-                            selected_text_row <= 340;
                         when others =>
                             selected_option <= 0;
                             selected_text_row <= 260;

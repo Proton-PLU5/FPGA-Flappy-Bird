@@ -50,7 +50,7 @@ architecture Behavioral of WinRenderer is
         text_col_start => 208
     );
 
-    TOOL_TIP : title_display generic map (text_string => "KEY 0 TO RETURN", text_size => 15, SIZE => 2) port map (
+    TOOL_TIP : title_display generic map (text_string => "KEY 3 TO RETURN", text_size => 15, SIZE => 2) port map (
         clk => clk25Mhz,
         pixel_row => pixel_row,
         pixel_column => pixel_column,

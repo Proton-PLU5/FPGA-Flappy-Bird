@@ -20,7 +20,8 @@ end entity Cutscene;
 architecture behavior of Cutscene is
     component SpriteRenderer is
         generic (
-            SCALE_FACTOR : integer := 1
+            SCALE_FACTOR : integer := 1;
+            SPRITE_ID : integer range 0 to 64 := 0
         );
         port (
             clk : in std_logic;
@@ -28,7 +29,6 @@ architecture behavior of Cutscene is
             pixel_column : in std_logic_vector(9 downto 0);
             start_x  : in std_logic_vector(10 downto 0);
             start_y  : in std_logic_vector(10 downto 0);
-            sprite_id : in integer range 0 to 64;
             flip_y  : in std_logic := '0';
             red   : out std_logic_vector(3 downto 0);
             green : out std_logic_vector(3 downto 0);
@@ -57,6 +57,9 @@ architecture behavior of Cutscene is
 
     signal boss_red, boss_green, boss_blue : std_logic_vector(3 downto 0);
     signal boss_transparent : std_logic;
+    signal boss_red16, boss_green16, boss_blue16 : std_logic_vector(3 downto 0);
+    signal boss_red17, boss_green17, boss_blue17 : std_logic_vector(3 downto 0);
+    signal boss_transparent16, boss_transparent17 : std_logic;
     signal boss_frame_index : integer range 16 to 17 := 16;
 
     -- Background signals
@@ -68,9 +71,10 @@ architecture behavior of Cutscene is
     signal frame_counter : integer range 0 to 101 := 0; -- Counts frames for animation timing
 begin
 
-    BOSS : SpriteRenderer
+    BOSS_16 : SpriteRenderer
     generic map (
-        SCALE_FACTOR => 2
+        SCALE_FACTOR => 2,
+        SPRITE_ID => 16
     )
     port map (
         clk => clk25Mhz,
@@ -78,13 +82,35 @@ begin
         pixel_column => pixel_column,
         start_x => CONV_STD_LOGIC_VECTOR(240, 11), -- X position of the boss sprite
         start_y => CONV_STD_LOGIC_VECTOR(144, 11), -- Y position of the boss sprite
-        sprite_id => boss_frame_index, -- Use frame index for animation
         flip_y => '0',
-        red => boss_red,
-        green => boss_green,
-        blue => boss_blue,
-        transparent => boss_transparent
+        red => boss_red16,
+        green => boss_green16,
+        blue => boss_blue16,
+        transparent => boss_transparent16
     );
+
+    BOSS_17 : SpriteRenderer
+    generic map (
+        SCALE_FACTOR => 2,
+        SPRITE_ID => 17
+    )
+    port map (
+        clk => clk25Mhz,
+        pixel_row => pixel_row,
+        pixel_column => pixel_column,
+        start_x => CONV_STD_LOGIC_VECTOR(240, 11), -- X position of the boss sprite
+        start_y => CONV_STD_LOGIC_VECTOR(144, 11), -- Y position of the boss sprite
+        flip_y => '0',
+        red => boss_red17,
+        green => boss_green17,
+        blue => boss_blue17,
+        transparent => boss_transparent17
+    );
+
+    boss_red <= boss_red17 when boss_frame_index = 17 else boss_red16;
+    boss_green <= boss_green17 when boss_frame_index = 17 else boss_green16;
+    boss_blue <= boss_blue17 when boss_frame_index = 17 else boss_blue16;
+    boss_transparent <= boss_transparent17 when boss_frame_index = 17 else boss_transparent16;
 
     MSG_ONE : title_display
     generic map (

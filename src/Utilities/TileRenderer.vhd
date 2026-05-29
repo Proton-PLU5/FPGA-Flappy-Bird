@@ -3,13 +3,15 @@ use IEEE.STD_LOGIC_1164.all;
 use IEEE.NUMERIC_STD.all;
 
 entity TileRenderer is
+    generic (
+        TILE_ID : integer range 0 to 255 := 0
+    );
     port (
         clk, vert_sync, mouse_left  : in std_logic;
         pixel_row, pixel_column     : in std_logic_vector(9 downto 0);
         red, green, blue            : out std_logic_vector(3 downto 0);
         reset                       : in std_logic;
         enabled                     : in std_logic;
-        tile_id                     : in integer range 0 to 255;
         offset                      : in  UNSIGNED(5 downto 0);
 		transparent : out std_logic
     );
@@ -18,7 +20,8 @@ end entity TileRenderer;
 architecture behaviour of TileRenderer is
     component SpriteRenderer is
         generic (
-            SCALE_FACTOR : integer := 1
+            SCALE_FACTOR : integer := 1;
+            SPRITE_ID : integer range 0 to 64 := 0
         );
         port (
             clk : in std_logic;
@@ -26,7 +29,6 @@ architecture behaviour of TileRenderer is
             pixel_column : in std_logic_vector(9 downto 0);
 			start_x  : in std_logic_vector(10 downto 0);
 			start_y  : in std_logic_vector(10 downto 0);
-			sprite_id : in integer range 0 to 64;
             flip_y  : in std_logic := '0';
             red   : out std_logic_vector(3 downto 0);
             green : out std_logic_vector(3 downto 0);
@@ -61,13 +63,16 @@ begin
                         to_unsigned( (to_integer(unsigned(pixel_row)) / TILE_H) * TILE_H, 10)
                     );
 
-    SPRITE_RENDERER : SpriteRenderer port map (
+    SPRITE_RENDERER : SpriteRenderer
+    generic map (
+        SPRITE_ID => TILE_ID
+    )
+    port map (
         clk => clk,
         pixel_row => pixel_row,
         pixel_column => std_logic_vector(shifted_column),
         start_x => '0' & tile_start_x,
         start_y => '0' & tile_start_y,
-        sprite_id => tile_id,  -- Use the provided tile_id
         flip_y => '0',
         red => sprite_red,
         green => sprite_green,

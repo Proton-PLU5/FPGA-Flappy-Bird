@@ -36,7 +36,8 @@ architecture behavior of LevelFour is
 
     component SpriteRenderer is
         generic (
-            SCALE_FACTOR : integer := 1
+            SCALE_FACTOR : integer := 1;
+            SPRITE_ID : integer range 0 to 64 := 0
         );
         port (
             clk : in std_logic;
@@ -44,7 +45,6 @@ architecture behavior of LevelFour is
             pixel_column : in std_logic_vector(9 downto 0);
             start_x  : in std_logic_vector(10 downto 0);
             start_y  : in std_logic_vector(10 downto 0);
-            sprite_id : in integer range 0 to 64;
             flip_y  : in std_logic := '0';
             red   : out std_logic_vector(3 downto 0);
             green : out std_logic_vector(3 downto 0);
@@ -71,13 +71,15 @@ architecture behavior of LevelFour is
     end component title_display;
 
     component TileRenderer is
+        generic (
+            TILE_ID : integer range 0 to 255 := 0
+        );
         port (
             clk, vert_sync, mouse_left  : in std_logic;
             pixel_row, pixel_column     : in std_logic_vector(9 downto 0);
             red, green, blue            : out std_logic_vector(3 downto 0);
             reset                       : in std_logic;
             enabled                     : in std_logic;
-            tile_id                     : in integer range 0 to 255;
             offset                      : in  UNSIGNED(5 downto 0);
 			transparent : out std_logic
         );
@@ -199,14 +201,16 @@ begin
     );
 
     DEAD_HEAD : SpriteRenderer 
-    generic map ( SCALE_FACTOR => 2 )
+    generic map (
+        SCALE_FACTOR => 2,
+        SPRITE_ID => 0
+    )
     port map (
         clk => clk25Mhz,
         pixel_row => pixel_row,
         pixel_column => pixel_column,
         start_x => '0' & std_logic_vector(dead_head_x),
         start_y => '0' & std_logic_vector(dead_head_y),
-        sprite_id => 0,
         red => dead_head_red,
         green => dead_head_green,
         blue => dead_head_blue,
@@ -214,14 +218,16 @@ begin
     );
 
     DEAD_JAW : SpriteRenderer 
-    generic map ( SCALE_FACTOR => 2 )
+    generic map (
+        SCALE_FACTOR => 2,
+        SPRITE_ID => 1
+    )
     port map (
         clk => clk25Mhz,
         pixel_row => pixel_row,
         pixel_column => pixel_column,
         start_x => '0' & std_logic_vector(dead_jaw_x),
         start_y => '0' & std_logic_vector(dead_jaw_y),
-        sprite_id => 1,
         red => dead_jaw_red,
         green => dead_jaw_green,
         blue => dead_jaw_blue,
@@ -229,13 +235,16 @@ begin
     );
 
     -- LASER WARNING 1 SPRITE
-    LASER_WARNING1 : SpriteRenderer port map (
+    LASER_WARNING1 : SpriteRenderer
+    generic map (
+        SPRITE_ID => 6
+    )
+    port map (
         clk => clk25Mhz,
         pixel_row => pixel_row,
         pixel_column => pixel_column,
         start_x => (others => '0'),
         start_y => std_logic_vector(resize(laser1_y_pos, 11)),
-        sprite_id => 6, 
         flip_y => '0',
         red => laser_warning1_red,
         green => laser_warning1_green,
@@ -244,13 +253,16 @@ begin
     );
 
     -- LASER WARNING 2 SPRITE
-    LASER_WARNING2 : SpriteRenderer port map (
+    LASER_WARNING2 : SpriteRenderer
+    generic map (
+        SPRITE_ID => 6
+    )
+    port map (
         clk => clk25Mhz,
         pixel_row => pixel_row,
         pixel_column => pixel_column,
         start_x => (others => '0'),
         start_y => std_logic_vector(resize(laser2_y_pos, 11)),
-        sprite_id => 6, 
         flip_y => '0',
         red => laser_warning2_red,
         green => laser_warning2_green,
@@ -259,13 +271,16 @@ begin
     );
 
     -- LASER 1 SPRITE
-    LASER_ONE : SpriteRenderer port map (
+    LASER_ONE : SpriteRenderer
+    generic map (
+        SPRITE_ID => 7
+    )
+    port map (
         clk => clk25Mhz,
         pixel_row => pixel_row,
         pixel_column => pixel_column,
         start_x => std_logic_vector(to_unsigned(0, 11)), 
         start_y => '0' & std_logic_vector(laser1_y_pos),
-        sprite_id => 7, 
         flip_y => '0',
         red => laser1_red,
         green => laser1_green,
@@ -274,13 +289,16 @@ begin
     );
 
     -- LASER 2 SPRITE
-    LASER_TWO : SpriteRenderer port map (
+    LASER_TWO : SpriteRenderer
+    generic map (
+        SPRITE_ID => 7
+    )
+    port map (
         clk => clk25Mhz,
         pixel_row => pixel_row,
         pixel_column => pixel_column,
         start_x => std_logic_vector(to_unsigned(0, 11)), 
         start_y => '0' & std_logic_vector(laser2_y_pos),
-        sprite_id => 7, 
         flip_y => '0',
         red => laser2_red,
         green => laser2_green,
@@ -333,7 +351,11 @@ begin
         text_col_start => 80
     );
 
-    TILE_RENDERER : TileRenderer port map (
+    TILE_RENDERER : TileRenderer
+    generic map (
+        TILE_ID => 15
+    )
+    port map (
         clk => clk25Mhz,
         vert_sync => vert_sync,
         mouse_left => mouse_left,
@@ -344,7 +366,6 @@ begin
         blue => background_blue,
         reset => '0',
         enabled => level_four_enable,
-        tile_id => 15,
 		transparent => background_transparent,
         offset => to_unsigned(0, 6)
     );

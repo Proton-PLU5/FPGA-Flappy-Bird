@@ -56,6 +56,7 @@ architecture behavior of BossRenderer is
 
     constant lower_jaw_anim_threshold : integer := 12; -- Number of clock cycles for lower jaw animation
 
+    -- Clocking to reduce the combination path length to improve Fmax.
     signal upper_x_clocked : std_logic_vector(10 downto 0) := (others => '0');
     signal upper_y_clocked : std_logic_vector(10 downto 0) := (others => '0');
     signal lower_x_clocked : std_logic_vector(10 downto 0) := (others => '0');

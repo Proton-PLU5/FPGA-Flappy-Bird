@@ -225,7 +225,7 @@ begin
                 pipe_bottom_y_pos <= to_unsigned(height, 10) + to_unsigned(gap/2, 10);
 
             elsif enabled = '1' then
-                -- move pipe leftward
+                -- Moving pipes leftward
                 if pipe_x_pos > to_unsigned(SPEED, 11) then
                     pipe_x_pos <= pipe_x_pos - to_unsigned(SPEED, 11);
                 else
@@ -233,54 +233,34 @@ begin
                     is_visible  <= '0';
                 end if;
 
-                -- latch player
+                -- Latch player
                 if (pipe_x_pos <= to_unsigned(300, 11)) and player_latched = '0' then
                     player_latched       <= '1';
                     player_latched_y_pos <= player_y_pos;
                     growth_enabled       <= '1';
                 end if;
 
-                -- safe center calc (no DSP inference)
                 gap_center := resize(pipe_top_y_pos, 11) + resize(pipe_bottom_y_pos, 11);
                 gap_center := '0' & gap_center(10 downto 1);
 
-                -- accelerated growth with safe directional limits
                 if growth_enabled = '1' and is_visible = '1' then
-
-                    -------------------------------------------------
-                    -- TOP PIPE ONLY (grows downward)
-                    -------------------------------------------------
+                    -- Top pipe (grows downwards)
                     if part_to_render = '1' then
-
                         if gap_center < resize(player_latched_y_pos, 11) - 4 then
-
                             if to_integer(pipe_top_y_pos) + to_integer(GROWTH_SPEED) < SCREEN_H - 100 then
-
                                 pipe_top_y_pos <= pipe_top_y_pos + GROWTH_SPEED;
                                 pipe_bottom_y_pos <= pipe_bottom_y_pos + GROWTH_SPEED;
-
                             end if;
-
                         end if;
-
-                    -------------------------------------------------
-                    -- BOTTOM PIPE ONLY (grows upward)
-                    -------------------------------------------------
+                    -- Bottom pipe (grows upwards)
                     else
-
                         if gap_center > resize(player_latched_y_pos, 11) + 4 then
-
                             if to_integer(pipe_bottom_y_pos) > to_integer(GROWTH_SPEED) + 100 then
-
                                 pipe_top_y_pos <= pipe_top_y_pos - GROWTH_SPEED;
                                 pipe_bottom_y_pos <= pipe_bottom_y_pos - GROWTH_SPEED;
-
                             end if;
-
                         end if;
-
                     end if;
-
                 end if;
             end if;
         end if;

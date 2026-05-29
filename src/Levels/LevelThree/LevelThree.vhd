@@ -238,9 +238,6 @@ begin
         random_out => lfsr_out
     );
 
-    --spawn_y_pos := to_integer(unsigned(lfsr)) * (SCREEN_HEIGHT - SKULL_SIZE);
-    --spawn_y_pos := spawn_y_pos / 255;
-
     SKULL_1_RANDOMISER : process (vert_sync)
         variable random_y : integer;
         variable lane_sel : std_logic_vector(2 downto 0);
@@ -251,6 +248,7 @@ begin
                 if skull_1_end_reached = '1' then
                     lane_sel := lfsr_out(2 downto 0) xor std_logic_vector(to_unsigned(1, 3));
 
+                    -- We will use preset spawn lanes
                     case lane_sel is
                         when "000" => skull_1_y_pos_s <= LANE_0;
                         when "001" => skull_1_y_pos_s <= LANE_1;
@@ -282,6 +280,7 @@ begin
                 if skull_2_end_reached = '1' then
                     lane_sel := lfsr_out(2 downto 0) xor std_logic_vector(to_unsigned(2, 3));
 
+                    -- Select lane depending on LSFR
                     case lane_sel is
                         when "000" => skull_2_y_pos_s <= LANE_0;
                         when "001" => skull_2_y_pos_s <= LANE_1;

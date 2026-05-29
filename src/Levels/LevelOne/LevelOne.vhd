@@ -146,11 +146,12 @@ begin
                 pipe_1_reset <= '0';
                 pipe_2_reset <= '0';
                 
-                -- At midpoint render second pipe
+                -- Stagger trigger: At midpoint render second pipe
                 if (pipe_1_x_pos_s < to_unsigned(320, 11)) then
                     start_rendering_pipe_2 <= '1';
                 end if;
                 
+                -- Reset pipes with new randomised height
                 if pipe_1_end_reached = '1' then
                     pipe_1_height <= to_integer(unsigned(lfsr_out)) * 280 / 256 + 100;
                     pipe_1_reset <= '1';

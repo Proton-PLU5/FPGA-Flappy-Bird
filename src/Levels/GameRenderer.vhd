@@ -584,7 +584,7 @@ begin
                 if (SW(1) = '1') then background_green <= "1111"; else background_green <= "0000"; end if;
                 if (SW(2) = '1') then background_blue <= "1111"; else background_blue <= "0000"; end if;
                 
-                -- Render priority: Ball > Score > Lives > Obstacles > Background
+                -- Render priority: Ball > Score > Lives > Obstacles > Powerup > Background
                 if (cutscene_enabled = '1') then
                     red <= cutscene_red;
                     green <= cutscene_green;
@@ -743,7 +743,7 @@ begin
                 win <= level_four_game_finished; -- Set win signal based on level four's output
 					 
             else
-                --While the game is disabled (on Title Screen), constantly hold important values at 0 
+                -- While the game is disabled (on Title Screen), constantly hold important values at 0 
                 score <= 0;
                 mouse_down <= '0';
                 obstacle_collision_pending <= '0';

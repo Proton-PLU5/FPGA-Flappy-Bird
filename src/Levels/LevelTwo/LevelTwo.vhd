@@ -196,14 +196,12 @@ begin
                 pipe_1_end_q <= pipe_1_end_reached;
                 pipe_2_end_q <= pipe_2_end_reached;
                 
-                -- STAGGER TRIGGER: Same as Level One
+                -- Stagger trigger: Same as level one
                 if (pipe_1_x_pos_s < to_unsigned(320, 11)) then
                     start_rendering_pipe_2 <= '1';
                 end if;
 
-                -------------------------------------------------
-                -- PIPE 1 HANDSHAKE (CDC PROTECTED)
-                -------------------------------------------------
+                -- Pipe 1 handshake
                 if pipe_1_end_reached = '1' then
                     pipe_1_reset <= '1'; -- Hold reset high so slow vert_sync domain catches it
                     
@@ -216,9 +214,7 @@ begin
                     pipe_1_reset <= '0';
                 end if;
 
-                -------------------------------------------------
-                -- PIPE 2 HANDSHAKE (CDC PROTECTED)
-                -------------------------------------------------
+                -- Pipe 2 handshake
                 if pipe_2_end_reached = '1' then
                     pipe_2_reset <= '1'; -- Hold reset high so slow vert_sync domain catches it
                     

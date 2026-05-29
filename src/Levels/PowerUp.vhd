@@ -80,7 +80,7 @@ begin
         transparent => transparent
     );
 
-    -- Small 8-bit LFSR for occasional spawn positions.
+    -- Small 8-bit LFSR for occasional spawn positions
     process (clk)
         variable feedback : std_logic;
     begin
@@ -94,16 +94,17 @@ begin
         variable spawn_y : integer;
     begin
         if rising_edge(vert_sync) then
+            -- Initial spawn positions offscreen
             if enable = '0' or reset = '1' then
                 powerup_x_pos <= to_unsigned(SCREEN_WIDTH, 11);
                 powerup_y_pos <= to_unsigned(0, 10);
                 active <= '0';
                 cooldown <= COOLDOWN_MAX;
             elsif collect = '1' then
-                -- Item collected successfully! Despawn instantly and reset gate
+                -- Item collected successfull, despawn instantly
                 active <= '0';
                 powerup_x_pos <= to_unsigned(SCREEN_WIDTH, 11);
-                cooldown <= COOLDOWN_MAX;
+                cooldown <= COOLDOWN_MAX; -- Set cooldown which will count down
             elsif active = '1' and paused = '0' then
                 if (powerup_x_pos + to_unsigned(POWERUP_WIDTH, 11)) <= to_unsigned(SPEED, 11) then
                     active <= '0';
@@ -112,15 +113,19 @@ begin
                 else
                     powerup_x_pos <= powerup_x_pos - to_unsigned(SPEED, 11);
                 end if;
+            -- Once cooldown finishes we will respawn it with a randomised vlaue
             elsif cooldown = 0 and paused = '0' then
                 spawn_y := to_integer(unsigned(lfsr)) * (SCREEN_HEIGHT - POWERUP_HEIGHT);
                 spawn_y := spawn_y / 256;
+
+                -- Clamping
                 if spawn_y > SCREEN_HEIGHT - POWERUP_HEIGHT then
                     spawn_y := SCREEN_HEIGHT - POWERUP_HEIGHT - 50;
                 end if;
                 if spawn_y < 0 then
                     spawn_y := 50;
                 end if;
+
                 powerup_y_pos <= to_unsigned(spawn_y, 10);
                 powerup_x_pos <= to_unsigned(SCREEN_WIDTH, 11);
                 active <= '1';
@@ -130,7 +135,7 @@ begin
         end if;
     end process;
 
-    render <= render_s and not transparent; -- expose render signal
+    render <= render_s and not transparent;
     red <= red_s;
     green <= green_s;
     blue <= blue_s;

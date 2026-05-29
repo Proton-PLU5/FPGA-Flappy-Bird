@@ -47,8 +47,10 @@ architecture behaviour of title_display is
     
 	constant title_string : char_array := CONV_TEXT_TO_ARRAY;
 	 
+    -- Width calculated based on size parameter (size 2 is 8x8, size 3 is 16x16, size 4 is 32x32)
     constant char_width : integer := (2**(SIZE+1));
     constant char_height : integer := (2**(SIZE+1));
+
     constant num_chars : integer := text_size;
 
     signal char_index : integer;
@@ -70,15 +72,17 @@ architecture behaviour of title_display is
 	 
 begin 
 
-	 
+	
     row_int <= to_integer(unsigned(pixel_row));
     col_int <= to_integer(unsigned(pixel_column));
 
+    -- Set text boundaries
     in_text_zone <= '1' when (row_int >= text_row and row_int < text_row + char_height and col_int >= text_col_start and col_int < text_col_start + num_chars * char_width) else '0';
 
     -- Determines which character we are currently displaying
     char_index <= (col_int - text_col_start) / char_width when in_text_zone = '1' else 0;
 
+    -- Calculate the row and column within the character sprite we are currently on
     font_row_full <= std_logic_vector(to_unsigned((row_int - text_row) mod char_height, 10)) when in_text_zone = '1' else (others => '0');
     font_col_full <= std_logic_vector(to_unsigned((col_int - text_col_start) mod char_width, 10)) when in_text_zone = '1' else (others => '0');
 
@@ -96,6 +100,7 @@ begin
             rom_mux_output    => rom_out
         );
 
+    -- Render the pixel if we are in the text zone and the ROM output is high for that pixel
     pixel_on <= rom_out when in_text_zone = '1' else '0';
 
 end architecture behaviour;

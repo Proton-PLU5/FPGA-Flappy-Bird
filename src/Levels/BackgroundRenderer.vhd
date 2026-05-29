@@ -42,26 +42,21 @@ architecture Behavioral of BackgroundRenderer is
     signal render1, render2, render3 : std_logic := '0';
 
     signal start_y1 : std_logic_vector(9 downto 0) := CONV_STD_LOGIC_VECTOR(0, 10);
-
     signal start_y2 : std_logic_vector(9 downto 0) := CONV_STD_LOGIC_VECTOR(64, 10);
-
     signal start_y3 : std_logic_vector(9 downto 0) := CONV_STD_LOGIC_VECTOR(416, 10);
 
     signal offset : unsigned(5 downto 0) := (others => '0');
 
-    -- Background size
-    constant SPRITE_WIDTH  : integer := 1138;
 begin 
 
+    -- Set rendering bounds 
     render1 <= '1' when (('0' & pixel_row  >= '0' & start_y1) and
         ('0' & pixel_row < '0' & start_y1 + CONV_STD_LOGIC_VECTOR(64,10)) 
     ) else '0';
-
     render2 <= '1' when (
         ('0' & pixel_row  >= '0' & start_y2) and
         ('0' & pixel_row  <  '0' & CONV_STD_LOGIC_VECTOR(416,10)) 
     ) else '0';
-
     render3 <= '1' when (
         ('0' & pixel_row    >= '0' & start_y3) and
         ('0' & pixel_row    <  '0' & CONV_STD_LOGIC_VECTOR(480,10)) 
@@ -83,7 +78,7 @@ begin
         reset => '0',
         enabled => render1,
         transparent => top_transparent,
-		  offset => offset
+		offset => offset
 	 );
     
     MIDDLE : TileRenderer
@@ -133,6 +128,7 @@ begin
         end if;
     end process;
 
+    -- Simple rendering logic
     red <= top_red when render1 = '1' else
            middle_red when render2 = '1' else
            down_red when render3 = '1' else

@@ -190,7 +190,7 @@ begin
         ('0' & pixel_row    >= '0' & start_y3) and
         ('0' & pixel_row    <  '0' & start_y3 + CONV_STD_LOGIC_VECTOR(32,10)) -- LIFE3 render bounds
     ) else '0';
-    
+  
         life1_full <= '1' when collision_count <= 2 else '0';
         life2_full <= '1' when collision_count <= 1 else '0';
         life3_full <= '1' when collision_count = 0 else '0';

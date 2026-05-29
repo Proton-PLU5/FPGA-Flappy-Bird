@@ -59,14 +59,13 @@ architecture behavior of LevelFour is
             text_size : integer := 11;
             SIZE : integer := 4
         );
-
         port (
             clk          : in  std_logic;
             pixel_row    : in  std_logic_vector(9 downto 0);
             pixel_column : in  std_logic_vector(9 downto 0);
             pixel_on     : out std_logic;
-				text_row : in integer;
-				text_col_start : in integer
+			text_row : in integer;
+			text_col_start : in integer
         );
     end component title_display;
 
@@ -126,9 +125,8 @@ architecture behavior of LevelFour is
     -- Top laser bottom edge = 165 (start_y = 165 - height)
     constant L1_TARGET_INT : integer := Y_CENTER - GAP_HALF - SPRITE_HEIGHT - 25;
     
-	 -- Bottom laser top edge = 315 (start_y = 315)
+	-- Bottom laser top edge = 315 (start_y = 315)
     constant L2_TARGET_INT : integer := Y_CENTER + GAP_HALF + 25;
-	 
 	 
     -- Keep bottom laser fully on-screen at spawn
     constant L2_START_INT  : integer := 480 - SPRITE_HEIGHT;
@@ -151,10 +149,10 @@ architecture behavior of LevelFour is
     constant laser1_target_y : unsigned(9 downto 0) := to_unsigned(L1_TARGET_INT, 10);
     constant laser2_target_y : unsigned(9 downto 0) := to_unsigned(L2_TARGET_INT, 10);
 
-    -- TEXT COMPONENT OUTPUTS (Hardware pixels)
+    -- TEXT COMPONENT OUTPUTS
     signal msg_1_pixel, msg_2_pixel, msg_3_pixel : std_logic;
     
-    -- TEXT STATE ENABLE SIGNALS (State machine logic)
+    -- TEXT STATE ENABLE SIGNALS
     signal show_msg_1, show_msg_2, show_msg_3 : std_logic := '0';
     signal text_counter : integer range 0 to 400 := 0;
 
@@ -317,7 +315,7 @@ begin
         pixel_row => pixel_row,
         pixel_column => pixel_column,
         pixel_on => msg_1_pixel, 
-        text_row => 240,
+        text_row => 224,
         text_col_start => 248
     );
 
@@ -332,7 +330,7 @@ begin
         pixel_row => pixel_row,
         pixel_column => pixel_column,
         pixel_on => msg_2_pixel, 
-        text_row => 240,
+        text_row => 224,
         text_col_start => 248
     );
 

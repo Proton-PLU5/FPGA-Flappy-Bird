@@ -64,6 +64,7 @@ architecture behaviour of Renderer is
         port (
             clk25Mhz : IN std_logic;
             mouse_left : IN std_logic;
+            KEY : IN std_logic_vector(3 DOWNTO 0);
             vert_sync, horz_sync : IN std_logic;
             pixel_row, pixel_column : IN std_logic_vector(9 DOWNTO 0);
             red, green, blue : OUT std_logic_vector(3 downto 0);
@@ -158,6 +159,7 @@ begin
     WIN_RENDERER_COMPONENT : WinRenderer port map (
         clk25Mhz => clk25Mhz,
         mouse_left => mouse_left,
+        KEY => KEY,
         vert_sync => vert_sync,
         horz_sync => horz_sync,
         pixel_row => pixel_row,

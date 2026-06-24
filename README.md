@@ -12,6 +12,10 @@
 </div>
 
 <div align="center">
+<img width="1029" height="580" alt="image" src="https://github.com/user-attachments/assets/9a727e34-796a-4d00-a120-0c86f280bf57" />
+</div>
+
+<div align="center">
 
 *A real-time game implemented on an Altera Cyclone V FPGA (DE0-CV board) using VHDL.*
 

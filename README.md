@@ -6,11 +6,15 @@
 ## Project Overview
 
 <div align="center">
-**Flappy Boss** 
+
+# Flappy Boss
+
 </div>
 
 <div align="center">
-A real-time game implemented on an Altera Cyclone V FPGA (DE0-CV board) using VHDL.
+
+*A real-time game implemented on an Altera Cyclone V FPGA (DE0-CV board) using VHDL.*
+
 </div>
 
 ---

@@ -1,10 +1,3 @@
-# Flappy Boss
-## A VHDL-Based Embedded Game System on DE0-CV FPGA
-
----
-
-## Project Overview
-
 <div align="center">
 
 # Flappy Boss
@@ -13,7 +6,7 @@
 
 <div align="center">
   
-<img width="480" height="270" alt="GIF_Flappy Boss Clip 1" src="https://github.com/user-attachments/assets/c51ee61b-43b1-41f0-ba59-18840617e752"/>
+<img width="1280" height="720" alt="GIF_Flappy Boss Clip 1" src="https://github.com/user-attachments/assets/c51ee61b-43b1-41f0-ba59-18840617e752"/>
 
 </div>
 
@@ -23,7 +16,8 @@
 
 </div>
 
-*More footage below!*
+> [!NOTE]
+> For more footage check the Extra Footage section!
 
 ## Team
 

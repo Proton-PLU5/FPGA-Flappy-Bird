@@ -12,7 +12,9 @@
 </div>
 
 <div align="center">
-<img width="1029" height="580" alt="image" src="https://github.com/user-attachments/assets/9a727e34-796a-4d00-a120-0c86f280bf57" />
+  
+<img width="480" height="270" alt="GIF_Flappy Boss Clip 1" src="https://github.com/user-attachments/assets/c51ee61b-43b1-41f0-ba59-18840617e752"/>
+
 </div>
 
 <div align="center">
@@ -21,14 +23,11 @@
 
 </div>
 
----
+*More footage below!*
 
 ## Team
 
-**Project Team**  
 *Mathew Cibi, Jerry Luo, Lachlan Henderson*
-
----
 
 ## Key Technical Features
 
@@ -54,13 +53,11 @@ Optimised hardware rendering eliminates frame buffer storage:
 - Efficient memory utilization allowing larger sprite sets and visual complexity
 
 ### **Modular Clock Domain Management**
-Multiple clock dividers ensure synchronization across subsystems:
+Multiple clock dividers ensure synchronisation across subsystems:
 - Master PLL input clock (50 MHz)
 - VGA pixel clock (25.175 MHz for 640×480 @ 60Hz)
 - Game logic clock (configurable for gameplay speed)
 - Debounce clock for input sampling
-
----
 
 ## System Architecture
 
@@ -79,8 +76,6 @@ The project is decomposed into modular, reusable hardware components centred aro
 - Renderer modules consume the current level state and active scan position to decide each pixel in real time
 - ROM-backed assets and generated obstacle data are combined directly in the output path
 
----
-
 ## Tools & Technologies
 
 | Category | Technology |
@@ -92,8 +87,6 @@ The project is decomposed into modular, reusable hardware components centred aro
 | **Version Control** | Git (team collaboration) |
 | **Development Host** | Windows / Linux |
 
----
-
 ## Hardware Specifications
 
 - **Target Device**: Cyclone V (5CEBA4F23C7)
@@ -101,8 +94,6 @@ The project is decomposed into modular, reusable hardware components centred aro
 - **Input**: Debounced push buttons (2–4 game controls)
 - **Clock Source**: 50 MHz onboard oscillator (25MHz VGA Clock using PLL)
 - **Memory**: Dual-port on-chip RAM for sprite ROMs; distributed RAM for pixel buffers
-
----
 
 ## Project Highlights
 
@@ -113,8 +104,6 @@ The project is decomposed into modular, reusable hardware components centred aro
 **Clean Game Flow Control** — Level switching, resetting, and state transitions are handled explicitly in the control logic  
 **Team-Oriented Integration** — Clear module boundaries supported parallel development and easier system testing  
 
----
-
 ## My Individual Contributions
 
 - **Modular System**: Designed the modular system for developing different Levels, renderers, and ensuring easy future development.
@@ -122,37 +111,12 @@ The project is decomposed into modular, reusable hardware components centred aro
 - **Level Design & Development**: Developed the main flow of the levels, and designed LFSR and Obstacle Generation.
 - **Game Logic**: Developed the level switching, resetting and flow of the game.
 
----
+## Extra Footage
 
-## Getting Started
+https://github.com/user-attachments/assets/192606bb-2fae-4452-a2fc-4d68435b96eb
 
-### Prerequisites
-- Altera/Intel Quartus Prime (or free Lite edition)
-- ModelSim or equivalent VHDL simulator
-- DE0-CV FPGA board with USB Blaster programmer
-- VGA monitor and cable
+https://github.com/user-attachments/assets/efbd71ee-6aef-43e1-8937-db9f9081356d
 
-### Build & Deploy
-1. Clone the repository  
-2. Open `project.qpf` in Quartus Prime  
-3. Run synthesis and place-and-route (typical runtime: 2–5 minutes)  
-4. Program the bitstream to the FPGA via USB Blaster  
-5. Connect the VGA monitor and power on the board  
+https://github.com/user-attachments/assets/4f5f4789-cd3a-482e-8b36-5141b8667c3f
 
----
-
-## Future Enhancements
-
-- Advanced sprite scaling and rotation (using hardware multipliers)
-- Parallax scrolling with multiple ROM-based background layers
-- Sound synthesis module (audio output via PWM)
-- Multiplayer support (using right-button for Player 2)
-- Adaptive difficulty scaling based on gameplay performance
-
----
-
-## References & Resources
-
-- Altera Cyclone V Datasheet
-- IEEE 1076-2019: VHDL Language Reference Manual
-- DE0-CV Board User Manual
+https://github.com/user-attachments/assets/f3bb89d0-21e7-4e68-9601-031b4d7c18ac

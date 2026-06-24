@@ -100,10 +100,9 @@ The project is decomposed into modular, reusable hardware components centred aro
 
 ## My Individual Contributions
 
-- **Modular System**: Designed the modular system for developing different Levels, renderers, and ensuring easy future development.
-- **Sprite Renderers**: Implemented the sprite rendering component of the project.
-- **Level Design & Development**: Developed the main flow of the levels, and designed LFSR and Obstacle Generation.
-- **Game Logic**: Developed the level switching, resetting and flow of the game.
+- **Modular System**: Designed the modular system for developing different Levels, renderers, and ensuring easy future development. E.G., the template and signal structures to easily implement new levels, seperating larger components into smaller modular ones, such as the different levels and scenes.
+- **Sprite Renderers**: Implemented the sprite rendering component of the project, such as the Tile Renderer, the sprite importer, the Background Renderer, etc
+- **Level Design & Development**: Developed the main flow of the levels, and designed LFSR and Obstacle Generation, as well as some of the levels (Level Two and Level Four)
 
 ## Extra Footage
 
